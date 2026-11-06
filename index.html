@@ -2,43 +2,86 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1d2333">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ポコ">
 <title>ポコのぼうけん</title>
 <style>
   html, body {
-    margin: 0; height: 100%; background: #1d2333; color: #fff; overflow: hidden;
+    margin: 0; height: 100%; background: #1d2333; color: #fff; overflow: hidden; overscroll-behavior: none;
     font-family: system-ui, "Hiragino Sans", "Noto Sans JP", sans-serif;
     touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
   }
-  #wrap { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
-  canvas { background: #7ec8ff; border-radius: 6px; box-shadow: 0 8px 30px rgba(0,0,0,.45); }
-  #touch {
-    position: fixed; left: 0; right: 0; bottom: 0; display: none;
-    justify-content: space-between; align-items: flex-end;
-    padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); pointer-events: none;
+  #app { position: fixed; inset: 0; display: flex; flex-direction: column; }
+  #stage {
+    flex: 1 1 auto; min-height: 0; min-width: 0; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
-  .pad { display: flex; gap: 12px; pointer-events: auto; }
+  canvas { display: block; border-radius: 6px; box-shadow: 0 8px 30px rgba(0,0,0,.45); }
+  body.touch canvas { border-radius: 0; box-shadow: none; }
+
+  /* タッチ操作 */
+  #touch { display: none; }
+  body.touch #touch {
+    display: flex; justify-content: space-between; align-items: flex-end; pointer-events: none;
+    position: fixed; left: 0; right: 0; bottom: 0;
+    padding: 12px calc(18px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(18px + env(safe-area-inset-left));
+  }
+  body.touch.portrait #stage { flex: 0 0 auto; padding-bottom: 0; }
+  body.touch.portrait #touch { position: relative; flex: 1 1 auto; align-items: center; padding-top: 64px; }
+  .pad { display: flex; gap: 10px; align-items: center; pointer-events: auto; touch-action: none; }
   .btn {
-    width: 68px; height: 68px; border-radius: 50%;
-    background: rgba(255,255,255,.22); border: 2px solid rgba(255,255,255,.65);
+    width: 70px; height: 70px; border-radius: 50%; box-sizing: border-box;
+    background: rgba(255,255,255,.18); border: 2px solid rgba(255,255,255,.6);
     color: #fff; font-size: 26px; font-weight: bold;
     display: flex; align-items: center; justify-content: center;
+    transition: transform .05s, background .05s;
   }
-  .btn.on { background: rgba(255,255,255,.5); }
-  .btn.small { width: 56px; height: 56px; font-size: 13px; }
-  .btn.jump { width: 84px; height: 84px; font-size: 17px; background: rgba(255,110,70,.45); }
+  .btn.on { background: rgba(255,255,255,.5); transform: scale(.93); }
+  .btn.small { width: 58px; height: 58px; font-size: 13px; }
+  .btn.jump { width: 86px; height: 86px; font-size: 17px; background: rgba(255,110,70,.42); }
+  .btn.jump.on { background: rgba(255,110,70,.75); }
+  body.landscape .btn { opacity: .8; }
+  body.portrait .btn { width: 84px; height: 84px; font-size: 30px; }
+  body.portrait .btn.small { width: 68px; height: 68px; font-size: 14px; }
+  body.portrait .btn.jump { width: 106px; height: 106px; font-size: 19px; }
+  .mid { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; pointer-events: auto; }
+  body.landscape .mid { bottom: calc(14px + env(safe-area-inset-bottom)); }
+  body.portrait .mid { top: 14px; }
+  .sbtn {
+    width: 44px; height: 44px; border-radius: 12px; box-sizing: border-box;
+    border: 2px solid rgba(255,255,255,.5); background: rgba(0,0,0,.28); color: #fff;
+    font-size: 18px; display: flex; align-items: center; justify-content: center;
+  }
+  #hint { display: none; }
+  body.touch.portrait #hint {
+    display: block; position: absolute; left: 0; right: 0; bottom: calc(10px + env(safe-area-inset-bottom));
+    text-align: center; font-size: 12px; opacity: .55; pointer-events: none;
+  }
 </style>
 </head>
 <body>
-<div id="wrap"><canvas id="game"></canvas></div>
-<div id="touch">
-  <div class="pad">
-    <div class="btn" data-k="left">◀</div>
-    <div class="btn" data-k="right">▶</div>
-  </div>
-  <div class="pad">
-    <div class="btn small" data-k="run">ダッシュ</div>
-    <div class="btn jump" data-k="jump">ジャンプ</div>
+<div id="app">
+  <div id="stage"><canvas id="game"></canvas></div>
+  <div id="touch">
+    <div class="pad">
+      <div class="btn" data-k="left">◀</div>
+      <div class="btn" data-k="right">▶</div>
+    </div>
+    <div class="mid">
+      <div class="sbtn" id="pauseBtn">⏸</div>
+      <div class="sbtn" id="fsBtn">⛶</div>
+    </div>
+    <div class="pad">
+      <div class="btn small" data-k="run">ダッシュ</div>
+      <div class="btn jump" data-k="jump">ジャンプ</div>
+    </div>
+    <div id="hint">よこむきにすると 画面が大きくなります</div>
   </div>
 </div>
 <script>
@@ -48,19 +91,39 @@
 // ===== 基本設定 =====
 const cv = document.getElementById('game');
 const ctx = cv.getContext('2d');
-const W = 640, H = 384, T = 32;
-cv.width = W; cv.height = H;
+const H = 384, T = 32;
+let W = 640, viewK = 1;          // W は画面の形に合わせて変わる
 
 const isTouch = ('ontouchstart' in window) || matchMedia('(pointer: coarse)').matches;
-if (isTouch) document.getElementById('touch').style.display = 'flex';
+const body = document.body, stage = document.getElementById('stage');
+if (isTouch) body.classList.add('touch');
 
-function resize() {
-  const s = Math.min(innerWidth / W, innerHeight / H);
-  cv.style.width = Math.floor(W * s) + 'px';
-  cv.style.height = Math.floor(H * s) + 'px';
+function layout() {
+  const vw = innerWidth, vh = innerHeight;
+  const portrait = isTouch && vh > vw;
+  body.classList.toggle('portrait', portrait);
+  body.classList.toggle('landscape', !portrait);
+  let s;
+  if (portrait) {
+    W = 448;                                  // 縦向きは少し狭くして大きく見せる
+    s = vw / W;
+    if (H * s > vh * 0.6) s = vh * 0.6 / H;
+  } else {
+    const cs = getComputedStyle(stage);
+    const aw = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const ah = stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    W = Math.round(Math.max(512, Math.min(768, H * aw / ah)) / 2) * 2;
+    s = Math.min(aw / W, ah / H);
+  }
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);  // 高解像度の画面でもくっきり
+  cv.width = Math.round(W * s * dpr); cv.height = Math.round(H * s * dpr);
+  cv.style.width = Math.round(W * s) + 'px'; cv.style.height = Math.round(H * s) + 'px';
+  viewK = cv.width / W;
 }
-addEventListener('resize', resize);
-resize();
+addEventListener('resize', layout);
+addEventListener('orientationchange', () => setTimeout(layout, 250));
+if (window.visualViewport) visualViewport.addEventListener('resize', layout);
+layout();
 
 // ===== サウンド =====
 let ac = null;
@@ -85,13 +148,13 @@ const seq = (notes, gap, d = 0.12, type = 'square') =>
 const sfx = {
   jump:   () => tone(320, 0.16, 'square', 0.05, 640),
   coin:   () => seq([988, 1319], 70, 0.15),
-  stomp:  () => tone(220, 0.12, 'square', 0.08, 70),
+  stomp:  () => { tone(220, 0.12, 'square', 0.08, 70); buzz(20); },
   bump:   () => tone(130, 0.09, 'triangle', 0.12),
-  brk:    () => tone(160, 0.18, 'sawtooth', 0.06, 50),
+  brk:    () => { tone(160, 0.18, 'sawtooth', 0.06, 50); buzz(15); },
   appear: () => tone(380, 0.35, 'triangle', 0.08, 900),
-  power:  () => seq([523, 659, 784, 1047, 1319], 60, 0.1),
-  hurt:   () => tone(500, 0.35, 'square', 0.06, 120),
-  die:    () => seq([494, 440, 392, 330, 262, 196], 130, 0.16),
+  power:  () => { seq([523, 659, 784, 1047, 1319], 60, 0.1); buzz(40); },
+  hurt:   () => { tone(500, 0.35, 'square', 0.06, 120); buzz(80); },
+  die:    () => { seq([494, 440, 392, 330, 262, 196], 130, 0.16); buzz([100, 60, 150]); },
   clear:  () => seq([523, 659, 784, 1047, 784, 1047, 1319], 120, 0.16),
   up:     () => seq([660, 880, 1100, 1320], 80, 0.1),
   tick:   () => tone(1200, 0.03, 'square', 0.03),
@@ -99,7 +162,16 @@ const sfx = {
 
 // ===== 入力 =====
 const keys = { left: false, right: false, jump: false, run: false };
-let jumpPressed = false, startPressed = false;
+const kb = { left: false, right: false, jump: false, run: false };   // キーボード
+const tk = { left: false, right: false, jump: false, run: false };   // タッチ
+let jumpPressed = false, startPressed = false, pausePressed = false;
+function syncKeys() {
+  for (const k in keys) {
+    const v = kb[k] || tk[k];
+    if (k === 'jump' && v && !keys.jump) jumpPressed = true;
+    keys[k] = v;
+  }
+}
 const keyMap = {
   ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right',
   ArrowUp: 'jump', KeyW: 'jump', Space: 'jump', KeyZ: 'jump',
@@ -108,33 +180,76 @@ const keyMap = {
 addEventListener('keydown', e => {
   initAudio();
   const k = keyMap[e.code];
-  if (k) {
-    if (k === 'jump' && !keys.jump) jumpPressed = true;
-    keys[k] = true;
-    e.preventDefault();
-  }
+  if (k) { kb[k] = true; syncKeys(); e.preventDefault(); }
   if (e.code === 'Enter') startPressed = true;
+  if (e.code === 'KeyP' || e.code === 'Escape') pausePressed = true;
 });
 addEventListener('keyup', e => {
   const k = keyMap[e.code];
-  if (k) { keys[k] = false; e.preventDefault(); }
+  if (k) { kb[k] = false; syncKeys(); e.preventDefault(); }
 });
-document.querySelectorAll('.btn').forEach(b => {
-  const k = b.dataset.k;
-  const on = e => {
+
+// タッチ：指をすべらせるとボタンが切りかわる／複数の指で同時に押せる
+const touches = new Map();
+const btnEls = [...document.querySelectorAll('.btn')];
+function keyAt(x, y) {
+  const el = document.elementFromPoint(x, y);
+  const b = el && el.closest ? el.closest('.btn') : null;
+  return b ? b.dataset.k : null;
+}
+function syncTouch() {
+  for (const k in tk) tk[k] = false;
+  for (const k of touches.values()) if (k) tk[k] = true;
+  btnEls.forEach(b => b.classList.toggle('on', tk[b.dataset.k]));
+  syncKeys();
+}
+document.querySelectorAll('.pad').forEach(pad => {
+  pad.addEventListener('pointerdown', e => {
     e.preventDefault(); initAudio();
-    if (k === 'jump' && !keys.jump) jumpPressed = true;
-    keys[k] = true; b.classList.add('on');
-    try { b.setPointerCapture(e.pointerId); } catch (_) {}
-  };
-  const off = e => { e.preventDefault(); keys[k] = false; b.classList.remove('on'); };
-  b.addEventListener('pointerdown', on);
-  b.addEventListener('pointerup', off);
-  b.addEventListener('pointercancel', off);
-  b.addEventListener('lostpointercapture', off);
+    try { pad.setPointerCapture(e.pointerId); } catch (_) {}
+    touches.set(e.pointerId, keyAt(e.clientX, e.clientY));
+    syncTouch();
+  });
+  pad.addEventListener('pointermove', e => {
+    if (!touches.has(e.pointerId)) return;
+    const k = keyAt(e.clientX, e.clientY);
+    if (k !== touches.get(e.pointerId)) { touches.set(e.pointerId, k); syncTouch(); }
+  });
+  const end = e => { if (touches.delete(e.pointerId)) syncTouch(); };
+  pad.addEventListener('pointerup', end);
+  pad.addEventListener('pointercancel', end);
+  pad.addEventListener('lostpointercapture', end);
 });
-cv.addEventListener('pointerdown', () => { initAudio(); startPressed = true; });
-addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
+function releaseAll() {
+  for (const k in kb) kb[k] = false;
+  touches.clear(); syncTouch();
+}
+cv.addEventListener('pointerdown', e => { e.preventDefault(); initAudio(); startPressed = true; });
+
+const pauseBtn = document.getElementById('pauseBtn');
+pauseBtn.addEventListener('pointerdown', e => { e.preventDefault(); initAudio(); pausePressed = true; });
+
+// 全画面（対応しているブラウザだけ表示）
+const fsBtn = document.getElementById('fsBtn');
+const root = document.documentElement;
+const reqFs = root.requestFullscreen || root.webkitRequestFullscreen;
+if (!reqFs) fsBtn.style.display = 'none';
+fsBtn.addEventListener('click', async () => {
+  try {
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    } else {
+      await reqFs.call(root);
+      try { await screen.orientation.lock('landscape'); } catch (_) {}
+    }
+  } catch (_) {}
+});
+
+addEventListener('blur', releaseAll);
+document.addEventListener('visibilitychange', () => { if (document.hidden) pauseGame(); });
+addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('gesturestart', e => e.preventDefault());
+function buzz(p) { if (isTouch && navigator.vibrate) { try { navigator.vibrate(p); } catch (_) {} } }
 
 // ===== ステージ =====
 const LW = 230, LH = 12;
@@ -467,9 +582,17 @@ function updateCamera() {
 }
 
 // ===== メインの更新 =====
+function pauseGame() {
+  if (state === 'play') { state = 'pause'; releaseAll(); }
+}
 function step() {
   frame++;
-  if (state === 'title' || state === 'gameover') {
+  if (pausePressed) {
+    if (state === 'play') pauseGame();
+    else if (state === 'pause') state = 'play';
+  } else if (state === 'pause') {
+    if (startPressed) state = 'play';
+  } else if (state === 'title' || state === 'gameover') {
     if (jumpPressed || startPressed) newGame();
   } else if (state === 'play') {
     updatePlayer();
@@ -492,7 +615,7 @@ function step() {
     updateClear();
     updateEnemies(); updateFx(); updateCamera();
   }
-  jumpPressed = false; startPressed = false;
+  jumpPressed = false; startPressed = false; pausePressed = false;
 }
 
 function updateClear() {
@@ -798,20 +921,23 @@ function text(s, x, y, size = 16, align = 'left', color = '#fff') {
   ctx.fillStyle = color; ctx.fillText(s, x, y);
 }
 function drawHUD() {
-  text('スコア ' + String(score).padStart(6, '0'), 14, 18, 15);
-  ctx.fillStyle = '#ffd84a'; ctx.beginPath(); ctx.ellipse(196, 18, 6, 8, 0, 0, Math.PI * 2); ctx.fill();
-  text('× ' + String(coins).padStart(2, '0'), 208, 18, 15);
-  text('ステージ 1', 330, 18, 15, 'center');
-  text('タイム ' + time, 500, 18, 15, 'center');
-  text('ライフ × ' + lives, 626, 18, 15, 'right');
+  text('スコア ' + String(score).padStart(6, '0'), 12, 18, 15);
+  const cx = Math.round(W * 0.31);
+  ctx.fillStyle = '#ffd84a'; ctx.beginPath(); ctx.ellipse(cx, 18, 6, 8, 0, 0, Math.PI * 2); ctx.fill();
+  text('× ' + String(coins).padStart(2, '0'), cx + 12, 18, 15);
+  if (W >= 600) text('ステージ 1', Math.round(W * 0.52), 18, 15, 'center');
+  text('タイム ' + time, W - 104, 18, 15, 'right');
+  text('ライフ × ' + lives, W - 12, 18, 15, 'right');
 }
 function panel(lines) {
-  ctx.fillStyle = 'rgba(15,25,50,.7)';
-  rr(W / 2 - 230, H / 2 - 110, 460, 220, 18); ctx.fill();
+  const pw = Math.min(460, W - 24);
+  ctx.fillStyle = 'rgba(15,25,50,.72)';
+  rr(W / 2 - pw / 2, H / 2 - 110, pw, 220, 18); ctx.fill();
   for (const [s, y, size, color] of lines) text(s, W / 2, H / 2 + y, size, 'center', color);
 }
 
 function draw() {
+  ctx.setTransform(viewK, 0, 0, viewK, 0, 0);
   drawBG();
   ctx.save();
   ctx.translate(-Math.round(camX), 0);
@@ -838,14 +964,27 @@ function draw() {
 
   if (state !== 'title') drawHUD();
 
+  const icon = state === 'pause' ? '▶' : '⏸';
+  if (pauseBtn.textContent !== icon) pauseBtn.textContent = icon;
   const blink = Math.floor(frame / 30) % 2 === 0;
   const go = isTouch ? 'タップでスタート' : 'スペース か Enter でスタート';
   if (state === 'title') {
-    panel([
+    panel(isTouch ? [
+      ['ポコのぼうけん', -66, 38, '#ffe066'],
+      ['◀ ▶ でいどう ／ ジャンプ ／ ダッシュ', -14, 15],
+      ['てきを ふんで たおそう！', 14, 14, '#cde'],
+      ['★ブロックを 下からたたこう', 36, 14, '#cde'],
+      [blink ? go : '', 76, 20, '#fff'],
+    ] : [
       ['ポコのぼうけん', -62, 38, '#ffe066'],
-      [isTouch ? '◀ ▶ でいどう ／ ジャンプ ／ ダッシュ' : '← → いどう ／ スペース・↑ ジャンプ ／ Shift ダッシュ', -8, 15],
+      ['← → いどう ／ スペース・↑ ジャンプ ／ Shift ダッシュ', -8, 15],
       ['てきを ふんで たおそう！ ★ブロックを 下からたたこう', 20, 14, '#cde'],
       [blink ? go : '', 66, 20, '#fff'],
+    ]);
+  } else if (state === 'pause') {
+    panel([
+      ['ポーズ中', -30, 34, '#ffe066'],
+      [isTouch ? 'がめんタップ か ▶ で つづける' : 'P か Enter で つづける', 30, 16],
     ]);
   } else if (state === 'gameover') {
     panel([
