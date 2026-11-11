@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#8fd3ff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="まめじま">
+<title>まめじまぐらし</title>
+<style>
+  :root { --ink:#3a2e3f; --paper:#fffaf2; --accent:#ff8a65; --accent2:#4fb3e8; --line:#eedfcd; --good:#7cc576; --warn:#ffcc4d; }
+  html, body {
+    margin:0; height:100%; overflow:hidden; background:#8fd3ff; color:var(--ink);
+    font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+    touch-action:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none;
+    -webkit-tap-highlight-color:transparent; overscroll-behavior:none;
+  }
+  button { font:inherit; color:inherit; cursor:pointer; }
+  #view { position:fixed; inset:0; }
+  #view canvas { display:block; width:100%; height:100%; }
+  #labels { position:fixed; inset:0; pointer-events:none; overflow:hidden; }
+  .lab { position:absolute; left:0; top:0; display:flex; flex-direction:column; align-items:center; gap:4px; will-change:transform; }
+  .lab .bub { background:#fff; border-radius:14px; padding:4px 10px; font-size:15px; line-height:1.3; box-shadow:0 2px 6px rgba(0,0,0,.18);
+    position:relative; white-space:nowrap; max-width:230px; overflow:hidden; text-overflow:ellipsis; display:none; }
+  .lab .bub.worry { background:#fff3c4; font-size:18px; padding:2px 8px; animation:pulse 1s ease-in-out infinite; }
+  .lab .bub.big { font-size:20px; padding:2px 8px; }
+  .lab .nm { font-size:11px; font-weight:700; background:rgba(255,255,255,.8); border-radius:8px; padding:1px 7px; }
+  .lab.sel .nm { background:var(--accent); color:#fff; }
+  @keyframes pulse { 50% { transform:scale(1.15); } }
+  .float { position:absolute; left:0; top:0; font-size:22px; pointer-events:none; will-change:transform,opacity; }
+
+  .pill { background:rgba(255,255,255,.88); border-radius:999px; padding:6px 12px; font-weight:700; font-size:14px; box-shadow:0 2px 8px rgba(0,0,0,.12); }
+  #hud { position:fixed; left:0; right:0; top:0; display:flex; justify-content:space-between; gap:8px; pointer-events:none;
+    padding: calc(10px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) 0 calc(12px + env(safe-area-inset-left)); }
+  #toolbar { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(12px + env(safe-area-inset-bottom)); display:flex; gap:8px;
+    background:rgba(255,255,255,.9); padding:8px; border-radius:22px; box-shadow:0 4px 16px rgba(0,0,0,.15); transition:transform .25s, opacity .25s; }
+  #toolbar.hide { transform:translate(-50%, 140%); opacity:0; pointer-events:none; }
+  .tb { border:0; background:#fff4e8; border-radius:14px; min-width:56px; height:52px; padding:0 8px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; font-size:20px; line-height:1; }
+  .tb small { font-size:10px; margin-top:4px; font-weight:700; }
+  .tb:active { transform:scale(.94); }
+  .tb.main { background:var(--accent); color:#fff; }
+
+  #panel { position:fixed; left:0; right:0; bottom:0; max-height:52%; background:var(--paper); border-radius:22px 22px 0 0;
+    box-shadow:0 -6px 24px rgba(0,0,0,.18); transform:translateY(105%); transition:transform .28s ease; display:flex; flex-direction:column;
+    padding-bottom:env(safe-area-inset-bottom); touch-action:pan-y; }
+  #panel.open { transform:translateY(0); }
+  @media (min-width:760px) {
+    #panel { left:auto; right:16px; bottom:16px; width:360px; max-height:calc(100% - 90px); border-radius:22px; transform:translateX(420px); }
+    #panel.open { transform:translateX(0); }
+  }
+  .ph { display:flex; align-items:center; gap:10px; padding:14px 14px 8px; }
+  .ph canvas { width:52px; height:52px; flex:none; }
+  .ph .t { flex:1; min-width:0; }
+  .ph .t b { font-size:20px; display:block; }
+  .ph .t span { font-size:12px; opacity:.75; }
+  .x { border:0; background:#f1e6d8; width:36px; height:36px; border-radius:50%; font-size:16px; flex:none; }
+  .pbody { overflow-y:auto; padding:0 14px 14px; -webkit-overflow-scrolling:touch; }
+  .bars { display:grid; grid-template-columns:auto 1fr; gap:6px 10px; align-items:center; font-size:12px; font-weight:700; margin:4px 0 10px; }
+  .meter { height:10px; background:#eadfd2; border-radius:6px; overflow:hidden; }
+  .meter i { display:block; height:100%; border-radius:6px; transition:width .3s; }
+  .worrybox { background:#fff3c4; border:2px dashed #f2c94c; border-radius:14px; padding:10px 12px; margin-bottom:10px; display:flex; align-items:center; gap:10px; }
+  .worrybox .wi { font-size:28px; }
+  .worrybox .wt { flex:1; font-size:14px; font-weight:700; }
+  .btn { border:0; border-radius:12px; padding:9px 14px; font-weight:700; background:var(--accent); color:#fff; font-size:14px; }
+  .btn.sub { background:#efe3d5; color:var(--ink); }
+  .btn.blue { background:var(--accent2); }
+  .btn:disabled { opacity:.4; }
+  .btn:active { transform:scale(.96); }
+  .acts { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px; }
+  .act { border:0; background:#fff; border-radius:14px; padding:8px 2px; font-size:22px; box-shadow:0 1px 4px rgba(0,0,0,.1); display:flex; flex-direction:column; align-items:center; gap:3px; }
+  .act small { font-size:11px; font-weight:700; }
+  .act:disabled { opacity:.35; }
+  .status { font-size:12px; background:#fff; border-radius:10px; padding:6px 10px; margin-bottom:10px; }
+  h4 { margin:6px 0 6px; font-size:13px; }
+  .rel { display:flex; align-items:center; gap:8px; padding:6px 4px; border-bottom:1px solid var(--line); }
+  .rel canvas { width:30px; height:30px; }
+  .rel .rn { flex:1; font-size:14px; font-weight:700; }
+  .tag { font-size:11px; padding:2px 8px; border-radius:10px; background:#eee; font-weight:700; white-space:nowrap; }
+  .tag.l3 { background:#ffd6e7; } .tag.l2 { background:#d8f0d2; } .tag.l1 { background:#e6eef7; } .tag.lm { background:#ffd9cc; } .tag.lv { background:#ff9fc4; color:#fff; }
+
+  #modalWrap { position:fixed; inset:0; background:rgba(40,30,50,.35); display:none; align-items:center; justify-content:center; padding:16px; z-index:20; }
+  #modalWrap.show { display:flex; }
+  #modal { background:var(--paper); border-radius:22px; width:100%; max-width:440px; max-height:calc(100% - 20px); display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,.25); }
+  #modal .mh { display:flex; align-items:center; gap:8px; padding:14px 16px 6px; font-weight:700; font-size:18px; }
+  #modal .mh span { flex:1; }
+  #modal .mb { overflow-y:auto; padding:6px 16px 16px; touch-action:pan-y; -webkit-overflow-scrolling:touch; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(92px,1fr)); gap:8px; }
+  .card { border:0; background:#fff; border-radius:14px; padding:10px 4px; display:flex; flex-direction:column; align-items:center; gap:4px; box-shadow:0 1px 4px rgba(0,0,0,.1); }
+  .card .e { font-size:30px; }
+  .card .n { font-size:12px; font-weight:700; }
+  .card .p { font-size:11px; opacity:.75; }
+  .card:disabled { opacity:.35; }
+  .card.on { outline:3px solid var(--accent); }
+  .card canvas { width:56px; height:56px; }
+  .choices { display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+  .choices .btn { padding:12px; font-size:15px; }
+  .msg { font-size:15px; line-height:1.6; }
+  .row { margin:10px 0; }
+  .row > label { display:block; font-size:12px; font-weight:700; margin-bottom:6px; }
+  .sw { display:flex; flex-wrap:wrap; gap:6px; }
+  .sw button { width:32px; height:32px; border-radius:50%; border:3px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,.25); }
+  .sw button.on { border-color:var(--ink); }
+  .seg { display:flex; flex-wrap:wrap; gap:6px; }
+  .seg button { border:0; background:#fff; border-radius:10px; padding:7px 10px; font-size:13px; box-shadow:0 1px 3px rgba(0,0,0,.12); }
+  .seg button.on { background:var(--accent); color:#fff; }
+  input[type=text], select { width:100%; box-sizing:border-box; font:inherit; font-size:16px; padding:9px 12px; border-radius:12px; border:2px solid var(--line); background:#fff; color:var(--ink); }
+  input[type=range] { width:100%; accent-color:var(--accent); }
+  .rng { display:flex; justify-content:space-between; font-size:11px; opacity:.8; }
+  #prev { display:block; margin:0 auto; width:170px; height:170px; border-radius:50%; background:radial-gradient(#e9f7ff,#bfe6ff); }
+  .persona { text-align:center; font-weight:700; margin-top:4px; }
+  .news { font-size:13px; padding:7px 0; border-bottom:1px solid var(--line); }
+  .news i { font-style:normal; opacity:.6; font-size:11px; margin-right:6px; }
+  .janken { display:flex; justify-content:center; gap:12px; margin:12px 0; }
+  .janken button { font-size:40px; width:78px; height:78px; border-radius:20px; border:0; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,.15); }
+  .jres { text-align:center; font-size:44px; margin:6px 0; min-height:56px; }
+  .center { text-align:center; }
+
+  #toast { position:fixed; left:50%; top:calc(56px + env(safe-area-inset-top)); transform:translateX(-50%); display:flex; flex-direction:column; gap:6px; align-items:center; pointer-events:none; z-index:30; width:max-content; max-width:92%; }
+  .toast { background:rgba(58,46,63,.9); color:#fff; padding:8px 14px; border-radius:14px; font-size:14px; font-weight:700; animation:tin .3s ease; text-align:center; }
+  @keyframes tin { from { opacity:0; transform:translateY(-8px); } }
+  #talk { position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom)); transform:translateX(-50%); width:min(92%,520px); background:#fff; border-radius:18px;
+    padding:14px 16px 22px; box-shadow:0 6px 24px rgba(0,0,0,.2); display:none; z-index:25; font-size:17px; line-height:1.6; }
+  #talk.show { display:block; }
+  #talk .who { position:absolute; top:-14px; left:16px; background:var(--accent); color:#fff; font-weight:700; padding:3px 12px; border-radius:10px; font-size:13px; }
+  #talk .nx { position:absolute; right:14px; bottom:6px; font-size:12px; animation:pulse 1s infinite; }
+  #fade { position:fixed; inset:0; background:#fff; opacity:0; pointer-events:none; transition:opacity .45s; z-index:24; }
+  #fade.on { opacity:1; }
+</style>
+</head>
+<body>
+<div id="view"></div>
+<div id="labels"></div>
+<div id="hud">
+  <div class="pill" id="clock">☀️ 1日目 8:00</div>
+  <div class="pill" id="money">💰 500</div>
+</div>
+<div id="toolbar">
+  <button class="tb" id="bHome" aria-label="島の全体を見る">🏝<small>しま</small></button>
+  <button class="tb" id="bList" aria-label="住人リスト">👥<small>住人</small></button>
+  <button class="tb main" id="bNew" aria-label="住人をつくる">✨<small>つくる</small></button>
+  <button class="tb" id="bNews" aria-label="ニュース">📰<small>ニュース</small></button>
+  <button class="tb" id="bSpeed" aria-label="時間の速さ">▶<small>ふつう</small></button>
+  <button class="tb" id="bSound" aria-label="音">🔊<small>おと</small></button>
+</div>
+<div id="panel"></div>
+<div id="modalWrap"><div id="modal"><div class="mh"><span id="mTitle"></span><button class="x" id="mClose" aria-label="とじる">✕</button></div><div class="mb" id="mBody"></div></div></div>
+<div id="toast"></div>
+<div id="fade"></div>
+<div id="talk"><div class="who" id="talkWho"></div><div id="talkText"></div><div class="nx">▼ タップ</div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+"use strict";
+// ============================================================
+//  まめじまぐらし — 3D の島で「まめびと」たちがくらすゲーム
+// ============================================================
+
+// ---------- データ ----------
+const FOODS = [
+  { id:'apple',  n:'りんご',       e:'🍎', p:20,  f:20 },
+  { id:'onigiri',n:'おにぎり',     e:'🍙', p:30,  f:35 },
+  { id:'bread',  n:'パン',         e:'🍞', p:40,  f:35 },
+  { id:'straw',  n:'いちご',       e:'🍓', p:50,  f:20 },
+  { id:'burger', n:'ハンバーガー', e:'🍔', p:70,  f:55 },
+  { id:'curry',  n:'カレー',       e:'🍛', p:80,  f:65 },
+  { id:'ramen',  n:'ラーメン',     e:'🍜', p:90,  f:65 },
+  { id:'pizza',  n:'ピザ',         e:'🍕', p:100, f:60 },
+  { id:'cake',   n:'ケーキ',       e:'🍰', p:120, f:40 },
+  { id:'sushi',  n:'おすし',       e:'🍣', p:150, f:60 },
+];
+const HATS = [
+  { id:'none',   n:'なし',         e:'🚫', p:0 },
+  { id:'leaf',   n:'はっぱ',       e:'🌱', p:50 },
+  { id:'flower', n:'おはな',       e:'🌼', p:80 },
+  { id:'ribbon', n:'リボン',       e:'🎀', p:120 },
+  { id:'cap',    n:'キャップ',     e:'🧢', p:150 },
+  { id:'beanie', n:'ニット帽',     e:'🧶', p:200 },
+  { id:'tophat', n:'シルクハット', e:'🎩', p:400 },
+  { id:'crown',  n:'おうかん',     e:'👑', p:800 },
+];
+const COLORS = ['#ff8a80','#ffb74d','#ffe082','#aed581','#81c784','#4dd0e1','#64b5f6','#9575cd','#f48fb1','#bcaaa4','#eeeeee','#90a4ae'];
+const EYES = [['round','まる'],['big','キラキラ'],['dot','てん'],['sharp','キリッ'],['sleepy','ねむそう']];
+const MOUTHS = [['smile','にっこり'],['cat','ねこ'],['open','ぱかっ'],['line','むっ']];
+const TOPICS = ['☀️','🌈','🍰','🎵','⚽','🐱','🐶','📚','🎮','🌸','🍜','✨','😂','🤔','🏖','🎨','🌙','🍓','👻','🚀'];
+const MAX_RES = 12;
+const DOOR = { x:0, z:-10.9 };
+const CAFE = { x:10.0, z:1, face:Math.PI/2, emo:['☕','🧁','🍩','🥤'] };
+const SHOP = { x:-10.0, z:1, face:-Math.PI/2, emo:['👒','🎀','✨','🧦'] };
+
+// ---------- 便利関数 ----------
+const rand = (a,b) => a + Math.random()*(b-a);
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const lerp = (a,b,t) => a + (b-a)*t;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const wait = ms => new Promise(r => setTimeout(r, ms));
+function hash(str){ let h = 2166136261; for (let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return ((h>>>0) % 10000) / 10000; }
+function angDiff(a,b){ let d = b - a; while (d > Math.PI) d -= Math.PI*2; while (d < -Math.PI) d += Math.PI*2; return d; }
+const $ = id => document.getElementById(id);
+const foodById = id => FOODS.find(f => f.id === id) || FOODS[0];
+const hatById = id => HATS.find(h => h.id === id) || HATS[0];
+
+// ---------- 状態とセーブ ----------
+const SAVE_KEY = 'mamejima-save-v1';
+let W = { time: 8*60, day: 1, money: 500, speed: 1, sound: true, residents: [], rel: {}, news: [], nextId: 1, seenHelp: false };
+const residents = [];   // 実行時オブジェクト
+let busy = false;       // イベント演出中
+let selected = null;
+let followRes = null;
+
+function save(){
+  W.residents = residents.map(r => ({ id:r.id, name:r.name, look:Object.assign({}, r.look), act:r.act, care:r.care, fav:r.fav, dislike:r.dislike,
+    level:r.level, happy:Math.round(r.happy), hunger:Math.round(r.hunger), room:r.room }));
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(W)); } catch(e) {}
+}
+function load(){
+  try { const s = localStorage.getItem(SAVE_KEY); if (s) { const d = JSON.parse(s); if (d && Array.isArray(d.residents)) { W = Object.assign(W, d); return true; } } } catch(e) {}
+  return false;
+}
+
+// ---------- 関係 ----------
+function relKey(a,b){ return a.id < b.id ? a.id+'|'+b.id : b.id+'|'+a.id; }
+function rel(a,b){ const k = relKey(a,b); if (!W.rel[k]) W.rel[k] = { aff: Math.round(hash(k)*10), lovers:false }; return W.rel[k]; }
+function relLevel(aff){ return aff >= 65 ? 3 : aff >= 30 ? 2 : aff >= 10 ? 1 : aff <= -10 ? -1 : 0; }
+function relLabel(R){ if (R.lovers) return ['恋人 💕','lv']; return ({3:['親友','l3'],2:['友だち','l2'],1:['知りあい','l1'],'-1':['けんか中','lm'],0:['ふつう','']})[relLevel(R.aff)]; }
+function loverOf(r){ for (const o of residents){ if (o !== r && rel(r,o).lovers) return o; } return null; }
+function compat(a,b){ const sim = 1 - (Math.abs(a.act-b.act) + Math.abs(a.care-b.care))/2; return clamp(sim*0.6 + hash('c'+relKey(a,b))*0.4, 0, 1); }
+function addAff(a, b, d){
+  const R = rel(a,b), before = relLevel(R.aff);
+  R.aff = clamp(Math.round(R.aff + d), -100, 100);
+  const after = relLevel(R.aff);
+  if (after !== before){
+    if (after === 2 && before < 2) { toast(`🤝 ${a.name}と${b.name}が友だちになった！`); news(`${a.name}と${b.name}が友だちになった`); jingle('good'); }
+    if (after === 3 && before < 3) { toast(`🌟 ${a.name}と${b.name}が親友になった！`); news(`${a.name}と${b.name}が親友になった`); jingle('good'); }
+    if (after === -1) { toast(`💢 ${a.name}と${b.name}がけんかした…`); news(`${a.name}と${b.name}がけんかした`); }
+    if (before === -1 && after >= 0) { news(`${a.name}と${b.name}が仲なおりした`); }
+  }
+}
+function persona(r){ const g = r.act >= .5, c = r.care >= .5; return g ? (c ? 'ムードメーカー' : 'じゆうじん') : (c ? 'やさしい' : 'のんびりや'); }
+
+// ---------- Three.js セットアップ ----------
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+$('view').appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x9fd8ff, 70, 160);
+const camera = new THREE.PerspectiveCamera(45, 1, 0.5, 500);
+const hemi = new THREE.HemisphereLight(0xffffff, 0x9bbf88, 0.5); scene.add(hemi);
+const amb = new THREE.AmbientLight(0xffffff, 0.08); scene.add(amb);
+const sun = new THREE.DirectionalLight(0xffffff, 0.62);
+sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, { left:-30, right:30, top:30, bottom:-30, near:1, far:140 });
+sun.shadow.bias = -0.0006;
+scene.add(sun, sun.target);
+
+const matCache = {};
+function toon(c){ const k = typeof c === 'string' ? c : '#' + c.getHexString(); if (!matCache[k]) matCache[k] = new THREE.MeshToonMaterial({ color:k }); return matCache[k]; }
+function mesh(geo, mat, x=0, y=0, z=0, shadow=true){ const m = new THREE.Mesh(geo, mat); m.position.set(x,y,z); m.castShadow = shadow; m.receiveShadow = true; return m; }
+
+// ---------- ワールド ----------
+let sea, seaBase, stars, windowMats = [], lampMats = [], clouds = [], fountainWater;
+function textSign(text, bg, fg, w=256, h=80){
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const c = cv.getContext('2d');
+  c.fillStyle = bg; c.beginPath(); c.roundRect ? c.roundRect(4,4,w-8,h-8,18) : c.rect(4,4,w-8,h-8); c.fill();
+  c.fillStyle = fg; c.font = 'bold 40px "Hiragino Maru Gothic ProN", sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(text, w/2, h/2+2);
+  const t = new THREE.CanvasTexture(cv);
+  return new THREE.Mesh(new THREE.PlaneGeometry(w/80, h/80), new THREE.MeshBasicMaterial({ map:t, transparent:true }));
+}
+function buildWorld(){
+  // 海
+  const sg = new THREE.PlaneGeometry(320, 320, 64, 64); sg.rotateX(-Math.PI/2);
+  sea = new THREE.Mesh(sg, new THREE.MeshPhongMaterial({ color:0x46aee6, shininess:90, specular:0xaee6ff, flatShading:true }));
+  sea.position.y = -0.6; scene.add(sea);
+  seaBase = Float32Array.from(sg.attributes.position.array);
+  // 砂浜と草地
+  const sand = mesh(new THREE.CylinderGeometry(24, 25.5, 1.6, 64), toon('#f6e3b4'), 0, -0.95, 0, false); scene.add(sand);
+  const grass = mesh(new THREE.CylinderGeometry(21.5, 22.2, 1.6, 64), toon('#7cc35e'), 0, -0.8, 0, false); scene.add(grass);
+  // 広場と道
+  const stone = toon('#e3d2b2');
+  scene.add(mesh(new THREE.CylinderGeometry(6.6, 6.6, 0.06, 48), stone, 0, 0.03, 0, false));
+  const pathGeo = new THREE.BoxGeometry(2.4, 0.05, 1);
+  const p1 = mesh(pathGeo, stone, 0, 0.03, -8.5, false); p1.scale.z = 5; scene.add(p1);
+  const p2 = mesh(pathGeo, stone, 9, 0.03, 1, false); p2.scale.z = 1; p2.scale.x = 2.3; p2.rotation.y = Math.PI/2; p2.scale.set(2.4/2.4, 1, 5.5); scene.add(p2);
+  const p3 = p2.clone(); p3.position.x = -9; scene.add(p3);
+  const p4 = mesh(pathGeo, stone, 0, 0.03, 13, false); p4.scale.z = 13; scene.add(p4);
+  // 噴水
+  const fg = new THREE.Group();
+  fg.add(mesh(new THREE.CylinderGeometry(2.3, 2.5, 0.6, 32), toon('#d9d4e6'), 0, 0.3, 0));
+  fountainWater = mesh(new THREE.CylinderGeometry(2.0, 2.0, 0.1, 32), new THREE.MeshPhongMaterial({ color:0x7fd3ff, shininess:120, transparent:true, opacity:.85 }), 0, 0.55, 0, false);
+  fg.add(fountainWater);
+  fg.add(mesh(new THREE.CylinderGeometry(0.3, 0.45, 1.6, 16), toon('#d9d4e6'), 0, 1.1, 0));
+  fg.add(mesh(new THREE.CylinderGeometry(1.0, 0.6, 0.25, 24), toon('#d9d4e6'), 0, 1.9, 0));
+  const spout = mesh(new THREE.SphereGeometry(0.45, 16, 12), new THREE.MeshPhongMaterial({ color:0xaee6ff, transparent:true, opacity:.8 }), 0, 2.3, 0, false);
+  spout.name = 'spout'; fg.add(spout);
+  scene.add(fg);
+  // アパート
+  buildApartment();
+  // お店
+  buildShop(14, 1, -Math.PI/2, '#fff1e0', '#e57373', '#ffffff', '#e57373', 'まめカフェ');
+  buildShop(-14, 1, Math.PI/2, '#eef6ff', '#5c8fd6', '#ffffff', '#ffd54f', 'ぼうし屋');
+  // さん橋
+  const wood = toon('#c79a6b');
+  const pier = mesh(new THREE.BoxGeometry(3, 0.25, 9), wood, 0, -0.1, 26); scene.add(pier);
+  for (const x of [-1.3, 1.3]) for (const z of [22.5, 26, 29.5]) scene.add(mesh(new THREE.CylinderGeometry(0.15,0.15,1.4,8), wood, x, -0.6, z));
+  // 木・花・ベンチ・街灯
+  const trunk = toon('#9c6b45');
+  const leafCols = ['#5fb85a','#4fa64b','#74c66a','#3f9a52'];
+  let seed = 7; const srand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  let placed = 0;
+  for (let i = 0; i < 400 && placed < 34; i++){
+    const a = srand()*Math.PI*2, d = 15.5 + srand()*5;
+    const x = Math.sin(a)*d, z = Math.cos(a)*d;
+    if (Math.abs(x) < 3 && z > 12) continue;              // さん橋への道
+    if (Math.abs(z - 1) < 4 && Math.abs(x) > 10.5) continue; // お店
+    if (z < -9 && Math.abs(x) < 8) continue;               // アパート
+    const s = 0.8 + srand()*0.6, t = new THREE.Group();
+    t.add(mesh(new THREE.CylinderGeometry(0.22*s, 0.3*s, 1.6*s, 8), trunk, 0, 0.8*s, 0));
+    const lc = toon(leafCols[Math.floor(srand()*leafCols.length)]);
+    if (srand() < 0.5){
+      t.add(mesh(new THREE.SphereGeometry(1.2*s, 14, 10), lc, 0, 2.2*s, 0));
+      t.add(mesh(new THREE.SphereGeometry(0.85*s, 14, 10), lc, 0.5*s, 2.9*s, 0.2*s));
+    } else {
+      t.add(mesh(new THREE.ConeGeometry(1.3*s, 2.2*s, 10), lc, 0, 2.4*s, 0));
+      t.add(mesh(new THREE.ConeGeometry(0.95*s, 1.7*s, 10), lc, 0, 3.4*s, 0));
+    }
+    t.position.set(x, 0, z); t.rotation.y = srand()*6; scene.add(t); placed++;
+  }
+  const flowerCols = ['#ff7aa2','#ffd54f','#ffffff','#b39ddb','#ff8a65'];
+  const fgeo = new THREE.SphereGeometry(0.12, 8, 6);
+  for (let i = 0; i < 90; i++){
+    const a = srand()*Math.PI*2, d = 7.5 + srand()*13.5;
+    const x = Math.sin(a)*d, z = Math.cos(a)*d;
+    if (z < -9.5 && Math.abs(x) < 7) continue;
+    if (Math.abs(x) < 1.5 && z > 6) continue;
+    scene.add(mesh(fgeo, toon(flowerCols[i % flowerCols.length]), x, 0.12, z, false));
+  }
+  const benchMat = toon('#b07a4f');
+  for (const a of [Math.PI*0.25, -Math.PI*0.25, Math.PI*0.75, -Math.PI*0.75]){
+    const b = new THREE.Group();
+    b.add(mesh(new THREE.BoxGeometry(2, 0.15, 0.6), benchMat, 0, 0.5, 0));
+    b.add(mesh(new THREE.BoxGeometry(2, 0.5, 0.12), benchMat, 0, 0.85, -0.28));
+    for (const x of [-0.8, 0.8]) b.add(mesh(new THREE.BoxGeometry(0.12, 0.5, 0.5), benchMat, x, 0.25, 0));
+    b.position.set(Math.sin(a)*8.2, 0, Math.cos(a)*8.2); b.rotation.y = a + Math.PI; scene.add(b);
+  }
+  for (const a of [0.5, -0.5, Math.PI-0.5, Math.PI+0.5]){
+    const l = new THREE.Group();
+    l.add(mesh(new THREE.CylinderGeometry(0.09, 0.12, 3, 8), toon('#556070'), 0, 1.5, 0));
+    const lm = new THREE.MeshToonMaterial({ color:'#fff6d0', emissive:'#ffcf6b', emissiveIntensity:0 }); lampMats.push(lm);
+    l.add(mesh(new THREE.SphereGeometry(0.3, 12, 10), lm, 0, 3.15, 0, false));
+    l.position.set(Math.sin(a)*7.1, 0, Math.cos(a)*7.1); scene.add(l);
+  }
+  // 雲
+  const cm = new THREE.MeshToonMaterial({ color:'#ffffff', transparent:true, opacity:.95 });
+  for (let i = 0; i < 7; i++){
+    const c = new THREE.Group();
+    for (let j = 0; j < 4; j++) c.add(mesh(new THREE.SphereGeometry(1.6 + srand()*1.4, 12, 10), cm, j*1.9 - 2.8, srand()*0.8, srand()*1.2, false));
+    c.position.set(-80 + srand()*160, 20 + srand()*8, -60 + srand()*90); c.userData.v = 0.6 + srand()*0.8;
+    scene.add(c); clouds.push(c);
+  }
+  // 星
+  const sp = []; for (let i = 0; i < 500; i++){ const v = new THREE.Vector3(srand()*2-1, srand()*0.9+0.1, srand()*2-1).normalize().multiplyScalar(220); sp.push(v.x, v.y, v.z); }
+  const sgeo = new THREE.BufferGeometry(); sgeo.setAttribute('position', new THREE.Float32BufferAttribute(sp, 3));
+  stars = new THREE.Points(sgeo, new THREE.PointsMaterial({ color:0xffffff, size:1.4, transparent:true, opacity:0, fog:false }));
+  scene.add(stars);
+}
+function buildApartment(){
+  const g = new THREE.Group();
+  g.add(mesh(new THREE.BoxGeometry(12, 9.4, 5), toon('#fbe3c8'), 0, 4.7, 0));
+  g.add(mesh(new THREE.BoxGeometry(12.8, 0.5, 5.8), toon('#e8896b'), 0, 9.6, 0));
+  for (const y of [3.2, 6.4]) g.add(mesh(new THREE.BoxGeometry(12.3, 0.18, 5.3), toon('#f0cfa8'), 0, y, 0, false));
+  // ドア
+  g.add(mesh(new THREE.BoxGeometry(1.5, 2.3, 0.2), toon('#a0674a'), 0, 1.15, 2.5));
+  g.add(mesh(new THREE.BoxGeometry(2.2, 0.15, 1), toon('#e8896b'), 0, 2.5, 2.8));
+  // 窓 (3階 × 4部屋)
+  const wgeo = new THREE.BoxGeometry(1.5, 1.3, 0.12);
+  const frame = toon('#ffffff');
+  for (let i = 0; i < MAX_RES; i++){
+    const col = i % 4, fl = Math.floor(i / 4);
+    const x = [-4.4, -2.2, 2.2, 4.4][col], y = 1.9 + fl*3.2;
+    if (fl === 0 && (col === 1 || col === 2)) {} // ドアの横も窓
+    g.add(mesh(new THREE.BoxGeometry(1.75, 1.55, 0.08), frame, x, y, 2.5, false));
+    const m = new THREE.MeshToonMaterial({ color:'#a9dcf5', emissive:'#ffcf6b', emissiveIntensity:0 });
+    windowMats.push(m);
+    g.add(mesh(wgeo, m, x, y, 2.55, false));
+  }
+  const sign = textSign('まめハイツ', '#ffffff', '#c0583f'); sign.position.set(0, 8.6, 2.56); g.add(sign);
+  g.position.set(0, 0, -14);
+  scene.add(g);
+}
+function buildShop(x, z, rotY, wall, roof, a1, a2, name){
+  const g = new THREE.Group();
+  g.add(mesh(new THREE.BoxGeometry(5, 3.4, 4.4), toon(wall), 0, 1.7, 0));
+  const r = mesh(new THREE.ConeGeometry(4.1, 2.2, 4), toon(roof), 0, 4.5, 0); r.rotation.y = Math.PI/4; r.scale.z = 0.9; g.add(r);
+  g.add(mesh(new THREE.BoxGeometry(1.3, 2.1, 0.15), toon('#8d5e44'), 0, 1.05, 2.22));
+  for (const sx of [-1.7, 1.7]) g.add(mesh(new THREE.BoxGeometry(1.1, 1.0, 0.12), toon('#a9dcf5'), sx, 1.9, 2.22, false));
+  for (let i = 0; i < 6; i++){
+    const s = mesh(new THREE.BoxGeometry(0.88, 0.08, 1.1), toon(i % 2 ? a2 : a1), -2.2 + i*0.88, 3.0, 2.7);
+    s.rotation.x = 0.35; g.add(s);
+  }
+  const sign = textSign(name, '#ffffff', roof); sign.position.set(0, 3.8, 2.35); sign.scale.setScalar(0.9); g.add(sign);
+  g.position.set(x, 0, z); g.rotation.y = rotY;
+  scene.add(g);
+}
+
+// ---------- まめびと（キャラクター） ----------
+const G = {
+  body: new THREE.SphereGeometry(0.7, 32, 24),
+  face: new THREE.SphereGeometry(0.712, 32, 16, Math.PI/2 - 0.8, 1.6, 0.66, 1.26),
+  arm:  new THREE.SphereGeometry(0.17, 12, 10),
+  foot: new THREE.SphereGeometry(0.2, 12, 10),
+};
+const INK = '#2a2230';
+function ell(c, x, y, rx, ry, rot=0){ c.beginPath(); c.ellipse(x, y, rx, ry, rot, 0, Math.PI*2); c.fill(); }
+function heart(c, x, y, s){
+  c.beginPath(); c.moveTo(x, y + s*0.9);
+  c.bezierCurveTo(x - s*1.6, y - s*0.2, x - s*0.7, y - s*1.3, x, y - s*0.45);
+  c.bezierCurveTo(x + s*0.7, y - s*1.3, x + s*1.6, y - s*0.2, x, y + s*0.9); c.fill();
+}
+function drawFace(cv, look, expr){
+  const c = cv.getContext('2d'); c.clearRect(0, 0, 256, 256);
+  c.lineCap = 'round'; c.lineJoin = 'round';
+  const L = 82, R = 174, Y = 104;
+  // ほっぺ
+  if (look.cheek || expr === 'love' || expr === 'happy'){
+    c.fillStyle = expr === 'love' ? 'rgba(255,80,120,.6)' : 'rgba(255,110,140,.42)';
+    ell(c, L - 22, 146, 19, 11); ell(c, R + 22, 146, 19, 11);
+  }
+  c.fillStyle = INK; c.strokeStyle = INK;
+  // め
+  for (const x of [L, R]){
+    const side = x < 128 ? -1 : 1;
+    if (expr === 'happy'){ c.lineWidth = 9; c.beginPath(); c.arc(x, Y + 8, 15, Math.PI*1.15, Math.PI*1.85); c.stroke(); }
+    else if (expr === 'sleep'){ c.lineWidth = 8; c.beginPath(); c.arc(x, Y - 6, 15, Math.PI*0.2, Math.PI*0.8); c.stroke(); }
+    else if (expr === 'love'){ c.fillStyle = '#ff4d6d'; heart(c, x, Y + 2, 17); c.fillStyle = INK; }
+    else if (expr === 'surprise'){ c.fillStyle = '#fff'; ell(c, x, Y, 19, 21); c.lineWidth = 5; c.beginPath(); c.ellipse(x, Y, 19, 21, 0, 0, Math.PI*2); c.stroke(); c.fillStyle = INK; ell(c, x, Y, 7, 8); }
+    else {
+      const st = look.eyes;
+      if (st === 'big'){ ell(c, x, Y, 13, 21); c.fillStyle = '#fff'; ell(c, x + 4, Y - 8, 5.5, 6.5); ell(c, x - 4, Y + 8, 2.8, 2.8); c.fillStyle = INK; }
+      else if (st === 'dot'){ ell(c, x, Y + 2, 8, 9); }
+      else if (st === 'sharp'){ ell(c, x, Y, 17, 9, side < 0 ? 0.3 : -0.3); c.fillStyle = '#fff'; ell(c, x + 5, Y - 3, 3.5, 3.5); c.fillStyle = INK; }
+      else if (st === 'sleepy'){ c.beginPath(); c.arc(x, Y, 15, 0, Math.PI); c.fill(); c.lineWidth = 6; c.beginPath(); c.moveTo(x - 17, Y); c.lineTo(x + 17, Y); c.stroke(); }
+      else { ell(c, x, Y, 15, 16); c.fillStyle = '#fff'; ell(c, x + 5, Y - 6, 5, 5); c.fillStyle = INK; }
+      // まゆ
+      if (expr === 'sad' || expr === 'angry'){
+        c.lineWidth = 7; c.beginPath();
+        const inner = expr === 'sad' ? -12 : 4, outer = expr === 'sad' ? 2 : -12;
+        c.moveTo(x + side*18, Y - 30 + outer); c.lineTo(x - side*14, Y - 30 + inner); c.stroke();
+      }
+      if (expr === 'sad' && side < 0){ c.fillStyle = '#6ec6ff'; c.beginPath(); c.moveTo(x + 10, Y + 16); c.quadraticCurveTo(x + 2, Y + 34, x + 10, Y + 38); c.quadraticCurveTo(x + 18, Y + 34, x + 10, Y + 16); c.fill(); c.fillStyle = INK; }
+    }
+  }
+  // くち
+  const MY = 158; c.lineWidth = 7;
+  if (expr === 'happy' || expr === 'love'){
+    c.fillStyle = '#c2405a'; c.beginPath(); c.arc(128, MY - 6, expr === 'love' ? 15 : 20, 0, Math.PI); c.closePath(); c.fill(); c.stroke();
+    c.fillStyle = '#ff8fa3'; ell(c, 128, MY + 6, 8, 5); c.fillStyle = INK;
+  } else if (expr === 'sad'){ c.beginPath(); c.arc(128, MY + 18, 16, Math.PI*1.2, Math.PI*1.8); c.stroke(); }
+  else if (expr === 'angry'){ c.beginPath(); c.moveTo(110, MY + 6); c.lineTo(119, MY - 2); c.lineTo(128, MY + 6); c.lineTo(137, MY - 2); c.lineTo(146, MY + 6); c.stroke(); }
+  else if (expr === 'surprise'){ ell(c, 128, MY + 4, 10, 13); }
+  else if (expr === 'sleep'){ c.lineWidth = 5; c.beginPath(); c.arc(128, MY + 2, 7, 0, Math.PI*2); c.stroke(); }
+  else {
+    const m = look.mouth;
+    if (m === 'cat'){ c.lineWidth = 6; c.beginPath(); c.arc(118, MY - 4, 10, Math.PI*0.1, Math.PI*0.9); c.stroke(); c.beginPath(); c.arc(138, MY - 4, 10, Math.PI*0.1, Math.PI*0.9); c.stroke(); }
+    else if (m === 'open'){ c.fillStyle = '#c2405a'; c.beginPath(); c.arc(128, MY - 6, 15, 0, Math.PI); c.closePath(); c.fill(); c.stroke(); c.fillStyle = INK; }
+    else if (m === 'line'){ c.beginPath(); c.moveTo(114, MY); c.lineTo(142, MY); c.stroke(); }
+    else { c.beginPath(); c.arc(128, MY - 14, 18, Math.PI*0.22, Math.PI*0.78); c.stroke(); }
+  }
+}
+function makeHat(type){
+  const g = new THREE.Group();
+  if (type === 'cap'){
+    const top = mesh(new THREE.SphereGeometry(0.56, 20, 10, 0, Math.PI*2, 0, Math.PI/2), toon('#e5534b'), 0, 1.5, 0); top.scale.y = 0.75; g.add(top);
+    const brim = mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.05, 20), toon('#e5534b'), 0, 1.53, 0.4); brim.scale.z = 0.75; g.add(brim);
+    g.add(mesh(new THREE.SphereGeometry(0.07, 8, 6), toon('#ffffff'), 0, 1.92, 0));
+  } else if (type === 'ribbon'){
+    const m = toon('#ff6fa5'); const p = new THREE.Group();
+    p.add(mesh(new THREE.SphereGeometry(0.1, 10, 8), m));
+    for (const s of [-1, 1]){ const c = mesh(new THREE.ConeGeometry(0.17, 0.32, 10), m, s*0.18, 0, 0); c.rotation.z = s*Math.PI/2; p.add(c); }
+    p.position.set(0.32, 1.66, 0.1); p.rotation.z = -0.4; g.add(p);
+  } else if (type === 'crown'){
+    const gold = new THREE.MeshToonMaterial({ color:'#ffd54f', side:THREE.DoubleSide });
+    g.add(mesh(new THREE.CylinderGeometry(0.34, 0.3, 0.28, 12, 1, true), gold, 0, 1.86, 0));
+    for (let i = 0; i < 6; i++){ const a = i/6*Math.PI*2; g.add(mesh(new THREE.ConeGeometry(0.07, 0.18, 6), gold, Math.sin(a)*0.33, 2.08, Math.cos(a)*0.33)); }
+    g.add(mesh(new THREE.SphereGeometry(0.06, 8, 6), toon('#e53935'), 0, 1.86, 0.33));
+  } else if (type === 'flower'){
+    const p = new THREE.Group();
+    p.add(mesh(new THREE.SphereGeometry(0.08, 10, 8), toon('#ffca28')));
+    for (let i = 0; i < 5; i++){ const a = i/5*Math.PI*2; const q = mesh(new THREE.SphereGeometry(0.09, 10, 8), toon('#ffffff'), Math.sin(a)*0.13, Math.cos(a)*0.13, 0); q.scale.z = 0.5; p.add(q); }
+    p.position.set(0.32, 1.66, 0.22); p.rotation.y = 0.5; g.add(p);
+  } else if (type === 'leaf'){
+    g.add(mesh(new THREE.CylinderGeometry(0.025, 0.03, 0.28, 6), toon('#5a8f3c'), 0, 1.9, 0));
+    for (const s of [-1, 1]){ const l = mesh(new THREE.SphereGeometry(0.17, 12, 8), toon('#7cc576'), s*0.15, 2.05, 0); l.scale.set(1, 0.3, 0.55); l.rotation.z = s*0.4; g.add(l); }
+  } else if (type === 'beanie'){
+    const m = toon('#5c8fd6');
+    const top = mesh(new THREE.SphereGeometry(0.6, 20, 10, 0, Math.PI*2, 0, Math.PI/2), m, 0, 1.38, 0); top.scale.y = 0.8; g.add(top);
+    const band = mesh(new THREE.TorusGeometry(0.56, 0.08, 8, 24), toon('#ffffff'), 0, 1.4, 0); band.rotation.x = Math.PI/2; g.add(band);
+    g.add(mesh(new THREE.SphereGeometry(0.14, 10, 8), toon('#ffffff'), 0, 1.92, 0));
+  } else if (type === 'tophat'){
+    const k = toon('#2f2b38');
+    g.add(mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.05, 20), k, 0, 1.72, 0));
+    g.add(mesh(new THREE.CylinderGeometry(0.3, 0.32, 0.55, 20), k, 0, 2.0, 0));
+    g.add(mesh(new THREE.CylinderGeometry(0.325, 0.325, 0.1, 20), toon('#d84f5f'), 0, 1.8, 0));
+  }
+  return g;
+}
+function buildChar(look){
+  const root = new THREE.Group();
+  const col = new THREE.Color(look.color);
+  const dark = col.clone().multiplyScalar(0.78);
+  const body = mesh(G.body, toon(col), 0, 0.95, 0); body.scale.set(1, 1.2, 0.95); root.add(body);
+  const cv = document.createElement('canvas'); cv.width = cv.height = 256;
+  const tex = new THREE.CanvasTexture(cv);
+  const fmat = new THREE.MeshToonMaterial({ map:tex, transparent:true, polygonOffset:true, polygonOffsetFactor:-2 });
+  const face = new THREE.Mesh(G.face, fmat); body.add(face);
+  const armL = mesh(G.arm, toon(dark), -0.7, 0.82, 0.05), armR = mesh(G.arm, toon(dark), 0.7, 0.82, 0.05);
+  armL.scale.set(0.85, 1.15, 0.85); armR.scale.copy(armL.scale);
+  const fc = dark.clone().multiplyScalar(0.8);
+  const footL = mesh(G.foot, toon(fc), -0.27, 0.1, 0.08), footR = mesh(G.foot, toon(fc), 0.27, 0.1, 0.08);
+  footL.scale.set(1, 0.6, 1.35); footR.scale.copy(footL.scale);
+  const hat = makeHat(look.hat);
+  root.add(armL, armR, footL, footR, hat);
+  drawFace(cv, look, 'normal'); tex.needsUpdate = true;
+  return { root, body, face, cv, tex, fmat, armL, armR, footL, footR, hat };
+}
+function disposeChar(ch){ scene.remove(ch.root); ch.tex.dispose(); ch.fmat.dispose(); }
+function iconCanvas(r, size=96, expr){
+  const cv = document.createElement('canvas'); cv.width = cv.height = size; const c = cv.getContext('2d');
+  const g = c.createRadialGradient(size*0.4, size*0.35, size*0.05, size/2, size/2, size*0.5);
+  const col = new THREE.Color(r.look.color);
+  g.addColorStop(0, '#' + col.clone().lerp(new THREE.Color('#ffffff'), 0.3).getHexString()); g.addColorStop(1, r.look.color);
+  c.fillStyle = g; c.beginPath(); c.ellipse(size/2, size/2, size*0.45, size*0.48, 0, 0, Math.PI*2); c.fill();
+  const f = document.createElement('canvas'); f.width = f.height = 256; drawFace(f, r.look, expr || 'normal');
+  c.drawImage(f, size*0.08, size*0.06, size*0.84, size*0.84);
+  return cv;
+}
+
+// ---------- 住人 ----------
+const labelsEl = $('labels');
+function spawnResident(d, x, z){
+  const ch = buildChar(d.look);
+  scene.add(ch.root);
+  const el = document.createElement('div'); el.className = 'lab';
+  el.innerHTML = '<div class="bub"></div><div class="nm"></div>';
+  labelsEl.appendChild(el);
+  const r = Object.assign({}, d, {
+    ch, el, bubEl: el.firstChild, nmEl: el.lastChild,
+    pos: new THREE.Vector3(x, 0, z), heading: rand(-3, 3), wantHeading: 0,
+    state: 'idle', timer: rand(0.5, 3), target: null, onArrive: null, chatWith: null, goingHome: false,
+    expr: 'normal', exprT: 0, shownExpr: '', phase: Math.random()*6, moving: false, jump: 0,
+    worry: null, nextWorry: rand(6, 35), bubble: '', bubbleT: 0, bubbleBig: false, chatCd: rand(4, 12), talkCd: 0, playCount: 0,
+    pitch: hash('v' + d.id + d.name), lastLabel: '',
+  });
+  r.wantHeading = r.heading;
+  r.nmEl.textContent = r.name;
+  r.ch.root.position.copy(r.pos);
+  residents.push(r);
+  return r;
+}
+function bedTime(r){ return 21.5 + r.act*1.3; }
+function wakeTime(r){ return 6 + (1 - r.act)*1.3; }
+function shouldSleep(r){ const h = W.time / 60; return h >= bedTime(r) || h < wakeTime(r); }
+function isAwake(r){ return r.state !== 'home'; }
+function available(r){ return (r.state === 'idle' || (r.state === 'walk' && !r.chatWith && !r.goingHome)) && !r.chatWith && r !== selected && !shouldSleep(r); }
+function setExpr(r, e, dur=2.5){ r.expr = e; r.exprT = dur; }
+function baseExpr(r){ if (r.state === 'home') return 'sleep'; if (r.hunger < 15 || r.happy < 20) return 'sad'; return 'normal'; }
+function showBubble(r, text, dur=2.2, big=false){ r.bubble = text; r.bubbleT = dur; r.bubbleBig = big; }
+function moveTo(r, x, z, cb){ r.state = 'walk'; r.target = { x, z }; r.onArrive = cb || null; }
+function randPoint(){
+  for (let i = 0; i < 60; i++){
+    const a = Math.random()*Math.PI*2, d = Math.sqrt(Math.random())*15;
+    const x = Math.sin(a)*d, z = Math.cos(a)*d;
+    if (z < -9 || Math.abs(x) > 10 || Math.hypot(x, z) < 3.3) continue;
+    return { x, z };
+  }
+  return { x: 0, z: 6 };
+}
+function goHome(r){
+  r.goingHome = true;
+  if (r.chatWith) endChatFor(r);
+  moveTo(r, DOOR.x + rand(-0.4, 0.4), DOOR.z, () => {
+    r.state = 'home'; r.goingHome = false; r.ch.root.visible = false; r.bubbleT = 0;
+  });
+}
+function wakeUp(r){
+  r.state = 'idle'; r.timer = rand(0.5, 2); r.pos.set(DOOR.x, 0, DOOR.z); r.ch.root.visible = true; r.heading = r.wantHeading = 0;
+  showBubble(r, pick(['おはよう！','ふぁ〜あ','いい朝だ〜','☀️']), 2.5);
+  r.hunger = Math.max(r.hunger, 10);
+  const p = randPoint(); moveTo(r, p.x, p.z);
+}
+function decide(r){
+  if (shouldSleep(r)) return goHome(r);
+  const x = Math.random();
+  if (r.chatCd <= 0 && x < 0.38 && tryChat(r)) return;
+  if (x < 0.48 && r.hunger < 60) return visit(r, CAFE);
+  if (x < 0.55) return visit(r, Math.random() < 0.5 ? CAFE : SHOP);
+  if (x < 0.66){ r.state = 'idle'; r.timer = rand(2, 5); if (Math.random() < 0.5) showBubble(r, pick(['🎵','💭','…','☁️','🌼','😌']), 2); return; }
+  const p = randPoint(); moveTo(r, p.x, p.z);
+}
+function visit(r, spot){
+  moveTo(r, spot.x + rand(-0.8, 0.8), spot.z + rand(-1.6, 1.6), () => {
+    r.timer = rand(3, 5); r.wantHeading = spot.face; showBubble(r, pick(spot.emo), 2.6, true);
+    if (spot === CAFE) r.hunger = Math.min(100, r.hunger + 12);
+  });
+}
+
+// ---------- おしゃべり ----------
+const chats = [];
+function tryChat(a){
+  const cands = residents.filter(b => b !== a && available(b) && b.chatCd <= 0 && a.pos.distanceTo(b.pos) < 12);
+  if (!cands.length) return false;
+  let tot = 0; const ws = cands.map(b => { const R = rel(a, b); const w = 1 + Math.max(0, R.aff)/25 + (R.lovers ? 4 : 0) - (R.aff < -10 ? 0.7 : 0); tot += w; return w; });
+  let t = Math.random()*tot, b = cands[0];
+  for (let i = 0; i < cands.length; i++){ t -= ws[i]; if (t <= 0){ b = cands[i]; break; } }
+  startChat(a, b);
+  return true;
+}
+function startChat(a, b, opt={}){
+  a.chatWith = b; b.chatWith = a;
+  b.state = 'wait'; b.waitT = 14; b.target = null;
+  const ang = Math.atan2(a.pos.x - b.pos.x, a.pos.z - b.pos.z);
+  let tx = b.pos.x + Math.sin(ang)*1.5, tz = b.pos.z + Math.cos(ang)*1.5;
+  if (Math.hypot(tx, tz) < 3.0){ tx = b.pos.x - Math.sin(ang)*1.5; tz = b.pos.z - Math.cos(ang)*1.5; }
+  moveTo(a, tx, tz, () => beginChat(a, b, opt));
+}
+function beginChat(a, b, opt){
+  if (b.state !== 'wait' || b.chatWith !== a){ a.chatWith = null; a.state = 'idle'; a.timer = 1; return; }
+  a.state = b.state = 'chat';
+  chats.push({ a, b, t: 0, dur: opt.force ? 4.5 : rand(4.5, 7), next: 0.2, turn: 0, opt });
+}
+function endChatFor(r){
+  const i = chats.findIndex(c => c.a === r || c.b === r);
+  const o = r.chatWith;
+  if (i >= 0) chats.splice(i, 1);
+  for (const x of [r, o]) if (x){ x.chatWith = null; if (x.state === 'chat' || x.state === 'wait'){ x.state = 'idle'; x.timer = rand(1, 2); } }
+}
+function updateChats(dt){
+  for (let i = chats.length - 1; i >= 0; i--){
+    const c = chats[i], { a, b } = c;
+    c.t += dt;
+    a.wantHeading = Math.atan2(b.pos.x - a.pos.x, b.pos.z - a.pos.z);
+    b.wantHeading = Math.atan2(a.pos.x - b.pos.x, a.pos.z - b.pos.z);
+    if (c.t >= c.next){
+      const sp = c.turn % 2 ? b : a;
+      const R = rel(a, b);
+      let t = pick(TOPICS);
+      if (R.lovers && Math.random() < 0.4) t = pick(['💕','😊','🌹','💗']);
+      if (c.opt.force === 'makeup' && c.turn === 0) t = 'ごめんね…';
+      if (c.opt.force === 'makeup' && c.turn === 1) t = 'こっちこそ！';
+      showBubble(sp, t, 1.2, t.length <= 2); sp.jump = 0.35; voice(sp, 3);
+      c.turn++; c.next += 1.3;
+    }
+    if (c.t >= c.dur){
+      chats.splice(i, 1);
+      finishChat(a, b, c.opt);
+    }
+  }
+}
+function finishChat(a, b, opt){
+  const R = rel(a, b);
+  const cp = compat(a, b);
+  let d;
+  if (opt.force === 'good'){ d = Math.max(10, 32 - R.aff); }
+  else if (opt.force === 'makeup'){ d = Math.max(0, 25 - R.aff); }
+  else if (opt.force === 'bad'){ d = -6; }
+  else {
+    d = Math.round((cp - 0.32)*14 + rand(-2, 4));
+    if (!R.lovers && cp < 0.42 && Math.random() < 0.12){ d = -22; }
+  }
+  addAff(a, b, d);
+  a.chatWith = b.chatWith = null;
+  for (const x of [a, b]){
+    x.state = 'idle'; x.timer = rand(1, 2.5); x.chatCd = rand(12, 24);
+    if (d <= -15){ setExpr(x, 'angry', 4); showBubble(x, '💢', 2.5, true); }
+    else if (d > 0){ setExpr(x, R.lovers ? 'love' : 'happy', 2.5); addHappy(x, 2 + d*0.3); if (R.lovers) floatAt(x, '💕'); }
+    else { setExpr(x, 'normal', 1); }
+  }
+  if (opt.onEnd) opt.onEnd(d);
+}
+
+// ---------- しあわせ・レベル ----------
+function addHappy(r, d){
+  r.happy = clamp(r.happy + d, 0, 140);
+  while (r.happy >= 100){
+    r.happy -= 55; r.level++;
+    const coins = 60 + r.level*30;
+    W.money += coins;
+    toast(`⭐ ${r.name}がレベル${r.level}になった！ おれいに 💰${coins}`);
+    news(`${r.name}がレベル${r.level}になった`);
+    floatAt(r, '⭐'); setExpr(r, 'happy', 3); jingle('level');
+  }
+  if (r === selected) renderPanel();
+}
+
+// ---------- なやみ ----------
+const DREAMS = ['空をとぶ夢を見たんだ！ 🕊', 'おすしの海でおよぐ夢を見たよ 🍣', '島がまるごとケーキになってた 🍰', '宇宙人とお茶する夢だった 👽',
+  '100才のおじいさんになってる夢… 👴', 'くじらの背中でおひるねする夢 🐳', 'まめびとが1000人にふえる夢！ 🫘'];
+function genWorry(r){
+  const others = residents.filter(o => o !== r);
+  const opts = [];
+  if (r.hunger < 45) opts.push([6, () => ({ type:'hungry', icon:'🍙', text:'おなかすいた…なにか食べたいな' })]);
+  opts.push([2, () => { const f = pick(FOODS); return { type:'food', food:f.id, icon:f.e, text:`${f.n}が食べたい気分！` }; }]);
+  opts.push([1.2, () => ({ type:'hat', icon:'🎩', text:'新しいぼうしがほしいな〜' })]);
+  opts.push([2, () => ({ type:'play', icon:'✊', text:'ひまだな〜。いっしょにあそぼ！' })]);
+  opts.push([1.2, () => ({ type:'dream', icon:'💭', text:'ねえねえ、聞いてほしい話があるの' })]);
+  const fights = others.filter(o => rel(r, o).aff <= -10);
+  if (fights.length) opts.push([5, () => { const o = pick(fights); return { type:'fight', target:o.id, icon:'💢', text:`${o.name}とけんかしちゃった…` }; }]);
+  if (!loverOf(r)){
+    const crush = others.filter(o => rel(r, o).aff >= 60 && !loverOf(o));
+    if (crush.length) opts.push([4, () => { const o = pick(crush); return { type:'love', target:o.id, icon:'💗', text:`${o.name}のことが気になってしかたない…` }; }]);
+  }
+  const strangers = others.filter(o => { const a = rel(r, o).aff; return a > -10 && a < 30; });
+  if (strangers.length) opts.push([2.5, () => { const o = pick(strangers); return { type:'friend', target:o.id, icon:'🤝', text:`${o.name}ともっとなかよくなりたいな` }; }]);
+  let tot = opts.reduce((s, o) => s + o[0], 0), t = Math.random()*tot, ch = opts[0];
+  for (const o of opts){ t -= o[0]; if (t <= 0){ ch = o; break; } }
+  r.worry = ch[1](); r.worry.life = 260;
+  blip(880, 0.08, 'triangle', 0.05); setTimeout(() => blip(1175, 0.1, 'triangle', 0.05), 90);
+  if (r === selected) renderPanel();
+}
+function solveWorry(r, happy, coins, msg){
+  r.worry = null; r.nextWorry = rand(55, 120);
+  W.money += coins;
+  addHappy(r, happy);
+  setExpr(r, 'happy', 3); floatAt(r, '✨'); jingle('good');
+  toast(`${msg ? msg + '　' : ''}💰+${coins}`);
+  save(); renderPanel();
+}
+const findRes = id => residents.find(o => o.id === id);
+
+// ---------- UI：トースト・ニュース・会話 ----------
+function toast(text){
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = text;
+  $('toast').appendChild(t); setTimeout(() => t.remove(), 3200);
+  while ($('toast').children.length > 3) $('toast').firstChild.remove();
+}
+function clockText(){ const h = Math.floor(W.time/60), m = Math.floor(W.time % 60); return `${h}:${String(m).padStart(2,'0')}`; }
+function news(text){ W.news.unshift({ d: W.day, t: clockText(), text }); if (W.news.length > 60) W.news.length = 60; }
+let talkResolve = null;
+function say(who, text){
+  $('talkWho').textContent = who; $('talkText').textContent = text; $('talk').classList.add('show');
+  const r = residents.find(x => x.name === who); if (r) voice(r, 6);
+  return new Promise(res => { talkResolve = res; });
+}
+$('talk').addEventListener('pointerup', () => { if (talkResolve){ const f = talkResolve; talkResolve = null; $('talk').classList.remove('show'); blip(660, 0.05); f(); } });
+async function fade(on){ $('fade').classList.toggle('on', on); await wait(480); }
+
+// ---------- UI：モーダル ----------
+let modalOnClose = null;
+function openModal(title, html, onClose){
+  $('mTitle').textContent = title; $('mBody').innerHTML = html; $('mBody').scrollTop = 0;
+  $('modalWrap').classList.add('show'); modalOnClose = onClose || null;
+}
+function closeModal(){ $('modalWrap').classList.remove('show'); const f = modalOnClose; modalOnClose = null; if (f) f(); }
+$('mClose').onclick = () => { blip(500, 0.05); closeModal(); };
+$('modalWrap').addEventListener('pointerdown', e => { if (e.target === $('modalWrap')) closeModal(); });
+
+// ---------- UI：パネル ----------
+const panel = $('panel');
+function select(r){
+  if (busy) return;
+  if (selected && selected !== r) unfocus(selected);
+  selected = r; followRes = r;
+  if (r.state === 'idle' || (r.state === 'walk' && !r.chatWith && !r.goingHome)){ r.state = 'focus'; r.target = null; }
+  cam.tDist = Math.min(cam.tDist, 15); cam.tPitch = Math.min(cam.tPitch, 0.6);
+  panel.classList.add('open'); $('toolbar').classList.add('hide');
+  renderPanel(); voice(r, 3); r.jump = 0.4;
+}
+function unfocus(r){ if (r.state === 'focus'){ r.state = 'idle'; r.timer = rand(0.5, 1.5); } }
+function deselect(){
+  if (selected) unfocus(selected);
+  selected = null; followRes = null;
+  panel.classList.remove('open'); $('toolbar').classList.remove('hide');
+}
+function statusText(r){
+  if (r.state === 'home') return '😴 アパートでおやすみ中';
+  if (r.state === 'chat' && r.chatWith) return `💬 ${esc(r.chatWith.name)}とおしゃべり中`;
+  if (r.state === 'event') return '✨ だいじな話の最中';
+  if (r.goingHome) return '🏠 おうちに帰るところ';
+  if (r.hunger < 25) return '🍙 おなかがペコペコ';
+  return pick(['🙂 島でのんびり', '🌼 きょうもいい日']);
+}
+let panelSig = '';
+function renderPanel(){
+  const r = selected; if (!r) return;
+  const sleeping = r.state === 'home';
+  const lv = loverOf(r);
+  const rels = residents.filter(o => o !== r).map(o => ({ o, R: rel(r, o) })).sort((x, y) => (y.R.lovers - x.R.lovers) || (y.R.aff - x.R.aff));
+  const w = r.worry;
+  let wHtml = '';
+  if (w && !sleeping){
+    const btn = { hungry:'ごはんをあげる', food:'ごはんをあげる', hat:'ぼうしをえらぶ', play:'あそぶ', dream:'話を聞く', fight:'相談にのる', love:'相談にのる', friend:'相談にのる' }[w.type];
+    wHtml = `<div class="worrybox"><div class="wi">${w.icon}</div><div class="wt">${esc(w.text)}</div><button class="btn" data-a="worry">${btn}</button></div>`;
+  }
+  panel.innerHTML = `
+    <div class="ph"><span id="pIcon"></span><div class="t"><b>${esc(r.name)}</b><span>Lv.${r.level}・${persona(r)}・すき: ${foodById(r.fav).e}</span></div>
+      <button class="x" data-a="close" aria-label="とじる">✕</button></div>
+    <div class="pbody">
+      <div class="status">${statusText(r)}${lv ? `　💕 恋人: ${esc(lv.name)}` : ''}</div>
+      <div class="bars"><span>🍙 まんぷく</span><div class="meter"><i id="mHun"></i></div><span>💖 しあわせ</span><div class="meter"><i id="mHap"></i></div></div>
+      ${wHtml}
+      <div class="acts">
+        <button class="act" data-a="talk" ${sleeping ? 'disabled' : ''}>💬<small>はなす</small></button>
+        <button class="act" data-a="food" ${sleeping ? 'disabled' : ''}>🍙<small>ごはん</small></button>
+        <button class="act" data-a="hat" ${sleeping ? 'disabled' : ''}>🎩<small>ぼうし</small></button>
+        <button class="act" data-a="play" ${sleeping ? 'disabled' : ''}>✊<small>あそぶ</small></button>
+      </div>
+      <h4>なかよし度</h4>
+      <div id="pRels">${rels.length ? '' : '<div class="status">まだ島にほかの住人がいないよ。✨から仲間をふやそう！</div>'}</div>
+      <div class="center" style="margin-top:12px"><button class="btn sub" data-a="edit">✏️ 見た目・せいかくを変える</button></div>
+    </div>`;
+  $('pIcon').appendChild(iconCanvas(r, 104, sleeping ? 'sleep' : r.expr === 'normal' ? baseExpr(r) : r.expr));
+  const box = $('pRels');
+  for (const { o, R } of rels){
+    const [lab, cls] = relLabel(R);
+    const row = document.createElement('div'); row.className = 'rel';
+    row.appendChild(iconCanvas(o, 60));
+    row.insertAdjacentHTML('beforeend', `<div class="rn">${esc(o.name)}</div><span class="tag ${cls}">${lab}</span><div class="meter" style="width:70px"><i style="width:${clamp((R.aff + 100)/2, 0, 100)}%;background:${R.aff < -10 ? '#ff8a65' : R.lovers ? '#ff6fa5' : '#7cc576'}"></i></div>`);
+    row.onclick = () => { blip(700, 0.05); select(o); };
+    box.appendChild(row);
+  }
+  updateBars();
+  panelSig = sigOf(r);
+}
+function sigOf(r){ return [r.state === 'home', r.state === 'chat', r.goingHome, !!r.worry, r.level, r.hunger < 25].join(); }
+function updateBars(){
+  const r = selected; if (!r) return;
+  const h = $('mHun'), p = $('mHap');
+  if (h){ h.style.width = r.hunger + '%'; h.style.background = r.hunger < 25 ? '#ff8a65' : '#ffb74d'; }
+  if (p){ p.style.width = Math.min(100, r.happy) + '%'; p.style.background = '#ff7aa2'; }
+}
+panel.addEventListener('click', e => {
+  const b = e.target.closest('[data-a]'); if (!b || !selected) return;
+  const r = selected, a = b.dataset.a;
+  blip(720, 0.05);
+  if (a === 'close') deselect();
+  else if (a === 'talk') doTalk(r);
+  else if (a === 'food') openFood(r);
+  else if (a === 'hat') openHats(r);
+  else if (a === 'play') openJanken(r);
+  else if (a === 'edit') openCreator(r);
+  else if (a === 'worry') handleWorry(r);
+});
+
+// ---------- アクション ----------
+function talkLine(r){
+  const lines = [];
+  const h = W.time/60;
+  if (h < 10) lines.push('おはよう！きょうもいい天気だね', 'あさごはん、なににしようかな');
+  if (h >= 18) lines.push('そろそろねむくなってきた…', '夕やけがきれいだったね');
+  if (r.hunger < 40) lines.push('おなかすいたなぁ…', `${foodById(r.fav).n}が食べたい…`);
+  if (r.happy < 30) lines.push('さいきん、ちょっとさびしいな…');
+  const lv = loverOf(r); if (lv) lines.push(`${lv.name}のことばっかり考えちゃう…💕`, `${lv.name}とデートしたいな`);
+  for (const o of residents){ if (o === r) continue; const R = rel(r, o); if (!R.lovers && R.aff >= 65) lines.push(`${o.name}とは親友なんだ！`); else if (R.aff >= 30) lines.push(`きのう${o.name}とあそんだよ！`); else if (R.aff <= -10) lines.push(`${o.name}とは…ちょっと気まずいの`); }
+  const per = { 'ムードメーカー':['みんなでパーティーしたいな！','わらってるのがいちばん！'], 'じゆうじん':['風のふくまま〜♪','きょうはなにしようかな〜'], 'やさしい':['みんな元気かな？','なにかお手伝いできることある？'], 'のんびりや':['ふぁ〜あ…','ゆっくりいこうよ〜'] }[persona(r)];
+  lines.push(...per, '島のくらし、たのしいね！', `${foodById(r.dislike).n}だけはにがてなんだ…`, 'あ、ちょうちょ！🦋');
+  return pick(lines);
+}
+function doTalk(r){
+  showBubble(r, talkLine(r), 3.5); voice(r, 6); r.jump = 0.4;
+  setExpr(r, r.happy < 30 ? 'sad' : 'happy', 2.5);
+  if (r.talkCd <= 0){ addHappy(r, 3); r.talkCd = 20; }
+}
+function openFood(r){
+  const html = `<div class="msg" style="margin-bottom:10px">${esc(r.name)}になにをあげる？ <small>(すき: ${foodById(r.fav).e})</small></div><div class="grid">` +
+    FOODS.map(f => `<button class="card" data-f="${f.id}" ${W.money < f.p ? 'disabled' : ''}><span class="e">${f.e}</span><span class="n">${f.n}</span><span class="p">💰${f.p}</span></button>`).join('') + '</div>';
+  openModal('🍙 ごはん', html);
+  $('mBody').querySelectorAll('[data-f]').forEach(b => b.onclick = () => { closeModal(); giveFood(r, foodById(b.dataset.f)); });
+}
+function giveFood(r, f){
+  if (W.money < f.p) return;
+  W.money -= f.p;
+  r.hunger = Math.min(100, r.hunger + f.f);
+  floatAt(r, f.e); r.jump = 0.4; blip(520, 0.06); setTimeout(() => blip(780, 0.08), 80);
+  let hp, msg;
+  if (f.id === r.fav){ setExpr(r, 'love', 3); showBubble(r, '大好物！！😍', 3); hp = 22; }
+  else if (f.id === r.dislike){ setExpr(r, 'sad', 3); showBubble(r, 'うっ…にがて…😖', 3); hp = -4; }
+  else { setExpr(r, 'happy', 2.5); showBubble(r, pick(['おいしい！😋','もぐもぐ…うまい！','ごちそうさま！']), 3); hp = 8; }
+  const w = r.worry;
+  if (w && w.type === 'hungry'){ addHappy(r, hp); solveWorry(r, 10, 60, `${r.name}のおなかがいっぱいになった！`); }
+  else if (w && w.type === 'food' && w.food === f.id){ addHappy(r, hp); solveWorry(r, 18, 90, `${r.name}の食べたいものをあげた！`); }
+  else { if (w && w.type === 'food') setTimeout(() => showBubble(r, `${foodById(w.food).n}が食べたかったな…`, 3), 2600); addHappy(r, hp); save(); renderPanel(); }
+}
+function openHats(r){
+  const html = `<div class="msg" style="margin-bottom:10px">${esc(r.name)}にぼうしをプレゼント</div><div class="grid">` +
+    HATS.map(h => { const on = r.look.hat === h.id; return `<button class="card ${on ? 'on' : ''}" data-h="${h.id}" ${(!on && W.money < h.p) ? 'disabled' : ''}><span class="e">${h.e}</span><span class="n">${h.n}</span><span class="p">${on ? 'かぶってる' : h.p ? '💰' + h.p : 'むりょう'}</span></button>`; }).join('') + '</div>';
+  openModal('🎩 ぼうし屋', html);
+  $('mBody').querySelectorAll('[data-h]').forEach(b => b.onclick = () => { closeModal(); giveHat(r, hatById(b.dataset.h)); });
+}
+function giveHat(r, h){
+  if (r.look.hat === h.id) return;
+  if (W.money < h.p) return;
+  W.money -= h.p;
+  r.look.hat = h.id;
+  r.ch.root.remove(r.ch.hat); r.ch.hat = makeHat(h.id); r.ch.root.add(r.ch.hat);
+  r.jump = 0.5;
+  if (h.id === 'none'){ showBubble(r, 'すっきり！', 2.5); save(); renderPanel(); return; }
+  const like = hash(r.id + h.id) > 0.25;
+  setExpr(r, like ? 'happy' : 'normal', 3); showBubble(r, like ? pick(['にあう？✨','わぁ、かわいい！','すてき！ありがとう！']) : 'う〜ん、まあまあかな', 3);
+  floatAt(r, h.e);
+  if (r.worry && r.worry.type === 'hat'){ addHappy(r, like ? 12 : 4); solveWorry(r, 12, 90, `${r.name}が新しいぼうしをゲット！`); }
+  else { addHappy(r, like ? 10 : 2); save(); renderPanel(); }
+}
+function openJanken(r, fromWorry){
+  const hands = ['✊','✌️','✋'];
+  openModal(`✊ ${r.name}とじゃんけん`, `<div class="msg center">じゃん けん…！</div><div class="jres" id="jres">❔</div><div class="janken">${hands.map((h, i) => `<button data-j="${i}">${h}</button>`).join('')}</div><div class="msg center" id="jmsg"></div>`);
+  let done = false;
+  $('mBody').querySelectorAll('[data-j]').forEach(b => b.onclick = () => {
+    if (done) return;
+    const me = +b.dataset.j, you = Math.floor(Math.random()*3);
+    const res = (me - you + 3) % 3; // 0=あいこ 1=まけ 2=かち
+    $('jres').textContent = `${hands[me]} vs ${hands[you]}`;
+    voice(r, 2);
+    if (res === 0){ $('jmsg').textContent = 'あいこ！もういっかい！'; return; }
+    done = true;
+    const win = res === 2;
+    $('jmsg').innerHTML = win ? `かち！ 🎉<br>${esc(r.name)}「まけた〜！もういっかいやろうね！」` : `まけ…！<br>${esc(r.name)}「やった〜！かった〜！」`;
+    setExpr(r, 'happy', 3); r.jump = 0.5;
+    r.playCount++;
+    const gain = r.playCount <= 2 ? 10 : 3;
+    setTimeout(() => {
+      $('mBody').insertAdjacentHTML('beforeend', '<div class="choices"><button class="btn" id="jAgain">もういっかい</button><button class="btn sub" id="jEnd">おわる</button></div>');
+      $('jAgain').onclick = () => openJanken(r);
+      $('jEnd').onclick = () => closeModal();
+    }, 400);
+    if (r.worry && r.worry.type === 'play') solveWorry(r, 14, 70, `${r.name}はいっぱいあそんで満足！`);
+    else addHappy(r, gain);
+  });
+}
+async function handleWorry(r){
+  const w = r.worry; if (!w) return;
+  if (w.type === 'hungry' || w.type === 'food') return openFood(r);
+  if (w.type === 'hat') return openHats(r);
+  if (w.type === 'play') return openJanken(r);
+  if (w.type === 'dream'){
+    let d = pick(DREAMS); const o = residents.find(x => x !== r);
+    if (o && Math.random() < 0.35) d = `${o.name}といっしょに冒険する夢を見たよ！🗺`;
+    openModal(`💭 ${r.name}の話`, `<div class="msg">${esc(r.name)}「${esc(d)}」</div><div class="choices"><button class="btn" id="dOk">へぇ〜！おもしろいね</button></div>`);
+    voice(r, 6);
+    $('dOk').onclick = () => { closeModal(); solveWorry(r, 10, 50, `${r.name}は話を聞いてもらえてうれしそう`); };
+    return;
+  }
+  const o = findRes(w.target);
+  if (!o){ r.worry = null; renderPanel(); return; }
+  if (w.type === 'friend'){
+    openModal('🤝 相談', `<div class="msg">${esc(r.name)}「${esc(o.name)}ともっとなかよくなりたいんだ。どうしたらいいかな？」</div>
+      <div class="choices"><button class="btn" id="c1">話しかけてみたら？</button><button class="btn blue" id="c2">いっしょにおやつを食べよう (💰60)</button><button class="btn sub" id="c3">また今度にしよう</button></div>`);
+    $('c2').disabled = W.money < 60;
+    const go = (bonus) => {
+      closeModal();
+      const ok = Math.random() < clamp(0.4 + compat(r, o)*0.4 + bonus, 0.1, 0.95);
+      r.worry = null; r.nextWorry = rand(55, 120);
+      chatOrApply(r, o, ok ? 'good' : 'bad', () => {
+        if (ok){ solveWorry(r, 12, 80, `${r.name}と${o.name}がなかよくなった！`); }
+        else { setExpr(r, 'sad', 3); showBubble(r, 'うまく話せなかった…', 3); addHappy(r, -3); toast(`${r.name}はうまく話せなかったみたい…`); renderPanel(); }
+      });
+    };
+    $('c1').onclick = () => go(0);
+    $('c2').onclick = () => { W.money -= 60; go(0.3); };
+    $('c3').onclick = () => { closeModal(); solveWorry(r, 2, 10, ''); };
+  } else if (w.type === 'fight'){
+    openModal('💢 相談', `<div class="msg">${esc(r.name)}「${esc(o.name)}とけんかしちゃった…。どうしよう？」</div>
+      <div class="choices"><button class="btn" id="c1">すなおにあやまろう</button><button class="btn blue" id="c2">プレゼントでなかなおり (💰100)</button><button class="btn sub" id="c3">しばらくそっとしておこう</button></div>`);
+    $('c2').disabled = W.money < 100;
+    const go = (p) => {
+      closeModal();
+      const ok = Math.random() < p;
+      r.worry = null; r.nextWorry = rand(55, 120);
+      chatOrApply(r, o, ok ? 'makeup' : 'bad', () => {
+        if (ok){ toast(`🕊 ${r.name}と${o.name}がなかなおりした！`); solveWorry(r, 15, 100, ''); }
+        else { setExpr(r, 'sad', 3); toast(`${o.name}はまだおこってるみたい…`); addHappy(r, -4); renderPanel(); }
+      });
+    };
+    $('c1').onclick = () => go(0.5 + compat(r, o)*0.3);
+    $('c2').onclick = () => { W.money -= 100; go(0.92); };
+    $('c3').onclick = () => { closeModal(); addAff(r, o, 6); solveWorry(r, 3, 20, '時間がたてば、きっと…'); };
+  } else if (w.type === 'love'){
+    openModal('💗 恋の相談', `<div class="msg">${esc(r.name)}「じつは…${esc(o.name)}のことが好きになっちゃったみたい。きもちを伝えたほうがいいかな？」</div>
+      <div class="choices"><button class="btn" id="c1">こくはくしよう！</button><button class="btn sub" id="c2">いまはやめておこう</button></div>`);
+    $('c1').onclick = () => { closeModal(); confession(r, o); };
+    $('c2').onclick = () => { closeModal(); solveWorry(r, 3, 20, `${r.name}はもうすこし考えるみたい`); };
+  }
+}
+function chatOrApply(a, b, force, after){
+  deselect();
+  if (b.state === 'home' || b.state === 'event' || b.chatWith || a.state === 'home'){
+    if (force === 'good') addAff(a, b, Math.max(10, 32 - rel(a, b).aff));
+    else if (force === 'makeup') addAff(a, b, Math.max(0, 25 - rel(a, b).aff));
+    else addAff(a, b, -6);
+    after(); return;
+  }
+  if (a.chatWith) endChatFor(a);
+  a.state = 'idle'; b.state = b.state === 'focus' ? 'idle' : b.state;
+  followRes = a; cam.tDist = Math.min(cam.tDist, 16);
+  startChat(a, b, { force, onEnd: () => { after(); } });
+}
+async function confession(a, b){
+  deselect(); busy = true;
+  for (const r of [a, b]){ if (r.chatWith) endChatFor(r); }
+  await fade(true);
+  for (const r of [a, b]){ r.state = 'event'; r.ch.root.visible = true; r.target = null; r.bubbleT = 0; r.goingHome = false; }
+  a.pos.set(-0.95, 0, 4.4); b.pos.set(0.95, 0, 4.4);
+  a.heading = a.wantHeading = 0.85; b.heading = b.wantHeading = -0.85;
+  const saved = { yaw: cam.tYaw, pitch: cam.tPitch, dist: cam.tDist };
+  followRes = null; cam.tTarget.set(0, 1.1, 4.4); cam.target.copy(cam.tTarget);
+  cam.yaw = cam.tYaw = 0; cam.pitch = cam.tPitch = 0.22; cam.dist = cam.tDist = innerWidth < innerHeight ? 11 : 7.5;
+  for (const o of residents){ if (o === a || o === b || !o.ch.root.visible) continue; if (o.pos.z > 2 && Math.abs(o.pos.x) < 5){ if (o.chatWith) endChatFor(o); o.pos.set(o.pos.x < 0 ? -6.5 : 6.5, 0, rand(-2, 8)); o.state = 'idle'; o.timer = 2; } }
+  await fade(false);
+  setExpr(a, 'love', 99); setExpr(b, 'normal', 99);
+  await say(a.name, `${b.name}…ちょっと、話があるんだ。`);
+  setExpr(b, 'surprise', 99);
+  await say(b.name, 'どうしたの？あらたまって…');
+  floatAt(a, '💗');
+  await say(a.name, pick(['ずっと前から好きでした！つきあってください！', 'いっしょにいると、すごくたのしいんだ。…大好きです！', 'これからも、となりにいてくれないかな？']));
+  setExpr(b, 'normal', 99); showBubble(b, '…', 2.4, true);
+  await wait(2200);
+  const R = rel(a, b);
+  const p = clamp(0.25 + (R.aff - 60)/80 + compat(a, b)*0.4, 0.15, 0.92);
+  if (Math.random() < p){
+    setExpr(b, 'love', 99); b.jump = 0.6;
+    for (let i = 0; i < 5; i++) setTimeout(() => { floatAt(a, '💕'); floatAt(b, '💖'); }, i*260);
+    jingle('love');
+    await say(b.name, pick(['うれしい…！こちらこそ、よろしくね！', 'じつは…おなじ気持ちだったんだ！', 'はい…！よろこんで！']));
+    setExpr(a, 'happy', 99); a.jump = 0.6;
+    await say(a.name, 'やったー！！');
+    R.lovers = true; R.aff = Math.max(R.aff, 70);
+    news(`💕 ${a.name}と${b.name}が恋人になった！`); toast(`💕 ${a.name}と${b.name}が恋人になった！`);
+    a.worry = null; a.nextWorry = rand(60, 120); W.money += 150; addHappy(a, 30); addHappy(b, 30);
+  } else {
+    setExpr(b, 'sad', 99);
+    await say(b.name, pick(['ごめんなさい…いいお友だちでいたいな。', 'ありがとう…。でも、ごめんね。']));
+    setExpr(a, 'sad', 99); showBubble(a, '😢', 3, true); blip(300, 0.3, 'sine', 0.06);
+    await say(a.name, 'そっか…。きいてくれて、ありがとう。');
+    R.aff = Math.max(30, R.aff - 25);
+    news(`${a.name}が${b.name}にこくはくしたけど…ふられてしまった`);
+    a.worry = null; a.nextWorry = rand(80, 140); addHappy(a, -15); W.money += 30;
+  }
+  await fade(true);
+  for (const r of [a, b]){ r.state = 'idle'; r.timer = rand(1, 2); r.exprT = 2; }
+  cam.tYaw = saved.yaw; cam.tPitch = Math.max(0.5, saved.pitch); cam.tDist = Math.max(14, saved.dist);
+  cam.yaw = cam.tYaw; cam.pitch = cam.tPitch; cam.dist = cam.tDist;
+  busy = false; save();
+  await fade(false);
+}
+
+// ---------- 住人づくり ----------
+let prev = null; // プレビュー用
+function getPreview(){
+  if (prev) return prev;
+  const r = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+  r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); r.setSize(170, 170, false);
+  const s = new THREE.Scene();
+  s.add(new THREE.HemisphereLight(0xffffff, 0xaaccdd, 0.8));
+  const d = new THREE.DirectionalLight(0xffffff, 0.6); d.position.set(3, 5, 6); s.add(d);
+  const c = new THREE.PerspectiveCamera(30, 1, 0.1, 50); c.position.set(0, 1.4, 6.2); c.lookAt(0, 1.05, 0);
+  prev = { r, s, c, ch: null, t: 0, on: false };
+  return prev;
+}
+function openCreator(edit){
+  const d = edit ? { name: edit.name, look: Object.assign({}, edit.look), act: edit.act, care: edit.care, fav: edit.fav }
+    : { name: '', look: { color: pick(COLORS), eyes: pick(EYES)[0], mouth: pick(MOUTHS)[0], cheek: Math.random() < 0.5, hat: 'none' }, act: 0.5, care: 0.5, fav: pick(FOODS).id };
+  if (!edit && residents.length >= MAX_RES){ toast('アパートが満室です（12人まで）'); return; }
+  const html = `
+    <canvas id="prev"></canvas><div class="persona" id="cPer"></div>
+    <div class="row"><label>なまえ（8文字まで）</label><input type="text" id="cName" maxlength="8" value="${esc(d.name)}" placeholder="なまえを入力"></div>
+    <div class="row"><label>からだの色</label><div class="sw" id="cCol">${COLORS.map(c => `<button data-v="${c}" style="background:${c}" aria-label="${c}"></button>`).join('')}</div></div>
+    <div class="row"><label>め</label><div class="seg" id="cEye">${EYES.map(([v, n]) => `<button data-v="${v}">${n}</button>`).join('')}</div></div>
+    <div class="row"><label>くち</label><div class="seg" id="cMouth">${MOUTHS.map(([v, n]) => `<button data-v="${v}">${n}</button>`).join('')}</div></div>
+    <div class="row"><label>ほっぺ</label><div class="seg" id="cCheek"><button data-v="1">あり</button><button data-v="0">なし</button></div></div>
+    <div class="row"><label>せいかく</label>
+      <input type="range" id="cAct" min="0" max="100" value="${Math.round(d.act*100)}"><div class="rng"><span>おっとり</span><span>げんき</span></div>
+      <input type="range" id="cCare" min="0" max="100" value="${Math.round(d.care*100)}"><div class="rng"><span>マイペース</span><span>気くばり</span></div></div>
+    <div class="row"><label>好きな食べもの</label><select id="cFav">${FOODS.map(f => `<option value="${f.id}" ${f.id === d.fav ? 'selected' : ''}>${f.e} ${f.n}</option>`).join('')}</select></div>
+    <div class="choices"><button class="btn" id="cOk">${edit ? 'これでOK！' : 'この子を島によぶ！'}</button>
+    ${edit ? '<button class="btn sub" id="cBye">島から引っこす…</button>' : ''}</div>`;
+  const pv = getPreview();
+  openModal(edit ? `✏️ ${edit.name}を編集` : '✨ 新しい住人をつくる', html, () => { pv.on = false; });
+  const holder = $('prev'); holder.replaceWith(pv.r.domElement); pv.r.domElement.id = 'prev'; pv.on = true;
+  const segSel = (id, val) => $(id).querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === String(val)));
+  const refresh = () => {
+    segSel('cCol', d.look.color); segSel('cEye', d.look.eyes); segSel('cMouth', d.look.mouth); segSel('cCheek', d.look.cheek ? 1 : 0);
+    $('cPer').textContent = `せいかく: ${persona(d)}`;
+    if (pv.ch) disposeCharPrev(pv);
+    pv.ch = buildChar(d.look); pv.s.add(pv.ch.root);
+    drawFace(pv.ch.cv, d.look, 'happy'); pv.ch.tex.needsUpdate = true; pv.t = 0;
+  };
+  const bindSeg = (id, fn) => $(id).querySelectorAll('button').forEach(b => b.onclick = () => { blip(760, 0.04); fn(b.dataset.v); refresh(); });
+  bindSeg('cCol', v => d.look.color = v);
+  bindSeg('cEye', v => d.look.eyes = v);
+  bindSeg('cMouth', v => d.look.mouth = v);
+  bindSeg('cCheek', v => d.look.cheek = v === '1');
+  $('cAct').oninput = e => { d.act = e.target.value/100; $('cPer').textContent = `せいかく: ${persona(d)}`; };
+  $('cCare').oninput = e => { d.care = e.target.value/100; $('cPer').textContent = `せいかく: ${persona(d)}`; };
+  $('cFav').onchange = e => d.fav = e.target.value;
+  refresh();
+  $('cOk').onclick = () => {
+    const name = $('cName').value.trim();
+    if (!name){ toast('なまえを入れてね'); $('cName').focus(); return; }
+    if (residents.some(o => o.name === name && o !== edit)){ toast('おなじなまえの住人がいるよ'); return; }
+    d.name = name;
+    closeModal();
+    if (edit) applyEdit(edit, d); else createResident(d);
+  };
+  if (edit) $('cBye').onclick = () => {
+    openModal('🧳 おわかれ', `<div class="msg">${esc(edit.name)}が島から引っこします。ほんとうにいいですか？<br><small>（もとにはもどせません）</small></div>
+      <div class="choices"><button class="btn" id="byeYes">引っこす</button><button class="btn sub" id="byeNo">やめる</button></div>`);
+    $('byeYes').onclick = () => { closeModal(); removeResident(edit); };
+    $('byeNo').onclick = () => closeModal();
+  };
+}
+function disposeCharPrev(pv){ pv.s.remove(pv.ch.root); pv.ch.tex.dispose(); pv.ch.fmat.dispose(); pv.ch = null; }
+function createResident(d){
+  const used = new Set(residents.map(r => r.room));
+  let room = 0; while (used.has(room)) room++;
+  let dislike; do { dislike = pick(FOODS).id; } while (dislike === d.fav);
+  const r = spawnResident({ id: 'r' + (W.nextId++), name: d.name, look: d.look, act: d.act, care: d.care, fav: d.fav, dislike, level: 1, happy: 60, hunger: 80, room }, rand(-1.5, 1.5), 9);
+  r.ch.root.visible = true;
+  if (shouldSleep(r)){ r.state = 'idle'; }
+  setExpr(r, 'happy', 4); showBubble(r, 'はじめまして！', 3.5); r.jump = 0.6;
+  for (let i = 0; i < 4; i++) setTimeout(() => floatAt(r, pick(['✨','🌟','🎉'])), i*220);
+  jingle('level');
+  toast(`🎉 ${r.name}が島にやってきた！`); news(`${r.name}が島にやってきた`);
+  save(); select(r);
+}
+function applyEdit(r, d){
+  Object.assign(r, { name: d.name, act: d.act, care: d.care, fav: d.fav });
+  if (r.dislike === r.fav){ do { r.dislike = pick(FOODS).id; } while (r.dislike === r.fav); }
+  d.look.hat = r.look.hat; r.look = d.look;
+  const vis = r.ch.root.visible;
+  disposeChar(r.ch); r.ch = buildChar(r.look); scene.add(r.ch.root); r.ch.root.visible = vis; r.shownExpr = '';
+  r.nmEl.textContent = r.name;
+  r.jump = 0.5; setExpr(r, 'happy', 2); save(); renderPanel();
+}
+function removeResident(r){
+  if (selected === r) deselect();
+  if (r.chatWith) endChatFor(r);
+  disposeChar(r.ch); r.el.remove();
+  residents.splice(residents.indexOf(r), 1);
+  for (const k of Object.keys(W.rel)) if (k.split('|').includes(r.id)) delete W.rel[k];
+  for (const o of residents) if (o.worry && o.worry.target === r.id) o.worry = null;
+  toast(`👋 ${r.name}は島を出ていった。またね！`); news(`${r.name}が島から引っこした`);
+  save();
+}
+
+// ---------- リスト・ニュース ----------
+function openList(){
+  if (!residents.length){ openModal('👥 住人', '<div class="msg">まだだれもいないよ。✨から住人をつくろう！</div>'); return; }
+  openModal(`👥 住人（${residents.length}/${MAX_RES}）`, '<div class="grid" id="lg"></div>');
+  for (const r of residents){
+    const b = document.createElement('button'); b.className = 'card';
+    b.appendChild(iconCanvas(r, 112, r.state === 'home' ? 'sleep' : undefined));
+    b.insertAdjacentHTML('beforeend', `<span class="n">${esc(r.name)}</span><span class="p">Lv.${r.level} ${r.state === 'home' ? '😴' : r.worry ? r.worry.icon : '🙂'}</span>`);
+    b.onclick = () => { closeModal(); select(r); };
+    $('lg').appendChild(b);
+  }
+}
+function openNews(){
+  const html = W.news.length ? W.news.map(n => `<div class="news"><i>${n.d}日目 ${n.t}</i>${esc(n.text)}</div>`).join('') : '<div class="msg">まだニュースはないよ。</div>';
+  openModal('📰 島のニュース', html);
+}
+function openHelp(){
+  openModal('🏝 まめじまへようこそ！', `<div class="msg">
+    ここは「まめびと」たちがくらす小さな島。<br><br>
+    👆 <b>住人をタップ</b>すると、話したり、ごはんやぼうしをあげたりできるよ。<br>
+    ❗ 頭の上にアイコンが出たら<b>なやみ</b>のサイン。解決するとおれいがもらえるよ。<br>
+    🤝 住人どうしで勝手におしゃべりして、友だち・親友・恋人になったり、けんかしたりするよ。<br>
+    ✨ <b>つくる</b>ボタンで新しい住人を島によべるよ（12人まで）。<br>
+    🌙 夜になるとみんなアパートでねむるよ。<br><br>
+    🖐 ドラッグで回転、ピンチ／ホイールでズーム、2本指で移動。</div>
+    <div class="choices"><button class="btn" id="hOk">はじめる！</button></div>`, () => { W.seenHelp = true; save(); });
+  $('hOk').onclick = () => closeModal();
+}
+$('bList').onclick = () => { blip(700, 0.05); openList(); };
+$('bNews').onclick = () => { blip(700, 0.05); openNews(); };
+$('bNew').onclick = () => { blip(700, 0.05); openCreator(null); };
+const homeDist = () => innerWidth < innerHeight ? 54 : 36;
+$('bHome').onclick = () => { blip(700, 0.05); followRes = null; cam.tTarget.set(0, 0, 2); cam.tDist = homeDist(); cam.tPitch = 0.78; };
+const SPEEDS = [[1, '▶', 'ふつう'], [2, '▶▶', 'はやい'], [4, '⏩', 'すごく']];
+function updateSpeedBtn(){ const s = SPEEDS.find(x => x[0] === W.speed) || SPEEDS[0]; $('bSpeed').innerHTML = `${s[1]}<small>${s[2]}</small>`; }
+$('bSpeed').onclick = () => { const i = SPEEDS.findIndex(x => x[0] === W.speed); W.speed = SPEEDS[(i + 1) % SPEEDS.length][0]; updateSpeedBtn(); blip(700, 0.05); };
+function updateSoundBtn(){ $('bSound').innerHTML = W.sound ? '🔊<small>おと</small>' : '🔇<small>おと</small>'; }
+$('bSound').onclick = () => { W.sound = !W.sound; updateSoundBtn(); blip(700, 0.05); save(); };
+
+// ---------- エフェクト ----------
+const floats = [];
+function floatAt(r, text){
+  const el = document.createElement('div'); el.className = 'float'; el.textContent = text; labelsEl.appendChild(el);
+  floats.push({ r, el, t: 0, life: 1.6, dx: rand(-0.4, 0.4) });
+}
+
+// ---------- 音 ----------
+let ac = null;
+function ensureAudio(){
+  if (!ac){ try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { ac = null; } }
+  if (ac && ac.state === 'suspended') ac.resume();
+}
+function blip(freq, dur=0.08, type='sine', vol=0.06, delay=0){
+  if (!W.sound || !ac) return;
+  const t0 = ac.currentTime + delay;
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type = type; o.frequency.setValueAtTime(freq, t0);
+  g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(g); g.connect(ac.destination); o.start(t0); o.stop(t0 + dur + 0.02);
+}
+function voice(r, n){
+  if (!W.sound || !ac || !r) return;
+  if (r !== selected && camera.position.distanceTo(r.pos) > 26) return;
+  const base = 320 + r.pitch*420;
+  for (let i = 0; i < n; i++) blip(base*rand(0.85, 1.25), 0.07, 'square', 0.025, i*0.09);
+}
+function jingle(kind){
+  const seq = { good:[523, 659, 784], level:[523, 659, 784, 1047], love:[659, 784, 988, 1319, 1175, 1319] }[kind] || [600];
+  seq.forEach((f, i) => blip(f, 0.16, 'triangle', 0.06, i*0.11));
+}
+window.addEventListener('pointerdown', ensureAudio, { capture:true });
+
+// ---------- カメラ操作 ----------
+const cam = { yaw:0, pitch:0.78, dist:36, tYaw:0, tPitch:0.78, tDist:36, target:new THREE.Vector3(0,0,2), tTarget:new THREE.Vector3(0,0,2), offX:0, offY:0 };
+const ptrs = new Map();
+let gesture = null;
+const cvs = renderer.domElement;
+cvs.addEventListener('pointerdown', e => {
+  cvs.setPointerCapture(e.pointerId);
+  ptrs.set(e.pointerId, { x:e.clientX, y:e.clientY, sx:e.clientX, sy:e.clientY, t:performance.now() });
+  gesture = ptrs.size === 1 ? { moved:false, button:e.button } : { moved:true };
+});
+cvs.addEventListener('pointermove', e => {
+  const p = ptrs.get(e.pointerId); if (!p) return;
+  const dx = e.clientX - p.x, dy = e.clientY - p.y;
+  if (ptrs.size === 1){
+    if (Math.hypot(e.clientX - p.sx, e.clientY - p.sy) > 8) gesture.moved = true;
+    if (gesture.moved){
+      if (gesture.button === 2 || e.shiftKey) pan(dx, dy);
+      else { cam.tYaw -= dx*0.007; cam.tPitch = clamp(cam.tPitch + dy*0.005, 0.18, 1.35); }
+    }
+  } else if (ptrs.size === 2){
+    const [a, b] = [...ptrs.values()];
+    const before = Math.hypot(a.x - b.x, a.y - b.y);
+    const mx0 = (a.x + b.x)/2, my0 = (a.y + b.y)/2;
+    p.x = e.clientX; p.y = e.clientY;
+    const after = Math.hypot(a.x - b.x, a.y - b.y);
+    if (before > 0) cam.tDist = clamp(cam.tDist*before/after, 6, 60);
+    pan((a.x + b.x)/2 - mx0, (a.y + b.y)/2 - my0);
+    return;
+  }
+  p.x = e.clientX; p.y = e.clientY;
+});
+function endPtr(e){
+  const p = ptrs.get(e.pointerId); if (!p) return;
+  ptrs.delete(e.pointerId);
+  if (ptrs.size === 0 && gesture && !gesture.moved && performance.now() - p.t < 500) onTap(e.clientX, e.clientY);
+  if (ptrs.size === 0) gesture = null;
+}
+cvs.addEventListener('pointerup', endPtr);
+cvs.addEventListener('pointercancel', e => { ptrs.delete(e.pointerId); gesture = null; });
+cvs.addEventListener('contextmenu', e => e.preventDefault());
+cvs.addEventListener('wheel', e => { e.preventDefault(); cam.tDist = clamp(cam.tDist*(1 + e.deltaY*0.0012), 6, 60); }, { passive:false });
+function pan(dx, dy){
+  followRes = null;
+  const k = cam.dist*0.0016;
+  const fx = Math.sin(cam.yaw), fz = Math.cos(cam.yaw);
+  cam.tTarget.x += (-dx*fz - dy*fx)*k*1.4;
+  cam.tTarget.z += (dx*fx - dy*fz)*k*1.4;
+  const d = Math.hypot(cam.tTarget.x, cam.tTarget.z);
+  if (d > 24){ cam.tTarget.x *= 24/d; cam.tTarget.z *= 24/d; }
+}
+const tmpV = new THREE.Vector3();
+function toScreen(x, y, z){
+  tmpV.set(x, y, z).project(camera);
+  return { x:(tmpV.x + 1)/2*innerWidth, y:(1 - tmpV.y)/2*innerHeight, ok: tmpV.z < 1 };
+}
+function onTap(x, y){
+  if (busy) return;
+  let best = null, bd = 46;
+  for (const r of residents){
+    if (!r.ch.root.visible) continue;
+    for (const h of [0.4, 1.0, 1.6]){
+      const s = toScreen(r.pos.x, h, r.pos.z); if (!s.ok) continue;
+      const d = Math.hypot(s.x - x, s.y - y);
+      if (d < bd){ bd = d; best = r; }
+    }
+  }
+  if (best){ blip(800, 0.05); select(best); }
+  else if (selected) deselect();
+}
+
+// ---------- 空の色 ----------
+const SKY = [[0,'#141a3d'],[4.5,'#1f2752'],[5.8,'#ffb38a'],[7,'#9fd8ff'],[16.8,'#9fd8ff'],[18.2,'#ff9e7a'],[19.4,'#38407a'],[21,'#141a3d'],[24,'#141a3d']];
+const skyC = new THREE.Color(), cA = new THREE.Color(), cB = new THREE.Color();
+function skyAt(h){
+  for (let i = 0; i < SKY.length - 1; i++){
+    const [h0, c0] = SKY[i], [h1, c1] = SKY[i + 1];
+    if (h >= h0 && h <= h1){ cA.set(c0); cB.set(c1); return skyC.copy(cA).lerp(cB, (h - h0)/(h1 - h0)); }
+  }
+  return skyC.set(SKY[0][1]);
+}
+function nightFactor(h){ if (h >= 7 && h <= 17) return 0; if (h > 17 && h < 19.5) return (h - 17)/2.5; if (h >= 5 && h < 7) return 1 - (h - 5)/2; return 1; }
+
+// ---------- メインループ ----------
+function simulate(dt){
+  // 時間
+  const allHome = residents.length > 0 && residents.every(r => r.state === 'home');
+  const before = W.time;
+  W.time += dt*2*(allHome ? 8 : 1);
+  if (W.time >= 1440){
+    W.time -= 1440; W.day++;
+    const gift = 30*residents.length;
+    W.money += gift;
+    toast(`🌅 ${W.day}日目の朝！ 島のおこづかい 💰+${gift}`); news(`${W.day}日目がはじまった`);
+    save();
+  }
+  if (Math.floor(before/60) !== Math.floor(W.time/60) && Math.floor(W.time/60) === 21) toast('🌙 夜になってきた。みんなそろそろおやすみ…');
+  for (const r of residents){
+    if (r.state === 'event') continue;
+    if (r.state === 'home'){
+      r.hunger = Math.max(0, r.hunger - dt*0.015);
+      if (!shouldSleep(r)) wakeUp(r);
+      continue;
+    }
+    r.hunger = Math.max(0, r.hunger - dt*0.06);
+    r.happy = Math.max(0, r.happy - dt*(r.hunger <= 0 ? 0.08 : 0.012));
+    r.chatCd -= dt; r.talkCd -= dt;
+    // なやみ
+    if (r.worry){
+      r.worry.life -= dt;
+      if (r.worry.life <= 0){ r.worry = null; r.nextWorry = rand(50, 100); addHappy(r, -8); setExpr(r, 'sad', 3); showBubble(r, '…もういいや', 2.5); if (r === selected) renderPanel(); }
+    } else if (!shouldSleep(r) && r.state !== 'chat'){
+      r.nextWorry -= dt;
+      if (r.nextWorry <= 0) genWorry(r);
+    }
+    // ねる時間
+    if (shouldSleep(r) && !r.goingHome && r.state !== 'chat' && r.state !== 'focus' && !(r.state === 'wait')) { goHome(r); }
+    switch (r.state){
+      case 'idle': r.timer -= dt; if (r.timer <= 0) decide(r); break;
+      case 'walk': stepWalk(r, dt); break;
+      case 'wait': r.waitT -= dt; if (r.chatWith) r.wantHeading = Math.atan2(r.chatWith.pos.x - r.pos.x, r.chatWith.pos.z - r.pos.z); if (r.waitT <= 0){ const o = r.chatWith; r.chatWith = null; if (o && o.chatWith === r){ o.chatWith = null; } r.state = 'idle'; r.timer = 1; } break;
+      case 'focus': r.wantHeading = Math.atan2(camera.position.x - r.pos.x, camera.position.z - r.pos.z); break;
+    }
+  }
+  updateChats(dt);
+  // おしあい・噴水よけ
+  for (let i = 0; i < residents.length; i++){
+    const a = residents[i]; if (!a.ch.root.visible || a.state === 'event') continue;
+    for (let j = i + 1; j < residents.length; j++){
+      const b = residents[j]; if (!b.ch.root.visible || b.state === 'event') continue;
+      const dx = b.pos.x - a.pos.x, dz = b.pos.z - a.pos.z, d = Math.hypot(dx, dz);
+      if (d > 0.001 && d < 1.15){ const push = (1.15 - d)/2; a.pos.x -= dx/d*push; a.pos.z -= dz/d*push; b.pos.x += dx/d*push; b.pos.z += dz/d*push; }
+    }
+    const fd = Math.hypot(a.pos.x, a.pos.z);
+    if (fd < 2.9 && fd > 0.001){ a.pos.x *= 2.9/fd; a.pos.z *= 2.9/fd; }
+  }
+}
+function stepWalk(r, dt){
+  const dx = r.target.x - r.pos.x, dz = r.target.z - r.pos.z, d = Math.hypot(dx, dz);
+  if (d < 0.2){ r.state = 'idle'; r.timer = rand(1.5, 4); r.target = null; const cb = r.onArrive; r.onArrive = null; if (cb) cb(); return; }
+  const s = Math.min(d, (1.3 + r.act*1.1)*dt);
+  r.pos.x += dx/d*s; r.pos.z += dz/d*s;
+  r.wantHeading = Math.atan2(dx, dz); r.moving = true;
+}
+function animate(dt, now){
+  const t = now/1000;
+  for (const r of residents){
+    const ch = r.ch;
+    if (!ch.root.visible) continue;
+    r.heading += angDiff(r.heading, r.wantHeading)*Math.min(1, dt*8);
+    const walking = r.state === 'walk';
+    if (walking) r.phase += dt*(8 + r.act*4);
+    r.jump = Math.max(0, r.jump - dt);
+    const jy = r.jump > 0 ? Math.sin((1 - r.jump/0.6)*Math.PI)*0.35*Math.min(1, r.jump*3) : 0;
+    const bob = walking ? Math.abs(Math.sin(r.phase))*0.1 : Math.sin(t*2 + r.pitch*6)*0.02;
+    ch.root.position.set(r.pos.x, jy, r.pos.z);
+    ch.root.rotation.y = r.heading;
+    ch.body.position.y = 0.95 + bob;
+    ch.body.rotation.z = walking ? Math.sin(r.phase)*0.06 : 0;
+    const sw = walking ? Math.sin(r.phase) : 0;
+    ch.footL.position.z = 0.08 + sw*0.18; ch.footR.position.z = 0.08 - sw*0.18;
+    ch.footL.position.y = 0.1 + Math.max(0, sw)*0.08; ch.footR.position.y = 0.1 + Math.max(0, -sw)*0.08;
+    const talking = r.state === 'chat' && r.bubbleT > 0;
+    const armUp = talking ? Math.abs(Math.sin(t*10))*0.25 : r.expr === 'happy' || r.expr === 'love' ? 0.2 + Math.abs(Math.sin(t*6))*0.2 : 0;
+    ch.armL.position.set(-0.7, 0.82 + bob + armUp, 0.05 - sw*0.12);
+    ch.armR.position.set(0.7, 0.82 + bob + armUp, 0.05 + sw*0.12);
+    ch.hat.position.y = bob;
+    // 表情
+    if (r.exprT > 0){ r.exprT -= dt; if (r.exprT <= 0) r.expr = 'normal'; }
+    let e = r.expr === 'normal' ? baseExpr(r) : r.expr;
+    const blink = (t + r.pitch*7) % 4 < 0.12;
+    if (blink && e === 'normal') e = 'sleep';
+    const key = e;
+    if (r.shownExpr !== key){ drawFace(ch.cv, r.look, e); ch.tex.needsUpdate = true; r.shownExpr = key; }
+    if (r.bubbleT > 0) r.bubbleT -= dt;
+  }
+}
+function updateLabels(dt){
+  for (const r of residents){
+    const el = r.el;
+    if (!r.ch.root.visible){ if (el.style.display !== 'none') el.style.display = 'none'; continue; }
+    const s = toScreen(r.pos.x, r.ch.root.position.y + 2.15 + (r.look.hat === 'tophat' ? 0.35 : 0), r.pos.z);
+    if (!s.ok || s.x < -100 || s.x > innerWidth + 100 || s.y < -60 || s.y > innerHeight + 60){ if (el.style.display !== 'none') el.style.display = 'none'; continue; }
+    if (el.style.display === 'none') el.style.display = '';
+    el.style.transform = `translate(${s.x}px, ${s.y}px) translate(-50%, -100%)`;
+    let txt = '', cls = 'bub';
+    if (r.bubbleT > 0){ txt = r.bubble; if (r.bubbleBig) cls += ' big'; }
+    else if (r.worry && r.state !== 'event'){ txt = r.worry.icon; cls += ' worry'; }
+    const lab = cls + '|' + txt;
+    if (lab !== r.lastLabel){
+      r.lastLabel = lab;
+      r.bubEl.className = cls; r.bubEl.textContent = txt; r.bubEl.style.display = txt ? 'block' : 'none';
+    }
+    el.classList.toggle('sel', r === selected);
+  }
+  for (let i = floats.length - 1; i >= 0; i--){
+    const f = floats[i]; f.t += dt;
+    if (f.t >= f.life || !f.r.ch.root.visible){ f.el.remove(); floats.splice(i, 1); continue; }
+    const s = toScreen(f.r.pos.x + f.dx, 2.0 + f.t*1.2, f.r.pos.z);
+    f.el.style.transform = `translate(${s.x}px, ${s.y}px) translate(-50%, -50%) scale(${0.8 + Math.min(1, f.t*4)*0.4})`;
+    f.el.style.opacity = String(1 - Math.max(0, f.t - f.life*0.6)/(f.life*0.4));
+  }
+}
+const sunCol = new THREE.Color();
+function updateWorld(dt, t){
+  const h = W.time/60;
+  const nf = nightFactor(h);
+  const sky = skyAt(h);
+  scene.background = sky; scene.fog.color.copy(sky);
+  const a = (h - 6)/12*Math.PI;
+  const day = Math.max(0, Math.sin(a));
+  sun.position.set(Math.cos(a)*40 + cam.target.x, Math.max(8, Math.sin(a)*45), 18 + cam.target.z);
+  if (day <= 0.05) sun.position.set(-20 + cam.target.x, 40, 20 + cam.target.z);
+  sun.target.position.set(cam.target.x, 0, cam.target.z);
+  sun.intensity = lerp(0.62, 0.25, nf);
+  sunCol.set('#fff4e0').lerp(cA.set('#9fb2ff'), nf); sun.color.copy(sunCol);
+  hemi.intensity = lerp(0.5, 0.3, nf);
+  hemi.color.set('#ffffff').lerp(cB.set('#7d8cd6'), nf);
+  stars.material.opacity = Math.max(0, nf - 0.4)*1.6;
+  for (const m of lampMats) m.emissiveIntensity = nf*1.1;
+  for (let i = 0; i < windowMats.length; i++){
+    const r = residents.find(x => x.room === i);
+    const lit = r && r.state === 'home' && nf > 0.2 && h > 12;
+    const m = windowMats[i];
+    m.emissiveIntensity = lerp(m.emissiveIntensity, lit ? 0.9 : 0, Math.min(1, dt*3));
+    m.color.set(nf > 0.5 ? '#3d4a7a' : '#a9dcf5');
+  }
+  // 海の波
+  const pos = sea.geometry.attributes.position;
+  for (let i = 0; i < pos.count; i++){
+    const x = seaBase[i*3], z = seaBase[i*3 + 2];
+    pos.array[i*3 + 1] = Math.sin(x*0.15 + t*1.2)*0.18 + Math.cos(z*0.13 + t*0.9)*0.18;
+  }
+  pos.needsUpdate = true; sea.geometry.computeVertexNormals();
+  sea.material.color.set('#46aee6').lerp(cA.set('#1d2c5c'), nf*0.8);
+  for (const c of clouds){ c.position.x += c.userData.v*dt; if (c.position.x > 90) c.position.x = -90; }
+  fountainWater.position.y = 0.55 + Math.sin(t*3)*0.02;
+  const sp = scene.getObjectByName('spout'); if (sp){ const s = 1 + Math.sin(t*6)*0.08; sp.scale.set(s, 1/s, s); }
+  // HUD
+  const icon = h >= 5 && h < 17 ? '☀️' : h >= 17 && h < 19.5 ? '🌇' : '🌙';
+  $('clock').textContent = `${icon} ${W.day}日目 ${clockText()}`;
+  $('money').textContent = `💰 ${W.money}`;
+}
+function updateCamera(dt){
+  if (followRes && followRes.ch.root.visible) cam.tTarget.set(followRes.pos.x, 1.0, followRes.pos.z);
+  else if (followRes && followRes.state === 'home'){
+    const i = followRes.room, col = i % 4, fl = Math.floor(i/4);
+    cam.tTarget.set([-4.4, -2.2, 2.2, 4.4][col], 1.9 + fl*3.2, -11.5);
+  }
+  const k = 1 - Math.exp(-dt*5);
+  cam.yaw += angDiff(cam.yaw, cam.tYaw)*k; cam.pitch = lerp(cam.pitch, cam.tPitch, k); cam.dist = lerp(cam.dist, cam.tDist, k);
+  cam.target.lerp(cam.tTarget, k);
+  camera.position.set(
+    cam.target.x + Math.sin(cam.yaw)*Math.cos(cam.pitch)*cam.dist,
+    cam.target.y + Math.sin(cam.pitch)*cam.dist,
+    cam.target.z + Math.cos(cam.yaw)*Math.cos(cam.pitch)*cam.dist);
+  camera.lookAt(cam.target);
+  // パネルの分だけ画面をずらす
+  const open = panel.classList.contains('open');
+  const wide = innerWidth >= 760;
+  const tx = open && wide ? (panel.offsetWidth + 16)/2 : 0;
+  const ty = open && !wide ? panel.offsetHeight/2 : 0;
+  cam.offX = lerp(cam.offX, tx, k); cam.offY = lerp(cam.offY, ty, k);
+  if (Math.abs(cam.offX) > 0.5 || Math.abs(cam.offY) > 0.5) camera.setViewOffset(innerWidth, innerHeight, cam.offX, cam.offY, innerWidth, innerHeight);
+  else camera.clearViewOffset();
+}
+function resize(){
+  renderer.setSize(innerWidth, innerHeight, false);
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+
+let last = performance.now(), saveT = 0, panelT = 0;
+function loop(now){
+  requestAnimationFrame(loop);
+  const dt = Math.min(0.05, (now - last)/1000); last = now;
+  if (!busy) simulate(dt*W.speed);
+  animate(dt, now);
+  updateCamera(dt);
+  updateWorld(dt, now/1000);
+  renderer.render(scene, camera);
+  updateLabels(dt);
+  if (prev && prev.on && prev.ch){ prev.t += dt; prev.ch.root.rotation.y = Math.sin(prev.t*1.2)*0.6; prev.ch.body.position.y = 0.95 + Math.abs(Math.sin(prev.t*3))*0.05; prev.r.render(prev.s, prev.c); }
+  panelT += dt;
+  if (selected && panelT > 0.4){ panelT = 0; if (sigOf(selected) !== panelSig) renderPanel(); else updateBars(); }
+  saveT += dt; if (saveT > 8){ saveT = 0; save(); }
+}
+
+// ---------- はじまり ----------
+function initDefault(){
+  const base = [
+    { name:'ハル', look:{ color:'#ffb74d', eyes:'round', mouth:'smile', cheek:true, hat:'cap' }, act:.8, care:.7, fav:'ramen', dislike:'straw' },
+    { name:'モモ', look:{ color:'#f48fb1', eyes:'big', mouth:'cat', cheek:true, hat:'ribbon' }, act:.4, care:.8, fav:'cake', dislike:'curry' },
+    { name:'ソラ', look:{ color:'#64b5f6', eyes:'dot', mouth:'line', cheek:false, hat:'none' }, act:.25, care:.3, fav:'sushi', dislike:'bread' },
+    { name:'コタ', look:{ color:'#aed581', eyes:'sharp', mouth:'open', cheek:false, hat:'leaf' }, act:.9, care:.3, fav:'curry', dislike:'apple' },
+  ];
+  W.residents = base.map((b, i) => Object.assign({ id:'r' + (W.nextId++), level:1, happy:55, hunger:70 - i*12, room:i }, b));
+  W.rel = {};
+  const [a, b, c, d] = W.residents;
+  W.rel[[a.id, b.id].sort().join('|')] = { aff:42, lovers:false };
+  W.rel[[a.id, d.id].sort().join('|')] = { aff:18, lovers:false };
+  W.rel[[b.id, c.id].sort().join('|')] = { aff:12, lovers:false };
+  news('まめじまでのくらしがはじまった！');
+}
+function start(){
+  buildWorld();
+  const loaded = load();
+  if (!loaded || !W.residents.length && !W.news.length) initDefault();
+  for (const d of W.residents){
+    const p = randPoint();
+    const r = spawnResident(d, p.x, p.z);
+    if (shouldSleep(r)){ r.state = 'home'; r.ch.root.visible = false; r.pos.set(DOOR.x, 0, DOOR.z); }
+  }
+  updateSpeedBtn(); updateSoundBtn();
+  resize();
+  cam.tTarget.set(0, 0, 2); cam.target.copy(cam.tTarget); cam.dist = cam.tDist = homeDist();
+  requestAnimationFrame(loop);
+  if (!W.seenHelp) openHelp();
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
+window.addEventListener('pagehide', save);
+start();
+</script>
+</body>
+</html>
