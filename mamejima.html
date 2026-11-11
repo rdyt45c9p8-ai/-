@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="まめじま">
 <title>まめじまぐらし</title>
 <style>
-  :root { --ink:#3a2e3f; --paper:#fffaf2; --accent:#ff8a65; --accent2:#4fb3e8; --line:#eedfcd; --good:#7cc576; --warn:#ffcc4d; }
+  :root { --ink:#3a2e3f; --paper:#fffaf2; --accent:#ff8a65; --accent2:#4fb3e8; --line:#eedfcd; }
   html, body {
     margin:0; height:100%; overflow:hidden; background:#8fd3ff; color:var(--ink);
     font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
@@ -22,7 +22,7 @@
   #labels { position:fixed; inset:0; pointer-events:none; overflow:hidden; }
   .lab { position:absolute; left:0; top:0; display:flex; flex-direction:column; align-items:center; gap:4px; will-change:transform; }
   .lab .bub { background:#fff; border-radius:14px; padding:4px 10px; font-size:15px; line-height:1.3; box-shadow:0 2px 6px rgba(0,0,0,.18);
-    position:relative; white-space:nowrap; max-width:230px; overflow:hidden; text-overflow:ellipsis; display:none; }
+    white-space:nowrap; max-width:230px; overflow:hidden; text-overflow:ellipsis; display:none; }
   .lab .bub.worry { background:#fff3c4; font-size:18px; padding:2px 8px; animation:pulse 1s ease-in-out infinite; }
   .lab .bub.big { font-size:20px; padding:2px 8px; }
   .lab .nm { font-size:11px; font-weight:700; background:rgba(255,255,255,.8); border-radius:8px; padding:1px 7px; }
@@ -33,18 +33,18 @@
   .pill { background:rgba(255,255,255,.88); border-radius:999px; padding:6px 12px; font-weight:700; font-size:14px; box-shadow:0 2px 8px rgba(0,0,0,.12); }
   #hud { position:fixed; left:0; right:0; top:0; display:flex; justify-content:space-between; gap:8px; pointer-events:none;
     padding: calc(10px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) 0 calc(12px + env(safe-area-inset-left)); }
-  #toolbar { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(12px + env(safe-area-inset-bottom)); display:flex; gap:8px;
-    background:rgba(255,255,255,.9); padding:8px; border-radius:22px; box-shadow:0 4px 16px rgba(0,0,0,.15); transition:transform .25s, opacity .25s; }
+  #toolbar { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(12px + env(safe-area-inset-bottom)); display:flex; gap:6px;
+    background:rgba(255,255,255,.9); padding:7px; border-radius:22px; box-shadow:0 4px 16px rgba(0,0,0,.15); transition:transform .25s, opacity .25s; }
   #toolbar.hide { transform:translate(-50%, 140%); opacity:0; pointer-events:none; }
-  .tb { border:0; background:#fff4e8; border-radius:14px; min-width:56px; height:52px; padding:0 8px; display:flex; flex-direction:column;
+  .tb { border:0; background:#fff4e8; border-radius:14px; min-width:54px; height:52px; padding:0 5px; display:flex; flex-direction:column;
     align-items:center; justify-content:center; font-size:20px; line-height:1; }
-  .tb small { font-size:10px; margin-top:4px; font-weight:700; }
+  .tb small { font-size:10px; margin-top:4px; font-weight:700; white-space:nowrap; }
   .tb:active { transform:scale(.94); }
   .tb.main { background:var(--accent); color:#fff; }
 
   #panel { position:fixed; left:0; right:0; bottom:0; max-height:52%; background:var(--paper); border-radius:22px 22px 0 0;
     box-shadow:0 -6px 24px rgba(0,0,0,.18); transform:translateY(105%); transition:transform .28s ease; display:flex; flex-direction:column;
-    padding-bottom:env(safe-area-inset-bottom); touch-action:pan-y; }
+    padding-bottom:env(safe-area-inset-bottom); }
   #panel.open { transform:translateY(0); }
   @media (min-width:760px) {
     #panel { left:auto; right:16px; bottom:16px; width:360px; max-height:calc(100% - 90px); border-radius:22px; transform:translateX(420px); }
@@ -56,16 +56,17 @@
   .ph .t b { font-size:20px; display:block; }
   .ph .t span { font-size:12px; opacity:.75; }
   .x { border:0; background:#f1e6d8; width:36px; height:36px; border-radius:50%; font-size:16px; flex:none; }
-  .pbody { overflow-y:auto; padding:0 14px 14px; -webkit-overflow-scrolling:touch; }
+  .pbody { overflow-y:auto; padding:0 14px 14px; -webkit-overflow-scrolling:touch; touch-action:pan-y; }
   .bars { display:grid; grid-template-columns:auto 1fr; gap:6px 10px; align-items:center; font-size:12px; font-weight:700; margin:4px 0 10px; }
   .meter { height:10px; background:#eadfd2; border-radius:6px; overflow:hidden; }
   .meter i { display:block; height:100%; border-radius:6px; transition:width .3s; }
   .worrybox { background:#fff3c4; border:2px dashed #f2c94c; border-radius:14px; padding:10px 12px; margin-bottom:10px; display:flex; align-items:center; gap:10px; }
   .worrybox .wi { font-size:28px; }
   .worrybox .wt { flex:1; font-size:14px; font-weight:700; }
-  .btn { border:0; border-radius:12px; padding:9px 14px; font-weight:700; background:var(--accent); color:#fff; font-size:14px; }
+  .btn { border:0; border-radius:12px; padding:9px 14px; font-weight:700; background:var(--accent); color:#fff; font-size:14px; white-space:nowrap; }
   .btn.sub { background:#efe3d5; color:var(--ink); }
   .btn.blue { background:var(--accent2); }
+  .btn.red { background:#e57373; }
   .btn:disabled { opacity:.4; }
   .btn:active { transform:scale(.96); }
   .acts { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px; }
@@ -80,9 +81,9 @@
   .tag { font-size:11px; padding:2px 8px; border-radius:10px; background:#eee; font-weight:700; white-space:nowrap; }
   .tag.l3 { background:#ffd6e7; } .tag.l2 { background:#d8f0d2; } .tag.l1 { background:#e6eef7; } .tag.lm { background:#ffd9cc; } .tag.lv { background:#ff9fc4; color:#fff; }
 
-  #modalWrap { position:fixed; inset:0; background:rgba(40,30,50,.35); display:none; align-items:center; justify-content:center; padding:16px; z-index:20; }
+  #modalWrap { position:fixed; inset:0; background:rgba(40,30,50,.35); display:none; align-items:center; justify-content:center; padding:12px; z-index:20; }
   #modalWrap.show { display:flex; }
-  #modal { background:var(--paper); border-radius:22px; width:100%; max-width:440px; max-height:calc(100% - 20px); display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,.25); }
+  #modal { background:var(--paper); border-radius:22px; width:100%; max-width:460px; max-height:calc(100% - 16px); display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,.25); }
   #modal .mh { display:flex; align-items:center; gap:8px; padding:14px 16px 6px; font-weight:700; font-size:18px; }
   #modal .mh span { flex:1; }
   #modal .mb { overflow-y:auto; padding:6px 16px 16px; touch-action:pan-y; -webkit-overflow-scrolling:touch; }
@@ -100,16 +101,21 @@
   .row { margin:10px 0; }
   .row > label { display:block; font-size:12px; font-weight:700; margin-bottom:6px; }
   .sw { display:flex; flex-wrap:wrap; gap:6px; }
-  .sw button { width:32px; height:32px; border-radius:50%; border:3px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,.25); }
+  .sw button { width:30px; height:30px; border-radius:50%; border:3px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,.25); }
   .sw button.on { border-color:var(--ink); }
   .seg { display:flex; flex-wrap:wrap; gap:6px; }
   .seg button { border:0; background:#fff; border-radius:10px; padding:7px 10px; font-size:13px; box-shadow:0 1px 3px rgba(0,0,0,.12); }
   .seg button.on { background:var(--accent); color:#fff; }
   input[type=text], select { width:100%; box-sizing:border-box; font:inherit; font-size:16px; padding:9px 12px; border-radius:12px; border:2px solid var(--line); background:#fff; color:var(--ink); }
   input[type=range] { width:100%; accent-color:var(--accent); }
-  .rng { display:flex; justify-content:space-between; font-size:11px; opacity:.8; }
-  #prev { display:block; margin:0 auto; width:170px; height:170px; border-radius:50%; background:radial-gradient(#e9f7ff,#bfe6ff); }
-  .persona { text-align:center; font-weight:700; margin-top:4px; }
+  .rng { display:flex; justify-content:space-between; font-size:11px; opacity:.8; margin-top:-2px; }
+  .sticky { position:sticky; top:-6px; background:var(--paper); z-index:2; padding:4px 0 6px; }
+  .crTop { display:flex; gap:8px; align-items:center; }
+  #prev { display:block; margin:6px auto 0; width:180px; height:180px; border-radius:50%; background:radial-gradient(#e9f7ff,#bfe6ff); touch-action:none; }
+  .tabs { display:flex; gap:5px; overflow-x:auto; touch-action:pan-x; padding:8px 0 2px; scrollbar-width:none; }
+  .tabs button { flex:none; border:0; background:#efe3d5; border-radius:10px; padding:7px 10px; font-size:13px; font-weight:700; }
+  .tabs button.on { background:var(--ink); color:#fff; }
+  .persona { text-align:center; font-weight:700; margin-top:4px; font-size:13px; }
   .news { font-size:13px; padding:7px 0; border-bottom:1px solid var(--line); }
   .news i { font-style:normal; opacity:.6; font-size:11px; margin-right:6px; }
   .janken { display:flex; justify-content:center; gap:12px; margin:12px 0; }
@@ -117,11 +123,32 @@
   .jres { text-align:center; font-size:44px; margin:6px 0; min-height:56px; }
   .center { text-align:center; }
 
+  #buildbar { position:fixed; left:0; right:0; bottom:0; background:var(--paper); border-radius:20px 20px 0 0; box-shadow:0 -6px 24px rgba(0,0,0,.18);
+    padding:8px 10px calc(10px + env(safe-area-inset-bottom)); transform:translateY(110%); transition:transform .25s; z-index:5; }
+  #buildbar.show { transform:none; }
+  @media (min-width:760px) { #buildbar { left:50%; right:auto; width:720px; margin-left:-360px; bottom:12px; border-radius:20px; } }
+  .bcats, .bitems { display:flex; gap:6px; overflow-x:auto; touch-action:pan-x; scrollbar-width:none; }
+  .bcats { padding-bottom:6px; }
+  .bcats button { flex:none; border:0; background:#fff; border-radius:12px; padding:7px 10px; font-size:13px; font-weight:700; box-shadow:0 1px 3px rgba(0,0,0,.12); }
+  .bcats button.on { background:var(--accent); color:#fff; }
+  .bitems { padding:4px 2px 8px; min-height:74px; }
+  .bitem { flex:none; width:72px; border:0; background:#fff; border-radius:14px; padding:7px 2px; display:flex; flex-direction:column; align-items:center; gap:2px; box-shadow:0 1px 4px rgba(0,0,0,.12); }
+  .bitem.on { outline:3px solid var(--accent); }
+  .bitem:disabled { opacity:.4; }
+  .bitem .e { font-size:26px; } .bitem .n { font-size:11px; font-weight:700; white-space:nowrap; } .bitem .p { font-size:10px; opacity:.75; }
+  .bhint { padding:8px; font-size:13px; line-height:1.5; }
+  .brow { display:flex; gap:8px; align-items:center; }
+  .brow .hint { flex:1; font-size:12px; line-height:1.4; }
+  #objbar { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(196px + env(safe-area-inset-bottom)); display:none; gap:6px; background:#fff;
+    border-radius:16px; padding:8px; box-shadow:0 4px 16px rgba(0,0,0,.2); z-index:6; align-items:center; white-space:nowrap; }
+  #objbar.show { display:flex; }
+  #objbar b { font-size:14px; margin:0 6px; }
+
   #toast { position:fixed; left:50%; top:calc(56px + env(safe-area-inset-top)); transform:translateX(-50%); display:flex; flex-direction:column; gap:6px; align-items:center; pointer-events:none; z-index:30; width:max-content; max-width:92%; }
   .toast { background:rgba(58,46,63,.9); color:#fff; padding:8px 14px; border-radius:14px; font-size:14px; font-weight:700; animation:tin .3s ease; text-align:center; }
   @keyframes tin { from { opacity:0; transform:translateY(-8px); } }
   #talk { position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom)); transform:translateX(-50%); width:min(92%,520px); background:#fff; border-radius:18px;
-    padding:14px 16px 22px; box-shadow:0 6px 24px rgba(0,0,0,.2); display:none; z-index:25; font-size:17px; line-height:1.6; }
+    padding:14px 16px 22px; box-shadow:0 6px 24px rgba(0,0,0,.2); display:none; z-index:25; font-size:17px; line-height:1.6; box-sizing:border-box; }
   #talk.show { display:block; }
   #talk .who { position:absolute; top:-14px; left:16px; background:var(--accent); color:#fff; font-weight:700; padding:3px 12px; border-radius:10px; font-size:13px; }
   #talk .nx { position:absolute; right:14px; bottom:6px; font-size:12px; animation:pulse 1s infinite; }
@@ -134,17 +161,23 @@
 <div id="labels"></div>
 <div id="hud">
   <div class="pill" id="clock">☀️ 1日目 8:00</div>
-  <div class="pill" id="money">💰 500</div>
+  <div class="pill" id="money">💰 1500</div>
 </div>
 <div id="toolbar">
   <button class="tb" id="bHome" aria-label="島の全体を見る">🏝<small>しま</small></button>
   <button class="tb" id="bList" aria-label="住人リスト">👥<small>住人</small></button>
-  <button class="tb main" id="bNew" aria-label="住人をつくる">✨<small>つくる</small></button>
+  <button class="tb main" id="bNew" aria-label="住人をつくる">✨<small>住人+</small></button>
+  <button class="tb" id="bBuild" aria-label="島づくり">🔨<small>島づくり</small></button>
   <button class="tb" id="bNews" aria-label="ニュース">📰<small>ニュース</small></button>
-  <button class="tb" id="bSpeed" aria-label="時間の速さ">▶<small>ふつう</small></button>
-  <button class="tb" id="bSound" aria-label="音">🔊<small>おと</small></button>
+  <button class="tb" id="bSet" aria-label="せってい">⚙️<small>せってい</small></button>
 </div>
 <div id="panel"></div>
+<div id="buildbar">
+  <div class="bcats" id="bCats"></div>
+  <div class="bitems" id="bItems"></div>
+  <div class="brow"><button class="btn sub" id="bRot">↻ 回転</button><div class="hint" id="bHint"></div><button class="btn" id="bPut">✓ おく</button><button class="btn blue" id="bDone">おわる</button></div>
+</div>
+<div id="objbar"><b id="obName"></b><button class="btn sub" id="obRot">↻</button><button class="btn blue" id="obMove">いどう</button><button class="btn red" id="obDel">しまう</button><button class="x" id="obClose" aria-label="とじる">✕</button></div>
 <div id="modalWrap"><div id="modal"><div class="mh"><span id="mTitle"></span><button class="x" id="mClose" aria-label="とじる">✕</button></div><div class="mb" id="mBody"></div></div></div>
 <div id="toast"></div>
 <div id="fade"></div>
@@ -154,7 +187,7 @@
 <script>
 "use strict";
 // ============================================================
-//  まめじまぐらし — 3D の島で「まめびと」たちがくらすゲーム
+//  まめじまぐらし — 3D の島で住人たちがくらすゲーム
 // ============================================================
 
 // ---------- データ ----------
@@ -180,14 +213,24 @@ const HATS = [
   { id:'tophat', n:'シルクハット', e:'🎩', p:400 },
   { id:'crown',  n:'おうかん',     e:'👑', p:800 },
 ];
-const COLORS = ['#ff8a80','#ffb74d','#ffe082','#aed581','#81c784','#4dd0e1','#64b5f6','#9575cd','#f48fb1','#bcaaa4','#eeeeee','#90a4ae'];
-const EYES = [['round','まる'],['big','キラキラ'],['dot','てん'],['sharp','キリッ'],['sleepy','ねむそう']];
-const MOUTHS = [['smile','にっこり'],['cat','ねこ'],['open','ぱかっ'],['line','むっ']];
+const SKINS = ['#ffe3cc','#f8d2b2','#efbf98','#dfa57c','#c98a5e','#a76b45','#7d4f33','#573624'];
+const HAIRC = ['#1f1a1c','#3b2a20','#6b4428','#a0683a','#d9a650','#f3dd96','#c0442e','#8f8f99','#f2f2f2','#ff8fb8','#5aa0e6','#5fbf7f','#9b6fd6'];
+const EYEC  = ['#2a1e18','#5a3a22','#8a5a2b','#3f6fb0','#3e8f5e','#8a5bd1','#c0392b','#6d7a86'];
+const CLOTH = ['#ff8a80','#e53935','#ffb74d','#ffe082','#aed581','#43a047','#4dd0e1','#64b5f6','#3949ab','#9575cd','#f48fb1','#ffffff','#bdbdbd','#455a64','#6d4c41','#212121'];
+const SHOES = ['#5d4037','#212121','#ffffff','#e53935','#3949ab','#ffb74d'];
+const FACES = [['round','まる'],['oval','たまご'],['square','しかく'],['sharp','シャープ'],['wide','ふっくら']];
+const HAIRS = [['short','ショート'],['buzz','ベリーショート'],['bob','ボブ'],['long','ロング'],['pony','ポニーテール'],['twin','ツインテール'],['bun','おだんご'],['spiky','ツンツン'],['fluffy','ふわふわ'],['afro','アフロ'],['bald','スキンヘッド']];
+const BANGS = [['full','ぱっつん'],['side','ななめ'],['center','センター分け'],['spiky','ギザギザ'],['none','なし']];
+const EYES  = [['round','まる'],['big','ぱっちり'],['almond','アーモンド'],['cat','つり目'],['droopy','たれ目'],['narrow','ほそ目'],['sleepy','ねむそう'],['dot','てん']];
+const LASHES = [[0,'なし'],[1,'すこし'],[2,'ながい']];
+const BROWS = [['normal','ふつう'],['arched','アーチ'],['straight','まっすぐ'],['worried','こまり'],['sharp','キリッ'],['short','まろ']];
+const NOSES = [['dot','てん'],['line','くの字'],['round','まるい'],['button','小鼻'],['none','なし']];
+const MOUTHS = [['smile','にっこり'],['grin','ニカッ'],['cat','ねこ'],['open','ぱかっ'],['small','ちいさい'],['line','むっ']];
+const GLASSES = [['none','なし'],['round','まるメガネ'],['square','しかくメガネ'],['sun','サングラス']];
+const BODIES = [['slim','ほっそり'],['normal','ふつう'],['chubby','がっしり']];
+const BOTTOMS = [['pants','ズボン'],['skirt','スカート'],['shorts','短パン']];
 const TOPICS = ['☀️','🌈','🍰','🎵','⚽','🐱','🐶','📚','🎮','🌸','🍜','✨','😂','🤔','🏖','🎨','🌙','🍓','👻','🚀'];
-const MAX_RES = 12;
-const DOOR = { x:0, z:-10.9 };
-const CAFE = { x:10.0, z:1, face:Math.PI/2, emo:['☕','🧁','🍩','🥤'] };
-const SHOP = { x:-10.0, z:1, face:-Math.PI/2, emo:['👒','🎀','✨','🧦'] };
+const ROOMS_PER_APT = 12, MAX_RES = 24;
 
 // ---------- 便利関数 ----------
 const rand = (a,b) => a + Math.random()*(b-a);
@@ -198,25 +241,26 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>'
 const wait = ms => new Promise(r => setTimeout(r, ms));
 function hash(str){ let h = 2166136261; for (let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return ((h>>>0) % 10000) / 10000; }
 function angDiff(a,b){ let d = b - a; while (d > Math.PI) d -= Math.PI*2; while (d < -Math.PI) d += Math.PI*2; return d; }
+function seeded(seed){ let s = (Math.floor(seed*99991) % 2147483646) + 1; return () => (s = (s*16807) % 2147483647) / 2147483647; }
 const $ = id => document.getElementById(id);
 const foodById = id => FOODS.find(f => f.id === id) || FOODS[0];
 const hatById = id => HATS.find(h => h.id === id) || HATS[0];
 
 // ---------- 状態とセーブ ----------
-const SAVE_KEY = 'mamejima-save-v1';
-let W = { time: 8*60, day: 1, money: 500, speed: 1, sound: true, residents: [], rel: {}, news: [], nextId: 1, seenHelp: false };
-const residents = [];   // 実行時オブジェクト
-let busy = false;       // イベント演出中
-let selected = null;
-let followRes = null;
+const SAVE_KEY = 'mamejima-save-v2';
+let W = { time: 8*60, day: 1, money: 1500, speed: 1, sound: true, residents: [], rel: {}, news: [], nextId: 1, seenHelp: false, land: [], objects: [], nextObj: 1 };
+const residents = [];
+let busy = false, selected = null, followRes = null;
 
 function save(){
   W.residents = residents.map(r => ({ id:r.id, name:r.name, look:Object.assign({}, r.look), act:r.act, care:r.care, fav:r.fav, dislike:r.dislike,
-    level:r.level, happy:Math.round(r.happy), hunger:Math.round(r.hunger), room:r.room }));
+    level:r.level, happy:Math.round(r.happy), hunger:Math.round(r.hunger), home:r.home, room:r.room }));
+  W.objects = [...objs.values()].map(o => ({ id:o.id, t:o.t, ox:o.ox, oz:o.oz, rot:o.rot }));
+  W.land = [...landSet];
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(W)); } catch(e) {}
 }
 function load(){
-  try { const s = localStorage.getItem(SAVE_KEY); if (s) { const d = JSON.parse(s); if (d && Array.isArray(d.residents)) { W = Object.assign(W, d); return true; } } } catch(e) {}
+  try { const s = localStorage.getItem(SAVE_KEY); if (s){ const d = JSON.parse(s); if (d && Array.isArray(d.residents) && Array.isArray(d.land) && d.land.length){ W = Object.assign(W, d); return true; } } } catch(e) {}
   return false;
 }
 
@@ -240,305 +284,670 @@ function addAff(a, b, d){
 }
 function persona(r){ const g = r.act >= .5, c = r.care >= .5; return g ? (c ? 'ムードメーカー' : 'じゆうじん') : (c ? 'やさしい' : 'のんびりや'); }
 
-// ---------- Three.js セットアップ ----------
+// ---------- Three.js ----------
 const renderer = new THREE.WebGLRenderer({ antialias:true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 $('view').appendChild(renderer.domElement);
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0x9fd8ff, 70, 160);
-const camera = new THREE.PerspectiveCamera(45, 1, 0.5, 500);
+scene.fog = new THREE.Fog(0x9fd8ff, 90, 230);
+const camera = new THREE.PerspectiveCamera(45, 1, 0.5, 700);
 const hemi = new THREE.HemisphereLight(0xffffff, 0x9bbf88, 0.5); scene.add(hemi);
 const amb = new THREE.AmbientLight(0xffffff, 0.08); scene.add(amb);
 const sun = new THREE.DirectionalLight(0xffffff, 0.62);
 sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
-Object.assign(sun.shadow.camera, { left:-30, right:30, top:30, bottom:-30, near:1, far:140 });
+Object.assign(sun.shadow.camera, { left:-34, right:34, top:34, bottom:-34, near:1, far:160 });
 sun.shadow.bias = -0.0006;
 scene.add(sun, sun.target);
 
+const GRAD = new THREE.DataTexture(new Uint8Array([200,200,200,255, 255,255,255,255]), 2, 1, THREE.RGBAFormat);
+GRAD.minFilter = GRAD.magFilter = THREE.NearestFilter; GRAD.needsUpdate = true;
 const matCache = {};
-function toon(c){ const k = typeof c === 'string' ? c : '#' + c.getHexString(); if (!matCache[k]) matCache[k] = new THREE.MeshToonMaterial({ color:k }); return matCache[k]; }
+function toon(c, double){
+  const hex = typeof c === 'string' ? c : '#' + c.getHexString();
+  const k = hex + (double ? '|D' : '');
+  if (!matCache[k]) matCache[k] = new THREE.MeshToonMaterial({ color:hex, gradientMap:GRAD, side: double ? THREE.DoubleSide : THREE.FrontSide });
+  return matCache[k];
+}
 function mesh(geo, mat, x=0, y=0, z=0, shadow=true){ const m = new THREE.Mesh(geo, mat); m.position.set(x,y,z); m.castShadow = shadow; m.receiveShadow = true; return m; }
 
-// ---------- ワールド ----------
-let sea, seaBase, stars, windowMats = [], lampMats = [], clouds = [], fountainWater;
-function textSign(text, bg, fg, w=256, h=80){
-  const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const c = cv.getContext('2d');
-  c.fillStyle = bg; c.beginPath(); c.roundRect ? c.roundRect(4,4,w-8,h-8,18) : c.rect(4,4,w-8,h-8); c.fill();
-  c.fillStyle = fg; c.font = 'bold 40px "Hiragino Maru Gothic ProN", sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(text, w/2, h/2+2);
-  const t = new THREE.CanvasTexture(cv);
-  return new THREE.Mesh(new THREE.PlaneGeometry(w/80, h/80), new THREE.MeshBasicMaterial({ map:t, transparent:true }));
-}
-function buildWorld(){
-  // 海
-  const sg = new THREE.PlaneGeometry(320, 320, 64, 64); sg.rotateX(-Math.PI/2);
-  sea = new THREE.Mesh(sg, new THREE.MeshPhongMaterial({ color:0x46aee6, shininess:90, specular:0xaee6ff, flatShading:true }));
-  sea.position.y = -0.6; scene.add(sea);
-  seaBase = Float32Array.from(sg.attributes.position.array);
-  // 砂浜と草地
-  const sand = mesh(new THREE.CylinderGeometry(24, 25.5, 1.6, 64), toon('#f6e3b4'), 0, -0.95, 0, false); scene.add(sand);
-  const grass = mesh(new THREE.CylinderGeometry(21.5, 22.2, 1.6, 64), toon('#7cc35e'), 0, -0.8, 0, false); scene.add(grass);
-  // 広場と道
-  const stone = toon('#e3d2b2');
-  scene.add(mesh(new THREE.CylinderGeometry(6.6, 6.6, 0.06, 48), stone, 0, 0.03, 0, false));
-  const pathGeo = new THREE.BoxGeometry(2.4, 0.05, 1);
-  const p1 = mesh(pathGeo, stone, 0, 0.03, -8.5, false); p1.scale.z = 5; scene.add(p1);
-  const p2 = mesh(pathGeo, stone, 9, 0.03, 1, false); p2.scale.z = 1; p2.scale.x = 2.3; p2.rotation.y = Math.PI/2; p2.scale.set(2.4/2.4, 1, 5.5); scene.add(p2);
-  const p3 = p2.clone(); p3.position.x = -9; scene.add(p3);
-  const p4 = mesh(pathGeo, stone, 0, 0.03, 13, false); p4.scale.z = 13; scene.add(p4);
-  // 噴水
-  const fg = new THREE.Group();
-  fg.add(mesh(new THREE.CylinderGeometry(2.3, 2.5, 0.6, 32), toon('#d9d4e6'), 0, 0.3, 0));
-  fountainWater = mesh(new THREE.CylinderGeometry(2.0, 2.0, 0.1, 32), new THREE.MeshPhongMaterial({ color:0x7fd3ff, shininess:120, transparent:true, opacity:.85 }), 0, 0.55, 0, false);
-  fg.add(fountainWater);
-  fg.add(mesh(new THREE.CylinderGeometry(0.3, 0.45, 1.6, 16), toon('#d9d4e6'), 0, 1.1, 0));
-  fg.add(mesh(new THREE.CylinderGeometry(1.0, 0.6, 0.25, 24), toon('#d9d4e6'), 0, 1.9, 0));
-  const spout = mesh(new THREE.SphereGeometry(0.45, 16, 12), new THREE.MeshPhongMaterial({ color:0xaee6ff, transparent:true, opacity:.8 }), 0, 2.3, 0, false);
-  spout.name = 'spout'; fg.add(spout);
-  scene.add(fg);
-  // アパート
-  buildApartment();
-  // お店
-  buildShop(14, 1, -Math.PI/2, '#fff1e0', '#e57373', '#ffffff', '#e57373', 'まめカフェ');
-  buildShop(-14, 1, Math.PI/2, '#eef6ff', '#5c8fd6', '#ffffff', '#ffd54f', 'ぼうし屋');
-  // さん橋
-  const wood = toon('#c79a6b');
-  const pier = mesh(new THREE.BoxGeometry(3, 0.25, 9), wood, 0, -0.1, 26); scene.add(pier);
-  for (const x of [-1.3, 1.3]) for (const z of [22.5, 26, 29.5]) scene.add(mesh(new THREE.CylinderGeometry(0.15,0.15,1.4,8), wood, x, -0.6, z));
-  // 木・花・ベンチ・街灯
-  const trunk = toon('#9c6b45');
-  const leafCols = ['#5fb85a','#4fa64b','#74c66a','#3f9a52'];
-  let seed = 7; const srand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  let placed = 0;
-  for (let i = 0; i < 400 && placed < 34; i++){
-    const a = srand()*Math.PI*2, d = 15.5 + srand()*5;
-    const x = Math.sin(a)*d, z = Math.cos(a)*d;
-    if (Math.abs(x) < 3 && z > 12) continue;              // さん橋への道
-    if (Math.abs(z - 1) < 4 && Math.abs(x) > 10.5) continue; // お店
-    if (z < -9 && Math.abs(x) < 8) continue;               // アパート
-    const s = 0.8 + srand()*0.6, t = new THREE.Group();
-    t.add(mesh(new THREE.CylinderGeometry(0.22*s, 0.3*s, 1.6*s, 8), trunk, 0, 0.8*s, 0));
-    const lc = toon(leafCols[Math.floor(srand()*leafCols.length)]);
-    if (srand() < 0.5){
-      t.add(mesh(new THREE.SphereGeometry(1.2*s, 14, 10), lc, 0, 2.2*s, 0));
-      t.add(mesh(new THREE.SphereGeometry(0.85*s, 14, 10), lc, 0.5*s, 2.9*s, 0.2*s));
-    } else {
-      t.add(mesh(new THREE.ConeGeometry(1.3*s, 2.2*s, 10), lc, 0, 2.4*s, 0));
-      t.add(mesh(new THREE.ConeGeometry(0.95*s, 1.7*s, 10), lc, 0, 3.4*s, 0));
+// ============================================================
+//  グリッド（地面・通れる場所）
+// ============================================================
+const GN = 200, GO = 100, CH = 8, CHMAX = 11;
+const gLand = new Uint8Array(GN*GN), gBlock = new Uint8Array(GN*GN), gOccO = new Int32Array(GN*GN), gOccG = new Int32Array(GN*GN);
+const inGrid = (i,j) => i >= -GO && i < GN-GO && j >= -GO && j < GN-GO;
+const gi = (i,j) => (j+GO)*GN + (i+GO);
+function walkable(i,j){ if (!inGrid(i,j)) return false; const k = gi(i,j); return gLand[k] === 1 && gBlock[k] === 0; }
+function walkableAt(x,z){ return walkable(Math.floor(x), Math.floor(z)); }
+function nearestWalkable(i,j, maxR=12){
+  if (walkable(i,j)) return [i,j];
+  for (let r = 1; r <= maxR; r++){
+    for (let a = -r; a <= r; a++){
+      for (const [x,z] of [[i+a,j-r],[i+a,j+r],[i-r,j+a],[i+r,j+a]]) if (walkable(x,z)) return [x,z];
     }
-    t.position.set(x, 0, z); t.rotation.y = srand()*6; scene.add(t); placed++;
   }
-  const flowerCols = ['#ff7aa2','#ffd54f','#ffffff','#b39ddb','#ff8a65'];
-  const fgeo = new THREE.SphereGeometry(0.12, 8, 6);
-  for (let i = 0; i < 90; i++){
-    const a = srand()*Math.PI*2, d = 7.5 + srand()*13.5;
-    const x = Math.sin(a)*d, z = Math.cos(a)*d;
-    if (z < -9.5 && Math.abs(x) < 7) continue;
-    if (Math.abs(x) < 1.5 && z > 6) continue;
-    scene.add(mesh(fgeo, toon(flowerCols[i % flowerCols.length]), x, 0.12, z, false));
-  }
-  const benchMat = toon('#b07a4f');
-  for (const a of [Math.PI*0.25, -Math.PI*0.25, Math.PI*0.75, -Math.PI*0.75]){
-    const b = new THREE.Group();
-    b.add(mesh(new THREE.BoxGeometry(2, 0.15, 0.6), benchMat, 0, 0.5, 0));
-    b.add(mesh(new THREE.BoxGeometry(2, 0.5, 0.12), benchMat, 0, 0.85, -0.28));
-    for (const x of [-0.8, 0.8]) b.add(mesh(new THREE.BoxGeometry(0.12, 0.5, 0.5), benchMat, x, 0.25, 0));
-    b.position.set(Math.sin(a)*8.2, 0, Math.cos(a)*8.2); b.rotation.y = a + Math.PI; scene.add(b);
-  }
-  for (const a of [0.5, -0.5, Math.PI-0.5, Math.PI+0.5]){
-    const l = new THREE.Group();
-    l.add(mesh(new THREE.CylinderGeometry(0.09, 0.12, 3, 8), toon('#556070'), 0, 1.5, 0));
-    const lm = new THREE.MeshToonMaterial({ color:'#fff6d0', emissive:'#ffcf6b', emissiveIntensity:0 }); lampMats.push(lm);
-    l.add(mesh(new THREE.SphereGeometry(0.3, 12, 10), lm, 0, 3.15, 0, false));
-    l.position.set(Math.sin(a)*7.1, 0, Math.cos(a)*7.1); scene.add(l);
-  }
-  // 雲
-  const cm = new THREE.MeshToonMaterial({ color:'#ffffff', transparent:true, opacity:.95 });
-  for (let i = 0; i < 7; i++){
-    const c = new THREE.Group();
-    for (let j = 0; j < 4; j++) c.add(mesh(new THREE.SphereGeometry(1.6 + srand()*1.4, 12, 10), cm, j*1.9 - 2.8, srand()*0.8, srand()*1.2, false));
-    c.position.set(-80 + srand()*160, 20 + srand()*8, -60 + srand()*90); c.userData.v = 0.6 + srand()*0.8;
-    scene.add(c); clouds.push(c);
-  }
-  // 星
-  const sp = []; for (let i = 0; i < 500; i++){ const v = new THREE.Vector3(srand()*2-1, srand()*0.9+0.1, srand()*2-1).normalize().multiplyScalar(220); sp.push(v.x, v.y, v.z); }
-  const sgeo = new THREE.BufferGeometry(); sgeo.setAttribute('position', new THREE.Float32BufferAttribute(sp, 3));
-  stars = new THREE.Points(sgeo, new THREE.PointsMaterial({ color:0xffffff, size:1.4, transparent:true, opacity:0, fog:false }));
-  scene.add(stars);
+  return null;
 }
-function buildApartment(){
-  const g = new THREE.Group();
-  g.add(mesh(new THREE.BoxGeometry(12, 9.4, 5), toon('#fbe3c8'), 0, 4.7, 0));
-  g.add(mesh(new THREE.BoxGeometry(12.8, 0.5, 5.8), toon('#e8896b'), 0, 9.6, 0));
-  for (const y of [3.2, 6.4]) g.add(mesh(new THREE.BoxGeometry(12.3, 0.18, 5.3), toon('#f0cfa8'), 0, y, 0, false));
-  // ドア
-  g.add(mesh(new THREE.BoxGeometry(1.5, 2.3, 0.2), toon('#a0674a'), 0, 1.15, 2.5));
-  g.add(mesh(new THREE.BoxGeometry(2.2, 0.15, 1), toon('#e8896b'), 0, 2.5, 2.8));
-  // 窓 (3階 × 4部屋)
-  const wgeo = new THREE.BoxGeometry(1.5, 1.3, 0.12);
-  const frame = toon('#ffffff');
-  for (let i = 0; i < MAX_RES; i++){
-    const col = i % 4, fl = Math.floor(i / 4);
-    const x = [-4.4, -2.2, 2.2, 4.4][col], y = 1.9 + fl*3.2;
-    if (fl === 0 && (col === 1 || col === 2)) {} // ドアの横も窓
-    g.add(mesh(new THREE.BoxGeometry(1.75, 1.55, 0.08), frame, x, y, 2.5, false));
-    const m = new THREE.MeshToonMaterial({ color:'#a9dcf5', emissive:'#ffcf6b', emissiveIntensity:0 });
-    windowMats.push(m);
-    g.add(mesh(wgeo, m, x, y, 2.55, false));
+function randomWalkableNear(x, z, rad){
+  for (let t = 0; t < 40; t++){
+    const i = Math.floor(x + rand(-rad, rad)), j = Math.floor(z + rand(-rad, rad));
+    if (walkable(i,j)) return { x: i + 0.5 + rand(-0.3, 0.3), z: j + 0.5 + rand(-0.3, 0.3) };
   }
-  const sign = textSign('まめハイツ', '#ffffff', '#c0583f'); sign.position.set(0, 8.6, 2.56); g.add(sign);
-  g.position.set(0, 0, -14);
-  scene.add(g);
+  return null;
 }
-function buildShop(x, z, rotY, wall, roof, a1, a2, name){
-  const g = new THREE.Group();
-  g.add(mesh(new THREE.BoxGeometry(5, 3.4, 4.4), toon(wall), 0, 1.7, 0));
-  const r = mesh(new THREE.ConeGeometry(4.1, 2.2, 4), toon(roof), 0, 4.5, 0); r.rotation.y = Math.PI/4; r.scale.z = 0.9; g.add(r);
-  g.add(mesh(new THREE.BoxGeometry(1.3, 2.1, 0.15), toon('#8d5e44'), 0, 1.05, 2.22));
-  for (const sx of [-1.7, 1.7]) g.add(mesh(new THREE.BoxGeometry(1.1, 1.0, 0.12), toon('#a9dcf5'), sx, 1.9, 2.22, false));
-  for (let i = 0; i < 6; i++){
-    const s = mesh(new THREE.BoxGeometry(0.88, 0.08, 1.1), toon(i % 2 ? a2 : a1), -2.2 + i*0.88, 3.0, 2.7);
-    s.rotation.x = 0.35; g.add(s);
+// A* 経路探索
+const AS = { g:new Float32Array(GN*GN), st:new Uint32Array(GN*GN), cl:new Uint32Array(GN*GN), from:new Int32Array(GN*GN), cur:0 };
+const NB = [[1,0,1],[-1,0,1],[0,1,1],[0,-1,1],[1,1,1.414],[1,-1,1.414],[-1,1,1.414],[-1,-1,1.414]];
+function los(ax, az, bx, bz){
+  const dx = bx - ax, dz = bz - az, d = Math.hypot(dx, dz);
+  if (d < 0.01) return true;
+  const n = Math.ceil(d/0.25), px = -dz/d*0.28, pz = dx/d*0.28;
+  for (let s = 0; s <= n; s++){
+    const x = ax + dx*s/n, z = az + dz*s/n;
+    if (!walkableAt(x, z) || !walkableAt(x+px, z+pz) || !walkableAt(x-px, z-pz)) return false;
   }
-  const sign = textSign(name, '#ffffff', roof); sign.position.set(0, 3.8, 2.35); sign.scale.setScalar(0.9); g.add(sign);
-  g.position.set(x, 0, z); g.rotation.y = rotY;
-  scene.add(g);
+  return true;
+}
+function findPath(sx, sz, tx, tz){
+  let si = Math.floor(sx), sj = Math.floor(sz);
+  const ti = Math.floor(tx), tj = Math.floor(tz);
+  if (!walkable(ti,tj)) return null;
+  if (!walkable(si,sj)){ const n = nearestWalkable(si,sj,4); if (!n) return null; si = n[0]; sj = n[1]; }
+  const st = ++AS.cur, sk = gi(si,sj), tk = gi(ti,tj);
+  if (sk === tk) return [{ x:tx, z:tz }];
+  const hf = [], hk = [];
+  const push = (f,k) => { hf.push(f); hk.push(k); let i = hf.length-1; while (i > 0){ const p = (i-1)>>1; if (hf[p] <= hf[i]) break; [hf[p],hf[i]] = [hf[i],hf[p]]; [hk[p],hk[i]] = [hk[i],hk[p]]; i = p; } };
+  const pop = () => { const k = hk[0]; const lf = hf.pop(), lk = hk.pop(); if (hf.length){ hf[0] = lf; hk[0] = lk; let i = 0; for(;;){ const l = i*2+1, r = l+1; let m = i; if (l < hf.length && hf[l] < hf[m]) m = l; if (r < hf.length && hf[r] < hf[m]) m = r; if (m === i) break; [hf[m],hf[i]] = [hf[i],hf[m]]; [hk[m],hk[i]] = [hk[i],hk[m]]; i = m; } } return k; };
+  const H = (i,j) => { const a = Math.abs(i-ti), b = Math.abs(j-tj); return Math.max(a,b) + 0.414*Math.min(a,b); };
+  AS.g[sk] = 0; AS.st[sk] = st; AS.from[sk] = -1; push(H(si,sj), sk);
+  let it = 0, found = false;
+  while (hf.length && it++ < 40000){
+    const k = pop();
+    if (AS.cl[k] === st) continue;
+    AS.cl[k] = st;
+    if (k === tk){ found = true; break; }
+    const i = (k % GN) - GO, j = Math.floor(k / GN) - GO;
+    for (const [di,dj,c] of NB){
+      const ni = i+di, nj = j+dj;
+      if (!walkable(ni,nj)) continue;
+      if (di && dj && (!walkable(i+di,j) || !walkable(i,j+dj))) continue;
+      const nk = gi(ni,nj); if (AS.cl[nk] === st) continue;
+      const ng = AS.g[k] + c;
+      if (AS.st[nk] !== st || ng < AS.g[nk]){ AS.st[nk] = st; AS.g[nk] = ng; AS.from[nk] = k; push(ng + H(ni,nj), nk); }
+    }
+  }
+  if (!found) return null;
+  const cells = []; let k = AS.from[tk];
+  while (k !== -1 && k !== sk){ cells.push({ x:(k % GN) - GO + 0.5, z:Math.floor(k / GN) - GO + 0.5 }); k = AS.from[k]; }
+  cells.reverse(); cells.push({ x:tx, z:tz });
+  // 経路をなめらかにする
+  const out = []; let cx = sx, cz = sz, idx = 0;
+  while (idx < cells.length){
+    let j = cells.length - 1;
+    for (; j > idx; j--) if (los(cx, cz, cells[j].x, cells[j].z)) break;
+    out.push(cells[j]); cx = cells[j].x; cz = cells[j].z; idx = j + 1;
+  }
+  return out;
 }
 
-// ---------- まめびと（キャラクター） ----------
-const G = {
-  body: new THREE.SphereGeometry(0.7, 32, 24),
-  face: new THREE.SphereGeometry(0.712, 32, 16, Math.PI/2 - 0.8, 1.6, 0.66, 1.26),
-  arm:  new THREE.SphereGeometry(0.17, 12, 10),
-  foot: new THREE.SphereGeometry(0.2, 12, 10),
+// ============================================================
+//  土地（チャンク）
+// ============================================================
+const landSet = new Set();
+const LG = { grass: new THREE.BoxGeometry(CH, 1.6, CH), sand: new THREE.BoxGeometry(CH + 2, 1.6, CH + 2) };
+function addChunk(cx, cz){
+  const key = cx + ',' + cz; if (landSet.has(key)) return;
+  landSet.add(key);
+  for (let i = 0; i < CH; i++) for (let j = 0; j < CH; j++){ const a = cx*CH + i, b = cz*CH + j; if (inGrid(a,b)) gLand[gi(a,b)] = 1; }
+  const g = new THREE.Group();
+  g.add(mesh(LG.grass, toon('#7cc35e'), 0, -0.8, 0, false), mesh(LG.sand, toon('#f6e3b4'), 0, -0.92, 0, false));
+  g.position.set(cx*CH + CH/2, 0, cz*CH + CH/2);
+  scene.add(g);
+}
+function landBBox(){
+  let a = 1e9, b = -1e9, c = 1e9, d = -1e9;
+  for (const k of landSet){ const [x,z] = k.split(',').map(Number); a = Math.min(a, x*CH); b = Math.max(b, x*CH+CH); c = Math.min(c, z*CH); d = Math.max(d, z*CH+CH); }
+  return { x0:a, x1:b, z0:c, z1:d, cx:(a+b)/2, cz:(c+d)/2, size:Math.max(b-a, d-c) };
+}
+function buyableChunks(){
+  const out = [];
+  for (const k of landSet){
+    const [x,z] = k.split(',').map(Number);
+    for (const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
+      const nx = x+dx, nz = z+dz, nk = nx+','+nz;
+      if (nx < -CHMAX || nx > CHMAX - 1 || nz < -CHMAX || nz > CHMAX - 1) continue;
+      if (!landSet.has(nk) && !out.some(o => o.k === nk)) out.push({ k:nk, x:nx, z:nz });
+    }
+  }
+  return out;
+}
+const landPrice = () => 300 + 60*Math.max(0, landSet.size - 36);
+
+// ============================================================
+//  オブジェクト（木・建物など）
+// ============================================================
+const ITEMS = {
+  tree:     { n:'まるい木',   e:'🌳', cat:'nature', w:1, d:1, p:40,  block:true },
+  pine:     { n:'とがった木', e:'🌲', cat:'nature', w:1, d:1, p:40,  block:true },
+  palm:     { n:'ヤシの木',   e:'🌴', cat:'nature', w:1, d:1, p:60,  block:true },
+  bush:     { n:'しげみ',     e:'🌿', cat:'nature', w:1, d:1, p:20,  block:true },
+  flower:   { n:'お花',       e:'🌷', cat:'nature', w:1, d:1, p:10,  block:false },
+  rock:     { n:'いわ',       e:'🪨', cat:'nature', w:1, d:1, p:15,  block:true },
+  pond:     { n:'いけ',       e:'💧', cat:'nature', w:4, d:4, p:150, block:true, visit:{ dz:2.6, emo:['🐟','🦆','💧','🐸'] } },
+  path:     { n:'土の道',     e:'🟫', cat:'ground', w:2, d:2, p:5,   ground:true },
+  stone:    { n:'石だたみ',   e:'⬜', cat:'ground', w:2, d:2, p:8,   ground:true },
+  plaza:    { n:'ひろば',     e:'⭕', cat:'ground', w:12, d:12, p:120, ground:true },
+  bench:    { n:'ベンチ',     e:'🪑', cat:'deco',   w:2, d:1, p:60,  block:true, visit:{ dz:1.3, emo:['😌','☁️','🎵','📖'] } },
+  lamp:     { n:'がいとう',   e:'💡', cat:'deco',   w:1, d:1, p:50,  block:true },
+  fountain: { n:'ふんすい',   e:'⛲', cat:'deco',   w:6, d:6, p:300, block:true, visit:{ dz:3.6, emo:['💦','✨','🪙'] } },
+  swing:    { n:'ブランコ',   e:'🎠', cat:'deco',   w:3, d:2, p:250, block:true, visit:{ dz:1.9, emo:['🎶','😆','🌀'] } },
+  statue:   { n:'まめ像',     e:'🗿', cat:'deco',   w:2, d:2, p:500, block:true, visit:{ dz:1.9, emo:['👏','📸','✨'] } },
+  apartment:{ n:'アパート',   e:'🏢', cat:'bldg',   w:12, d:6, p:2000, block:true },
+  cafe:     { n:'カフェ',     e:'☕', cat:'bldg',   w:6, d:6, p:800, block:true, visit:{ dz:3.6, emo:['☕','🧁','🍩','🥤'], food:true } },
+  hatshop:  { n:'ぼうし屋',   e:'🎩', cat:'bldg',   w:6, d:6, p:800, block:true, visit:{ dz:3.6, emo:['👒','🎀','✨','🧦'] } },
 };
+const CATS = [['land','🗺 土地'],['nature','🌳 しぜん'],['ground','🛤 じめん'],['deco','🪑 かざり'],['bldg','🏠 たてもの'],['select','👆 えらぶ']];
+const objs = new Map();
+function dims(t, rot){ const it = ITEMS[t]; return rot % 2 ? [it.d, it.w] : [it.w, it.d]; }
+function objCenter(t, ox, oz, rot){ const [w,d] = dims(t, rot); return { x: ox + w/2, z: oz + d/2 }; }
+function canPlace(t, ox, oz, rot, ignore=0){
+  const it = ITEMS[t], [w,d] = dims(t, rot);
+  for (let i = ox; i < ox+w; i++) for (let j = oz; j < oz+d; j++){
+    if (!inGrid(i,j)) return false;
+    const k = gi(i,j);
+    if (!gLand[k]) return false;
+    if (it.ground){ if (gOccG[k] && gOccG[k] !== ignore) return false; }
+    else if (gOccO[k] && gOccO[k] !== ignore) return false;
+  }
+  return true;
+}
+function markObj(o, on){
+  const it = ITEMS[o.t], [w,d] = dims(o.t, o.rot);
+  for (let i = o.ox; i < o.ox+w; i++) for (let j = o.oz; j < o.oz+d; j++){
+    const k = gi(i,j);
+    if (it.ground) gOccG[k] = on ? o.id : 0;
+    else { gOccO[k] = on ? o.id : 0; if (it.block) gBlock[k] = on ? 1 : 0; }
+  }
+}
+function placeObj(t, ox, oz, rot, id){
+  const o = { id: id || W.nextObj++, t, ox, oz, rot };
+  if (id && id >= W.nextObj) W.nextObj = id + 1;
+  o.mesh = buildItem(t, o.id);
+  positionObj(o);
+  scene.add(o.mesh);
+  objs.set(o.id, o); markObj(o, true);
+  return o;
+}
+function positionObj(o){ const c = objCenter(o.t, o.ox, o.oz, o.rot); o.mesh.position.set(c.x, 0, c.z); o.mesh.rotation.y = o.rot*Math.PI/2; }
+function removeObj(o){ markObj(o, false); scene.remove(o.mesh); objs.delete(o.id); }
+function objAt(i,j){ if (!inGrid(i,j)) return null; const k = gi(i,j); return objs.get(gOccO[k]) || objs.get(gOccG[k]) || null; }
+function spotOf(o){ const it = ITEMS[o.t]; const c = objCenter(o.t, o.ox, o.oz, o.rot); const a = o.rot*Math.PI/2, dz = it.visit ? it.visit.dz : 3.6; return { x: c.x + Math.sin(a)*dz, z: c.z + Math.cos(a)*dz, face: a + Math.PI }; }
+const apartments = () => [...objs.values()].filter(o => o.t === 'apartment');
+const capacity = () => Math.min(MAX_RES, apartments().length*ROOMS_PER_APT);
+
+// ---------- オブジェクトの見た目 ----------
+function textSign(text, bg, fg, w=256, h=80){
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const c = cv.getContext('2d');
+  c.fillStyle = bg; c.beginPath(); if (c.roundRect) c.roundRect(4,4,w-8,h-8,18); else c.rect(4,4,w-8,h-8); c.fill();
+  c.fillStyle = fg; c.font = 'bold 40px "Hiragino Maru Gothic ProN", sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(text, w/2, h/2+2);
+  return new THREE.Mesh(new THREE.PlaneGeometry(w/80, h/80), new THREE.MeshBasicMaterial({ map:new THREE.CanvasTexture(cv), transparent:true }));
+}
+const OG = {
+  trunk: new THREE.CylinderGeometry(0.2, 0.28, 1.6, 8), ball: new THREE.SphereGeometry(1, 14, 10), cone: new THREE.ConeGeometry(1, 1, 10),
+  petal: new THREE.SphereGeometry(0.12, 8, 6), rock: new THREE.DodecahedronGeometry(0.42, 0),
+};
+const LEAF = ['#5fb85a','#4fa64b','#74c66a','#3f9a52'];
+function buildItem(t, seed){
+  const sr = seeded(hash('o' + seed) + 0.01);
+  const g = new THREE.Group();
+  if (t === 'tree'){
+    const s = 0.85 + sr()*0.4, lc = toon(LEAF[Math.floor(sr()*4)]);
+    const tr = mesh(OG.trunk, toon('#9c6b45'), 0, 0.8*s, 0); tr.scale.setScalar(s); g.add(tr);
+    const a = mesh(OG.ball, lc, 0, 2.2*s, 0); a.scale.setScalar(1.15*s); g.add(a);
+    const b = mesh(OG.ball, lc, 0.45*s, 2.9*s, 0.2*s); b.scale.setScalar(0.8*s); g.add(b);
+  } else if (t === 'pine'){
+    const s = 0.85 + sr()*0.4, lc = toon(LEAF[Math.floor(sr()*4)]);
+    const tr = mesh(OG.trunk, toon('#8a5a3a'), 0, 0.6*s, 0); tr.scale.setScalar(s*0.8); g.add(tr);
+    for (const [y, r, h] of [[1.7, 1.25, 1.8], [2.6, 0.95, 1.5], [3.4, 0.65, 1.2]]){ const c = mesh(OG.cone, lc, 0, y*s, 0); c.scale.set(r*s, h*s, r*s); g.add(c); }
+  } else if (t === 'palm'){
+    const s = 0.9 + sr()*0.3;
+    for (let i = 0; i < 5; i++){ const p = mesh(OG.trunk, toon('#b88a5a'), i*i*0.025*s, (0.45 + i*0.62)*s, 0); p.scale.set(s*0.8, 0.42*s, s*0.8); g.add(p); }
+    const top = new THREE.Group(); top.position.set(0.42*s, 3.2*s, 0);
+    for (let i = 0; i < 6; i++){ const l = mesh(OG.ball, toon('#4fa64b'), Math.cos(i)*0.9*s, -0.25, Math.sin(i)*0.9*s); l.scale.set(1.2*s, 0.08, 0.32*s); l.rotation.y = -i; l.rotation.z = -0.35; top.add(l); }
+    const nut = mesh(OG.ball, toon('#6d4c2f'), 0, -0.2, 0); nut.scale.setScalar(0.22); top.add(nut);
+    g.add(top);
+  } else if (t === 'bush'){
+    const lc = toon(LEAF[Math.floor(sr()*4)]);
+    for (let i = 0; i < 3; i++){ const b = mesh(OG.ball, lc, (sr()-0.5)*0.5, 0.35, (sr()-0.5)*0.5); b.scale.setScalar(0.38 + sr()*0.15); g.add(b); }
+  } else if (t === 'flower'){
+    const cols = ['#ff7aa2','#ffd54f','#ffffff','#b39ddb','#ff8a65','#64b5f6'];
+    const leaf = mesh(OG.ball, toon('#5fb85a'), 0, 0.06, 0, false); leaf.scale.set(0.45, 0.08, 0.45); g.add(leaf);
+    for (let i = 0; i < 4; i++) g.add(mesh(OG.petal, toon(cols[Math.floor(sr()*cols.length)]), (sr()-0.5)*0.6, 0.18 + sr()*0.08, (sr()-0.5)*0.6, false));
+  } else if (t === 'rock'){
+    const r = mesh(OG.rock, toon('#a7a7b3'), 0, 0.25, 0); r.scale.set(1.1, 0.75, 0.95); r.rotation.y = sr()*6; g.add(r);
+  } else if (t === 'pond'){
+    g.add(mesh(new THREE.CylinderGeometry(1.95, 1.95, 0.12, 28), toon('#d8c9a5'), 0, 0.03, 0, false));
+    g.add(mesh(new THREE.CylinderGeometry(1.7, 1.7, 0.1, 28), new THREE.MeshPhongMaterial({ color:0x5fc4f0, shininess:120 }), 0, 0.08, 0, false));
+    for (let i = 0; i < 3; i++) g.add(mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.03, 10), toon('#5fb85a'), Math.cos(i*2.1)*0.9, 0.15, Math.sin(i*2.1)*0.9, false));
+    for (let i = 0; i < 7; i++){ const r = mesh(OG.rock, toon('#b0afb8'), Math.cos(i*0.9)*1.95, 0.1, Math.sin(i*0.9)*1.95); r.scale.setScalar(0.45); g.add(r); }
+  } else if (t === 'path'){
+    g.add(mesh(new THREE.BoxGeometry(2, 0.04, 2), toon('#c9a77c'), 0, 0.02, 0, false));
+  } else if (t === 'stone'){
+    g.add(mesh(new THREE.BoxGeometry(2, 0.04, 2), toon('#cdb994'), 0, 0.02, 0, false));
+    for (const [x,z] of [[-0.5,-0.5],[0.5,-0.5],[-0.5,0.5],[0.5,0.5]]) g.add(mesh(new THREE.BoxGeometry(0.92, 0.05, 0.92), toon('#e6d7ba'), x, 0.03, z, false));
+  } else if (t === 'plaza'){
+    g.add(mesh(new THREE.CylinderGeometry(5.9, 5.9, 0.05, 48), toon('#e3d2b2'), 0, 0.025, 0, false));
+    const ring = mesh(new THREE.TorusGeometry(5.4, 0.08, 4, 48), toon('#cdb994'), 0, 0.05, 0, false); ring.rotation.x = Math.PI/2; g.add(ring);
+  } else if (t === 'bench'){
+    const m = toon('#b07a4f');
+    g.add(mesh(new THREE.BoxGeometry(1.9, 0.15, 0.6), m, 0, 0.5, 0.05));
+    g.add(mesh(new THREE.BoxGeometry(1.9, 0.5, 0.12), m, 0, 0.85, -0.25));
+    for (const x of [-0.8, 0.8]) g.add(mesh(new THREE.BoxGeometry(0.12, 0.5, 0.5), m, x, 0.25, 0.05));
+  } else if (t === 'lamp'){
+    g.add(mesh(new THREE.CylinderGeometry(0.09, 0.12, 3, 8), toon('#556070'), 0, 1.5, 0));
+    const lm = new THREE.MeshToonMaterial({ color:'#fff6d0', emissive:'#ffcf6b', emissiveIntensity:0 });
+    g.add(mesh(new THREE.SphereGeometry(0.3, 12, 10), lm, 0, 3.15, 0, false));
+    g.userData.bulb = lm;
+  } else if (t === 'fountain'){
+    const st = toon('#d9d4e6');
+    g.add(mesh(new THREE.CylinderGeometry(2.3, 2.5, 0.6, 32), st, 0, 0.3, 0));
+    const wtr = mesh(new THREE.CylinderGeometry(2.0, 2.0, 0.1, 32), new THREE.MeshPhongMaterial({ color:0x7fd3ff, shininess:120, transparent:true, opacity:.85 }), 0, 0.55, 0, false); g.add(wtr);
+    g.add(mesh(new THREE.CylinderGeometry(0.3, 0.45, 1.6, 16), st, 0, 1.1, 0));
+    g.add(mesh(new THREE.CylinderGeometry(1.0, 0.6, 0.25, 24), st, 0, 1.9, 0));
+    const sp = mesh(new THREE.SphereGeometry(0.45, 16, 12), new THREE.MeshPhongMaterial({ color:0xaee6ff, transparent:true, opacity:.8 }), 0, 2.3, 0, false); g.add(sp);
+    g.userData.spout = sp; g.userData.water = wtr;
+  } else if (t === 'swing'){
+    const m = toon('#e57373'), seat = toon('#8d5e44');
+    for (const x of [-1.3, 1.3]) for (const z of [-0.5, 0.5]){ const p = mesh(new THREE.CylinderGeometry(0.07, 0.07, 2.6, 6), m, x, 1.25, z*0.9); p.rotation.x = z*0.35; g.add(p); }
+    const bar = mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.8, 8), m, 0, 2.5, 0); bar.rotation.z = Math.PI/2; g.add(bar);
+    g.userData.swings = [];
+    for (const x of [-0.6, 0.6]){
+      const sw = new THREE.Group(); sw.position.set(x, 2.45, 0);
+      sw.add(mesh(new THREE.CylinderGeometry(0.015, 0.015, 1.8, 4), toon('#555555'), -0.2, -0.9, 0, false));
+      sw.add(mesh(new THREE.CylinderGeometry(0.015, 0.015, 1.8, 4), toon('#555555'), 0.2, -0.9, 0, false));
+      sw.add(mesh(new THREE.BoxGeometry(0.5, 0.06, 0.3), seat, 0, -1.8, 0));
+      g.add(sw); g.userData.swings.push(sw);
+    }
+  } else if (t === 'statue'){
+    g.add(mesh(new THREE.BoxGeometry(1.4, 0.8, 1.4), toon('#cfc8b8'), 0, 0.4, 0));
+    const b = mesh(OG.ball, toon('#d8b85a'), 0, 1.45, 0); b.scale.set(0.5, 0.65, 0.45); g.add(b);
+    const h = mesh(OG.ball, toon('#d8b85a'), 0, 2.35, 0); h.scale.setScalar(0.42); g.add(h);
+  } else if (t === 'apartment'){
+    const b = new THREE.Group(); b.position.z = -0.5; g.add(b);
+    b.add(mesh(new THREE.BoxGeometry(12, 9.4, 5), toon('#fbe3c8'), 0, 4.7, 0));
+    b.add(mesh(new THREE.BoxGeometry(12.8, 0.5, 5.8), toon('#e8896b'), 0, 9.6, 0));
+    for (const y of [3.2, 6.4]) b.add(mesh(new THREE.BoxGeometry(12.3, 0.18, 5.3), toon('#f0cfa8'), 0, y, 0, false));
+    b.add(mesh(new THREE.BoxGeometry(1.5, 2.3, 0.2), toon('#a0674a'), 0, 1.15, 2.5));
+    b.add(mesh(new THREE.BoxGeometry(2.2, 0.15, 1), toon('#e8896b'), 0, 2.5, 2.8));
+    const wins = [], wgeo = new THREE.BoxGeometry(1.5, 1.3, 0.12), fgeo = new THREE.BoxGeometry(1.75, 1.55, 0.08);
+    for (let i = 0; i < ROOMS_PER_APT; i++){
+      const x = [-4.4, -2.2, 2.2, 4.4][i % 4], y = 1.9 + Math.floor(i/4)*3.2;
+      b.add(mesh(fgeo, toon('#ffffff'), x, y, 2.5, false));
+      const m = new THREE.MeshToonMaterial({ color:'#a9dcf5', emissive:'#ffcf6b', emissiveIntensity:0 }); wins.push(m);
+      b.add(mesh(wgeo, m, x, y, 2.55, false));
+    }
+    const sign = textSign('まめハイツ', '#ffffff', '#c0583f'); sign.position.set(0, 8.6, 2.56); b.add(sign);
+    g.userData.win = wins;
+  } else if (t === 'cafe' || t === 'hatshop'){
+    const cafe = t === 'cafe';
+    const [wall, roof, a1, a2, name] = cafe ? ['#fff1e0','#e57373','#ffffff','#e57373','まめカフェ'] : ['#eef6ff','#5c8fd6','#ffffff','#ffd54f','ぼうし屋'];
+    g.add(mesh(new THREE.BoxGeometry(5, 3.4, 4.4), toon(wall), 0, 1.7, 0));
+    const r = mesh(new THREE.ConeGeometry(4.1, 2.2, 4), toon(roof), 0, 4.5, 0); r.rotation.y = Math.PI/4; r.scale.z = 0.9; g.add(r);
+    g.add(mesh(new THREE.BoxGeometry(1.3, 2.1, 0.15), toon('#8d5e44'), 0, 1.05, 2.22));
+    for (const sx of [-1.7, 1.7]) g.add(mesh(new THREE.BoxGeometry(1.1, 1.0, 0.12), toon('#a9dcf5'), sx, 1.9, 2.22, false));
+    for (let i = 0; i < 6; i++){ const s = mesh(new THREE.BoxGeometry(0.88, 0.08, 1.1), toon(i % 2 ? a2 : a1), -2.2 + i*0.88, 3.0, 2.7); s.rotation.x = 0.35; g.add(s); }
+    const sign = textSign(name, '#ffffff', roof); sign.position.set(0, 3.8, 2.35); sign.scale.setScalar(0.9); g.add(sign);
+  }
+  return g;
+}
+
+// ============================================================
+//  キャラクター（人）
+// ============================================================
+const HR = 0.6;  // 頭の半径
+function shapeDir(x, y, z, shape){
+  switch (shape){
+    case 'oval': return [x*0.93, y*1.1, z*0.96];
+    case 'square': { const k = Math.pow(x**4 + y**4 + z**4, 0.25); const f = lerp(1, 1/k, 0.6)*0.93; return [x*f, y*f*1.02, z*f]; }
+    case 'sharp': { if (y < 0){ const t = Math.pow(-y, 1.2); return [x*(1 - 0.32*t), y*1.08, z*(1 - 0.1*t)]; } return [x, y*1.02, z]; }
+    case 'wide': { const t = y < 0 ? -y : 0; return [x*(1.08 + 0.08*t), y*0.95, z*(1.02 + 0.04*t)]; }
+    default: return [x, y, z];
+  }
+}
+function deformGeo(geo, shape){
+  if (shape === 'round') return geo;
+  const p = geo.attributes.position, a = p.array;
+  for (let i = 0; i < p.count; i++){
+    const x = a[i*3], y = a[i*3+1], z = a[i*3+2], r = Math.hypot(x, y, z) || 1;
+    const [nx, ny, nz] = shapeDir(x/r, y/r, z/r, shape);
+    a[i*3] = nx*r; a[i*3+1] = ny*r; a[i*3+2] = nz*r;
+  }
+  p.needsUpdate = true; geo.computeVertexNormals();
+  return geo;
+}
+const geoCache = {};
+function cgeo(key, make){ return geoCache[key] || (geoCache[key] = make()); }
+const CG = {
+  leg: new THREE.CylinderGeometry(0.1, 0.085, 1, 10), torso: new THREE.CylinderGeometry(0.24, 0.3, 1, 18),
+  arm: new THREE.CylinderGeometry(0.075, 0.068, 1, 8), ball: new THREE.SphereGeometry(1, 16, 12),
+  neck: new THREE.CylinderGeometry(0.085, 0.09, 0.2, 8), skirt: new THREE.CylinderGeometry(0.26, 0.46, 0.38, 18, 1, true),
+};
+// 髪型: [半径倍率, 顔まわりのあき, うしろの長さ]
+const HAIR = {
+  short:[1.07, 0.95, 1.85], buzz:[1.03, 1.0, 1.75], bob:[1.12, 0.85, 2.25], long:[1.1, 0.85, 2.2], pony:[1.07, 0.95, 1.85], twin:[1.07, 0.95, 1.85],
+  bun:[1.07, 0.95, 1.85], spiky:[1.07, 0.95, 1.8], fluffy:[1.1, 0.9, 1.95], afro:[1.38, 1.15, 2.1],
+};
+function hairTop(L){ const h = HAIR[L.hair]; return HR*(h ? h[0] : 1)*shapeDir(0, 1, 0, L.face)[1]; }
+function buildHair(L){
+  const g = new THREE.Group();
+  const hp = HAIR[L.hair]; if (!hp) return g;
+  const m = toon(L.hairColor, true);
+  const [rf, ex, back] = hp, top = L.hair === 'afro' ? 0.75 : 0.8;
+  const sx = shapeDir(1, 0, 0, L.face)[0], sy = shapeDir(0, 1, 0, L.face)[1];
+  const cap = cgeo(`cap|${L.hair}|${L.face}`, () => deformGeo(new THREE.SphereGeometry(HR*rf, 32, 10, 0, Math.PI*2, 0, top), L.face));
+  const bk = cgeo(`bk|${L.hair}|${L.face}`, () => deformGeo(new THREE.SphereGeometry(HR*rf, 32, 16, Math.PI/2 + ex, Math.PI*2 - ex*2, top - 0.05, back - top + 0.05), L.face));
+  g.add(mesh(cap, m), mesh(bk, m));
+  if (L.hair === 'long'){
+    const p = mesh(cgeo('longback', () => new THREE.CylinderGeometry(HR*1.02, HR*1.22, 1.1, 20, 1, true, Math.PI - 1.35, 2.7)), m, 0, -HR*0.35 - 0.5, 0); p.scale.x = sx; g.add(p);
+    for (const s of [-1, 1]){ const st = mesh(CG.ball, m, s*HR*0.95*sx, -HR*0.75, HR*0.25); st.scale.set(0.13, 0.42, 0.13); g.add(st); }
+  } else if (L.hair === 'pony'){
+    const t = mesh(CG.ball, m, 0, -0.05, -HR*1.25); t.scale.set(0.2, 0.46, 0.2); t.rotation.x = 0.35; g.add(t);
+    const tie = mesh(CG.ball, toon('#e5534b'), 0, 0.22, -HR*1.04); tie.scale.setScalar(0.07); g.add(tie);
+  } else if (L.hair === 'twin'){
+    for (const s of [-1, 1]){
+      const t = mesh(CG.ball, m, s*HR*1.2*sx, -0.12, -HR*0.25); t.scale.set(0.18, 0.46, 0.18); t.rotation.z = s*0.25; g.add(t);
+      const tie = mesh(CG.ball, toon('#e5534b'), s*HR*1.03*sx, 0.18, -HR*0.25); tie.scale.setScalar(0.07); g.add(tie);
+    }
+  } else if (L.hair === 'bun'){
+    const b = mesh(CG.ball, m, 0, HR*1.1*sy, -HR*0.3); b.scale.setScalar(0.25); g.add(b);
+  } else if (L.hair === 'spiky'){
+    const cg = cgeo('spike', () => new THREE.ConeGeometry(0.13, 0.36, 6));
+    const up = new THREE.Vector3(0, 1, 0);
+    for (let i = 0; i < 10; i++){
+      const th = 0.3 + (i % 2)*0.45, ph = i*2.4;
+      const dir = new THREE.Vector3(Math.sin(th)*Math.cos(ph), Math.cos(th), Math.sin(th)*Math.sin(ph));
+      if (dir.z > 0.5) dir.z = 0.3;
+      dir.normalize();
+      const c = mesh(cg, m, dir.x*HR*1.05*sx, dir.y*HR*1.05*sy, dir.z*HR*1.05);
+      c.quaternion.setFromUnitVectors(up, dir); g.add(c);
+    }
+  } else if (L.hair === 'fluffy'){
+    for (let i = 0; i < 11; i++){
+      const th = 0.25 + (i % 3)*0.38, ph = i*2.1 + 0.5;
+      const dir = new THREE.Vector3(Math.sin(th)*Math.cos(ph), Math.cos(th), Math.sin(th)*Math.sin(ph));
+      if (dir.z > 0.45) continue;
+      const b = mesh(CG.ball, m, dir.x*HR*1.05*sx, dir.y*HR*1.08*sy, dir.z*HR*1.05); b.scale.setScalar(0.2); g.add(b);
+    }
+  }
+  return g;
+}
+function makeHat(type){
+  const g = new THREE.Group();
+  if (type === 'cap'){
+    const top = mesh(new THREE.SphereGeometry(0.7, 20, 10, 0, Math.PI*2, 0, Math.PI/2), toon('#e5534b'), 0, 0.05, 0); top.scale.y = 0.82; g.add(top);
+    const brim = mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.04, 20), toon('#e5534b'), 0, 0.12, 0.58); brim.scale.z = 0.75; g.add(brim);
+    g.add(mesh(new THREE.SphereGeometry(0.06, 8, 6), toon('#ffffff'), 0, 0.63, 0));
+  } else if (type === 'ribbon'){
+    const m = toon('#ff6fa5'), p = new THREE.Group();
+    p.add(mesh(new THREE.SphereGeometry(0.1, 10, 8), m));
+    for (const s of [-1, 1]){ const c = mesh(new THREE.ConeGeometry(0.17, 0.32, 10), m, s*0.18, 0, 0); c.rotation.z = s*Math.PI/2; p.add(c); }
+    p.position.set(0.4, 0.45, 0.15); p.rotation.z = -0.5; g.add(p);
+  } else if (type === 'crown'){
+    const gold = new THREE.MeshToonMaterial({ color:'#ffd54f', side:THREE.DoubleSide });
+    g.add(mesh(new THREE.CylinderGeometry(0.34, 0.3, 0.26, 12, 1, true), gold, 0, 0.68, 0));
+    for (let i = 0; i < 6; i++){ const a = i/6*Math.PI*2; g.add(mesh(new THREE.ConeGeometry(0.07, 0.18, 6), gold, Math.sin(a)*0.33, 0.88, Math.cos(a)*0.33)); }
+    g.add(mesh(new THREE.SphereGeometry(0.06, 8, 6), toon('#e53935'), 0, 0.68, 0.33));
+  } else if (type === 'flower'){
+    const p = new THREE.Group();
+    p.add(mesh(new THREE.SphereGeometry(0.08, 10, 8), toon('#ffca28')));
+    for (let i = 0; i < 5; i++){ const a = i/5*Math.PI*2; const q = mesh(new THREE.SphereGeometry(0.09, 10, 8), toon('#ffffff'), Math.sin(a)*0.13, Math.cos(a)*0.13, 0); q.scale.z = 0.5; p.add(q); }
+    p.position.set(0.4, 0.42, 0.3); p.rotation.y = 0.6; g.add(p);
+  } else if (type === 'leaf'){
+    g.add(mesh(new THREE.CylinderGeometry(0.025, 0.03, 0.28, 6), toon('#5a8f3c'), 0, 0.74, 0));
+    for (const s of [-1, 1]){ const l = mesh(new THREE.SphereGeometry(0.17, 12, 8), toon('#7cc576'), s*0.15, 0.88, 0); l.scale.set(1, 0.3, 0.55); l.rotation.z = s*0.4; g.add(l); }
+  } else if (type === 'beanie'){
+    const m = toon('#5c8fd6');
+    const top = mesh(new THREE.SphereGeometry(0.71, 20, 10, 0, Math.PI*2, 0, Math.PI/2), m, 0, 0.02, 0); top.scale.y = 0.9; g.add(top);
+    const band = mesh(new THREE.TorusGeometry(0.69, 0.07, 8, 24), toon('#ffffff'), 0, 0.05, 0); band.rotation.x = Math.PI/2; g.add(band);
+    g.add(mesh(new THREE.SphereGeometry(0.13, 10, 8), toon('#ffffff'), 0, 0.7, 0));
+  } else if (type === 'tophat'){
+    const k = toon('#2f2b38');
+    g.add(mesh(new THREE.CylinderGeometry(0.58, 0.58, 0.04, 20), k, 0, 0.56, 0));
+    g.add(mesh(new THREE.CylinderGeometry(0.36, 0.38, 0.55, 20), k, 0, 0.85, 0));
+    g.add(mesh(new THREE.CylinderGeometry(0.385, 0.385, 0.1, 20), toon('#d84f5f'), 0, 0.64, 0));
+  }
+  return g;
+}
+function fitHat(hat, L){
+  const big = L.hair === 'afro' ? 1.3 : L.hair === 'bob' ? 1.06 : 1;
+  hat.scale.set(big*shapeDir(1, 0, 0, L.face)[0], big, big);
+  hat.position.y = hairTop(L) - HR*1.07*big;
+}
+
+// ---------- 顔の絵 ----------
 const INK = '#2a2230';
-function ell(c, x, y, rx, ry, rot=0){ c.beginPath(); c.ellipse(x, y, rx, ry, rot, 0, Math.PI*2); c.fill(); }
+function ell(c, x, y, rx, ry, rot=0){ c.beginPath(); c.ellipse(x, y, Math.max(0.1, rx), Math.max(0.1, ry), rot, 0, Math.PI*2); c.fill(); }
 function heart(c, x, y, s){
   c.beginPath(); c.moveTo(x, y + s*0.9);
   c.bezierCurveTo(x - s*1.6, y - s*0.2, x - s*0.7, y - s*1.3, x, y - s*0.45);
   c.bezierCurveTo(x + s*0.7, y - s*1.3, x + s*1.6, y - s*0.2, x, y + s*0.9); c.fill();
 }
-function drawFace(cv, look, expr){
-  const c = cv.getContext('2d'); c.clearRect(0, 0, 256, 256);
-  c.lineCap = 'round'; c.lineJoin = 'round';
-  const L = 82, R = 174, Y = 104;
-  // ほっぺ
-  if (look.cheek || expr === 'love' || expr === 'happy'){
-    c.fillStyle = expr === 'love' ? 'rgba(255,80,120,.6)' : 'rgba(255,110,140,.42)';
-    ell(c, L - 22, 146, 19, 11); ell(c, R + 22, 146, 19, 11);
+const EYE_SHAPES = {
+  round:{ w:13, h:14 }, big:{ w:14, h:18 }, almond:{ w:17, h:10, lens:true, tilt:0.08 }, cat:{ w:16, h:9.5, lens:true, tilt:0.32 },
+  droopy:{ w:15, h:10, lens:true, tilt:-0.26 }, narrow:{ w:16, h:5.5, lens:true }, sleepy:{ w:14, h:12, half:true },
+};
+function eyePath(c, sh, w, h, upperOnly){
+  c.beginPath();
+  if (sh.lens){ c.moveTo(-w, 0); c.quadraticCurveTo(0, -h*2, w, 0); if (!upperOnly) c.quadraticCurveTo(0, h*2, -w, 0); }
+  else if (upperOnly) c.ellipse(0, 0, w, h, 0, Math.PI*1.02, Math.PI*1.98);
+  else c.ellipse(0, 0, w, h, 0, 0, Math.PI*2);
+}
+function drawEye(c, x, y, side, L, expr){
+  const s = L.eyeSize;
+  c.save(); c.translate(x, y);
+  c.strokeStyle = INK; c.fillStyle = INK;
+  if (expr === 'happy'){ c.lineWidth = 5.5; c.beginPath(); c.arc(0, 8*s, 12*s, Math.PI*1.15, Math.PI*1.85); c.stroke(); c.restore(); return; }
+  if (expr === 'sleep'){
+    c.lineWidth = 5; c.beginPath(); c.arc(0, -6*s, 12*s, Math.PI*0.2, Math.PI*0.8); c.stroke();
+    if (L.lashes){ c.lineWidth = 2.5; for (let k = 0; k <= L.lashes; k++){ const px = side*(7 + k*3)*s; c.beginPath(); c.moveTo(px, 3*s); c.lineTo(px + side*5, 7*s + k*2); c.stroke(); } }
+    c.restore(); return;
   }
-  c.fillStyle = INK; c.strokeStyle = INK;
-  // め
-  for (const x of [L, R]){
-    const side = x < 128 ? -1 : 1;
-    if (expr === 'happy'){ c.lineWidth = 9; c.beginPath(); c.arc(x, Y + 8, 15, Math.PI*1.15, Math.PI*1.85); c.stroke(); }
-    else if (expr === 'sleep'){ c.lineWidth = 8; c.beginPath(); c.arc(x, Y - 6, 15, Math.PI*0.2, Math.PI*0.8); c.stroke(); }
-    else if (expr === 'love'){ c.fillStyle = '#ff4d6d'; heart(c, x, Y + 2, 17); c.fillStyle = INK; }
-    else if (expr === 'surprise'){ c.fillStyle = '#fff'; ell(c, x, Y, 19, 21); c.lineWidth = 5; c.beginPath(); c.ellipse(x, Y, 19, 21, 0, 0, Math.PI*2); c.stroke(); c.fillStyle = INK; ell(c, x, Y, 7, 8); }
-    else {
-      const st = look.eyes;
-      if (st === 'big'){ ell(c, x, Y, 13, 21); c.fillStyle = '#fff'; ell(c, x + 4, Y - 8, 5.5, 6.5); ell(c, x - 4, Y + 8, 2.8, 2.8); c.fillStyle = INK; }
-      else if (st === 'dot'){ ell(c, x, Y + 2, 8, 9); }
-      else if (st === 'sharp'){ ell(c, x, Y, 17, 9, side < 0 ? 0.3 : -0.3); c.fillStyle = '#fff'; ell(c, x + 5, Y - 3, 3.5, 3.5); c.fillStyle = INK; }
-      else if (st === 'sleepy'){ c.beginPath(); c.arc(x, Y, 15, 0, Math.PI); c.fill(); c.lineWidth = 6; c.beginPath(); c.moveTo(x - 17, Y); c.lineTo(x + 17, Y); c.stroke(); }
-      else { ell(c, x, Y, 15, 16); c.fillStyle = '#fff'; ell(c, x + 5, Y - 6, 5, 5); c.fillStyle = INK; }
-      // まゆ
-      if (expr === 'sad' || expr === 'angry'){
-        c.lineWidth = 7; c.beginPath();
-        const inner = expr === 'sad' ? -12 : 4, outer = expr === 'sad' ? 2 : -12;
-        c.moveTo(x + side*18, Y - 30 + outer); c.lineTo(x - side*14, Y - 30 + inner); c.stroke();
-      }
-      if (expr === 'sad' && side < 0){ c.fillStyle = '#6ec6ff'; c.beginPath(); c.moveTo(x + 10, Y + 16); c.quadraticCurveTo(x + 2, Y + 34, x + 10, Y + 38); c.quadraticCurveTo(x + 18, Y + 34, x + 10, Y + 16); c.fill(); c.fillStyle = INK; }
+  if (expr === 'love'){ c.fillStyle = '#ff4d6d'; heart(c, 0, 2, 14*s); c.restore(); return; }
+  const st = expr === 'surprise' ? 'round' : L.eyes;
+  if (st === 'dot'){ ell(c, 0, 2, 6*s, 7*s); c.restore(); return; }
+  const sh = EYE_SHAPES[st] || EYE_SHAPES.round;
+  let w = sh.w*s, h = sh.h*s;
+  if (expr === 'surprise'){ w *= 1.15; h *= 1.25; }
+  c.rotate(-side*(sh.tilt || 0));
+  eyePath(c, sh, w, h); c.fillStyle = '#ffffff'; c.fill();
+  c.save(); eyePath(c, sh, w, h); c.clip();
+  const ir = Math.min(sh.lens ? h*1.15 : h*0.92, w*0.78), iy = sh.half ? h*0.3 : (sh.lens ? h*0.1 : h*0.08);
+  c.fillStyle = L.eyeColor; ell(c, 0, iy, ir*0.9, ir);
+  c.fillStyle = INK; ell(c, 0, iy, ir*0.45, ir*0.52);
+  c.fillStyle = '#ffffff'; ell(c, ir*0.35, iy - ir*0.42, ir*0.28, ir*0.28); ell(c, -ir*0.3, iy + ir*0.45, ir*0.12, ir*0.12);
+  if (sh.half){ c.fillStyle = L.skin; c.fillRect(-w - 2, -h - 4, w*2 + 4, h*0.95); }
+  c.restore();
+  c.strokeStyle = INK; c.lineWidth = 4;
+  if (sh.half){ c.beginPath(); c.moveTo(-w, -h*0.05); c.quadraticCurveTo(0, -h*0.2, w, -h*0.05); c.stroke(); }
+  else { eyePath(c, sh, w, h, true); c.stroke(); }
+  if (L.lashes){
+    const n = L.lashes === 2 ? 3 : 2, len = L.lashes === 2 ? 8 : 5;
+    c.lineWidth = 2.6;
+    for (let k = 0; k < n; k++){
+      const t = 0.62 + k*0.16, px = side*w*t;
+      const py = sh.half ? -h*0.08 : sh.lens ? -h*(1 - t*t) : -h*Math.sqrt(Math.max(0, 1 - t*t));
+      c.beginPath(); c.moveTo(px, py); c.lineTo(px + side*len*0.85, py - len*0.75 + k*2.2); c.stroke();
     }
   }
+  c.restore();
+}
+function drawBrow(c, x, y, side, L, expr){
+  let shape = L.brows;
+  if (expr === 'sad') shape = 'worried';
+  if (expr === 'angry') shape = 'sharp';
+  if (expr === 'surprise') y -= 6;
+  const col = L.hair === 'bald' ? '#5a3a22' : '#' + new THREE.Color(L.hairColor).multiplyScalar(0.85).getHexString();
+  c.strokeStyle = col; c.fillStyle = col; c.lineWidth = L.browW; c.lineCap = 'round';
+  const P = (dx, dy) => [x + side*dx, y + dy];
+  if (shape === 'short'){ ell(c, ...P(-2, 0), 6 + L.browW*0.4, 3 + L.browW*0.35); return; }
+  c.beginPath();
+  if (shape === 'straight'){ c.moveTo(...P(-12, 0)); c.lineTo(...P(14, 0)); }
+  else if (shape === 'arched'){ c.moveTo(...P(-12, 4)); c.quadraticCurveTo(...P(2, -10), ...P(15, 4)); }
+  else if (shape === 'worried'){ c.moveTo(...P(-12, -7)); c.quadraticCurveTo(...P(2, -3), ...P(14, 4)); }
+  else if (shape === 'sharp'){ c.moveTo(...P(-12, 6)); c.lineTo(...P(14, -5)); }
+  else { c.moveTo(...P(-12, 2)); c.quadraticCurveTo(...P(2, -5), ...P(14, 1)); }
+  c.stroke();
+}
+function drawBangs(c, L){
+  if (L.hair === 'bald' || L.bangs === 'none') return;
+  c.fillStyle = L.hairColor;
+  c.beginPath();
+  if (L.bangs === 'full'){
+    c.moveTo(0, 0); c.lineTo(256, 0); c.lineTo(256, 118);
+    for (let x = 256; x > 1; x -= 21.33){ const yb = 86 + 30*Math.pow((x - 21.33 - 128)/128, 4); c.quadraticCurveTo(x - 10.66, yb + 9, x - 21.33, yb); }
+    c.lineTo(0, 118);
+  } else if (L.bangs === 'side'){
+    c.moveTo(0, 0); c.lineTo(256, 0); c.lineTo(256, 108); c.quadraticCurveTo(200, 62, 120, 62); c.quadraticCurveTo(50, 70, 0, 112);
+  } else if (L.bangs === 'center'){
+    c.moveTo(0, 0); c.lineTo(256, 0); c.lineTo(256, 120); c.quadraticCurveTo(200, 80, 134, 32); c.lineTo(122, 32); c.quadraticCurveTo(56, 80, 0, 120);
+  } else if (L.bangs === 'spiky'){
+    c.moveTo(0, 0); c.lineTo(256, 0); c.lineTo(256, 115);
+    for (const [px, py] of [[234,78],[214,96],[192,70],[170,94],[148,68],[128,92],[108,68],[86,94],[64,70],[42,96],[22,78],[0,115]]) c.lineTo(px, py);
+  }
+  c.closePath(); c.fill();
+  c.strokeStyle = '#' + new THREE.Color(L.hairColor).multiplyScalar(0.8).getHexString(); c.lineWidth = 3; c.stroke();
+}
+function drawFace(cv, L, expr){
+  const c = cv.getContext('2d'); c.clearRect(0, 0, 256, 256);
+  c.lineCap = 'round'; c.lineJoin = 'round';
+  const s = L.eyeSize, gap = 38 + L.eyeGap*24, EY = 128 + L.eyeY*22;
+  const dk = '#' + new THREE.Color(L.skin).multiplyScalar(0.72).getHexString();
+  drawBangs(c, L);
+  if (L.cheek || expr === 'love' || expr === 'happy'){
+    c.fillStyle = expr === 'love' ? 'rgba(255,80,120,.55)' : 'rgba(255,110,130,.35)';
+    ell(c, 128 - gap - 18, EY + 28, 16, 9); ell(c, 128 + gap + 18, EY + 28, 16, 9);
+  }
+  if (L.freckles){ c.fillStyle = 'rgba(140,85,50,.55)'; for (const sx of [-1, 1]) for (const [dx, dy] of [[0,0],[9,4],[-8,5],[3,10],[-4,-4]]) ell(c, 128 + sx*(gap + 16) + dx, EY + 24 + dy, 2.1, 2.1); }
+  if (L.mole){ c.fillStyle = INK; ell(c, 128 + gap + 12, EY + 22, 2.5, 2.5); }
+  for (const side of [-1, 1]) drawEye(c, 128 + side*gap, EY, side, L, expr);
+  for (const side of [-1, 1]) drawBrow(c, 128 + side*gap, EY - 20*s - 10, side, L, expr);
+  // はな
+  const ny = EY + 36; c.strokeStyle = dk; c.fillStyle = dk; c.lineWidth = 3.5;
+  if (L.nose === 'dot') ell(c, 128, ny, 3.5, 2.6);
+  else if (L.nose === 'line'){ c.beginPath(); c.moveTo(131, ny - 9); c.lineTo(125, ny + 1); c.lineTo(132, ny + 2); c.stroke(); }
+  else if (L.nose === 'round'){ c.beginPath(); c.arc(128, ny - 3, 6, Math.PI*0.15, Math.PI*0.85); c.stroke(); }
+  else if (L.nose === 'button'){ ell(c, 124, ny, 2.2, 2.2); ell(c, 132, ny, 2.2, 2.2); }
   // くち
-  const MY = 158; c.lineWidth = 7;
+  const my = EY + 60; c.strokeStyle = INK; c.lineWidth = 5;
+  const red = '#c2405a';
   if (expr === 'happy' || expr === 'love'){
-    c.fillStyle = '#c2405a'; c.beginPath(); c.arc(128, MY - 6, expr === 'love' ? 15 : 20, 0, Math.PI); c.closePath(); c.fill(); c.stroke();
-    c.fillStyle = '#ff8fa3'; ell(c, 128, MY + 6, 8, 5); c.fillStyle = INK;
-  } else if (expr === 'sad'){ c.beginPath(); c.arc(128, MY + 18, 16, Math.PI*1.2, Math.PI*1.8); c.stroke(); }
-  else if (expr === 'angry'){ c.beginPath(); c.moveTo(110, MY + 6); c.lineTo(119, MY - 2); c.lineTo(128, MY + 6); c.lineTo(137, MY - 2); c.lineTo(146, MY + 6); c.stroke(); }
-  else if (expr === 'surprise'){ ell(c, 128, MY + 4, 10, 13); }
-  else if (expr === 'sleep'){ c.lineWidth = 5; c.beginPath(); c.arc(128, MY + 2, 7, 0, Math.PI*2); c.stroke(); }
+    c.fillStyle = red; c.beginPath(); c.arc(128, my - 5, expr === 'love' ? 11 : 15, 0, Math.PI); c.closePath(); c.fill(); c.stroke();
+    c.fillStyle = '#ff8fa3'; ell(c, 128, my + 4, 6, 3.5);
+  } else if (expr === 'sad'){ c.beginPath(); c.arc(128, my + 14, 12, Math.PI*1.2, Math.PI*1.8); c.stroke(); }
+  else if (expr === 'angry'){ c.beginPath(); c.moveTo(114, my + 4); c.lineTo(121, my - 2); c.lineTo(128, my + 4); c.lineTo(135, my - 2); c.lineTo(142, my + 4); c.stroke(); }
+  else if (expr === 'surprise'){ c.fillStyle = INK; ell(c, 128, my + 2, 8, 10); }
+  else if (expr === 'sleep'){ c.lineWidth = 4; c.beginPath(); c.arc(128, my, 5, 0, Math.PI*2); c.stroke(); }
   else {
-    const m = look.mouth;
-    if (m === 'cat'){ c.lineWidth = 6; c.beginPath(); c.arc(118, MY - 4, 10, Math.PI*0.1, Math.PI*0.9); c.stroke(); c.beginPath(); c.arc(138, MY - 4, 10, Math.PI*0.1, Math.PI*0.9); c.stroke(); }
-    else if (m === 'open'){ c.fillStyle = '#c2405a'; c.beginPath(); c.arc(128, MY - 6, 15, 0, Math.PI); c.closePath(); c.fill(); c.stroke(); c.fillStyle = INK; }
-    else if (m === 'line'){ c.beginPath(); c.moveTo(114, MY); c.lineTo(142, MY); c.stroke(); }
-    else { c.beginPath(); c.arc(128, MY - 14, 18, Math.PI*0.22, Math.PI*0.78); c.stroke(); }
+    const m = L.mouth;
+    if (m === 'cat'){ c.lineWidth = 4.5; c.beginPath(); c.arc(121, my - 4, 7, Math.PI*0.1, Math.PI*0.9); c.stroke(); c.beginPath(); c.arc(135, my - 4, 7, Math.PI*0.1, Math.PI*0.9); c.stroke(); }
+    else if (m === 'open'){ c.fillStyle = red; c.beginPath(); c.arc(128, my - 5, 11, 0, Math.PI); c.closePath(); c.fill(); c.stroke(); }
+    else if (m === 'line'){ c.beginPath(); c.moveTo(118, my); c.lineTo(138, my); c.stroke(); }
+    else if (m === 'small'){ c.lineWidth = 4; c.beginPath(); c.arc(128, my - 6, 6, Math.PI*0.2, Math.PI*0.8); c.stroke(); }
+    else if (m === 'grin'){ c.fillStyle = '#ffffff'; c.beginPath(); c.moveTo(111, my - 5); c.quadraticCurveTo(128, my + 16, 145, my - 5); c.closePath(); c.fill(); c.lineWidth = 4.5; c.stroke(); }
+    else { c.beginPath(); c.arc(128, my - 12, 14, Math.PI*0.22, Math.PI*0.78); c.stroke(); }
+  }
+  // メガネ
+  if (L.glasses && L.glasses !== 'none'){
+    c.strokeStyle = L.glasses === 'sun' ? '#1b1b22' : '#3a3046'; c.lineWidth = 4;
+    const gw = 21*s + 4, gh = 17*s + 4;
+    for (const side of [-1, 1]){
+      const x = 128 + side*gap;
+      c.beginPath();
+      if (L.glasses === 'round') c.arc(x, EY, gw, 0, Math.PI*2);
+      else if (c.roundRect) c.roundRect(x - gw, EY - gh, gw*2, gh*2, 7); else c.rect(x - gw, EY - gh, gw*2, gh*2);
+      if (L.glasses === 'sun'){ c.fillStyle = 'rgba(25,25,35,.88)'; c.fill(); }
+      c.stroke();
+      if (L.glasses === 'sun'){ c.fillStyle = 'rgba(255,255,255,.35)'; ell(c, x + gw*0.35, EY - gh*0.45, 5, 3); }
+    }
+    c.beginPath(); c.moveTo(128 - gap + gw, EY - 2); c.quadraticCurveTo(128, EY - 9, 128 + gap - gw, EY - 2); c.stroke();
   }
 }
-function makeHat(type){
-  const g = new THREE.Group();
-  if (type === 'cap'){
-    const top = mesh(new THREE.SphereGeometry(0.56, 20, 10, 0, Math.PI*2, 0, Math.PI/2), toon('#e5534b'), 0, 1.5, 0); top.scale.y = 0.75; g.add(top);
-    const brim = mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.05, 20), toon('#e5534b'), 0, 1.53, 0.4); brim.scale.z = 0.75; g.add(brim);
-    g.add(mesh(new THREE.SphereGeometry(0.07, 8, 6), toon('#ffffff'), 0, 1.92, 0));
-  } else if (type === 'ribbon'){
-    const m = toon('#ff6fa5'); const p = new THREE.Group();
-    p.add(mesh(new THREE.SphereGeometry(0.1, 10, 8), m));
-    for (const s of [-1, 1]){ const c = mesh(new THREE.ConeGeometry(0.17, 0.32, 10), m, s*0.18, 0, 0); c.rotation.z = s*Math.PI/2; p.add(c); }
-    p.position.set(0.32, 1.66, 0.1); p.rotation.z = -0.4; g.add(p);
-  } else if (type === 'crown'){
-    const gold = new THREE.MeshToonMaterial({ color:'#ffd54f', side:THREE.DoubleSide });
-    g.add(mesh(new THREE.CylinderGeometry(0.34, 0.3, 0.28, 12, 1, true), gold, 0, 1.86, 0));
-    for (let i = 0; i < 6; i++){ const a = i/6*Math.PI*2; g.add(mesh(new THREE.ConeGeometry(0.07, 0.18, 6), gold, Math.sin(a)*0.33, 2.08, Math.cos(a)*0.33)); }
-    g.add(mesh(new THREE.SphereGeometry(0.06, 8, 6), toon('#e53935'), 0, 1.86, 0.33));
-  } else if (type === 'flower'){
-    const p = new THREE.Group();
-    p.add(mesh(new THREE.SphereGeometry(0.08, 10, 8), toon('#ffca28')));
-    for (let i = 0; i < 5; i++){ const a = i/5*Math.PI*2; const q = mesh(new THREE.SphereGeometry(0.09, 10, 8), toon('#ffffff'), Math.sin(a)*0.13, Math.cos(a)*0.13, 0); q.scale.z = 0.5; p.add(q); }
-    p.position.set(0.32, 1.66, 0.22); p.rotation.y = 0.5; g.add(p);
-  } else if (type === 'leaf'){
-    g.add(mesh(new THREE.CylinderGeometry(0.025, 0.03, 0.28, 6), toon('#5a8f3c'), 0, 1.9, 0));
-    for (const s of [-1, 1]){ const l = mesh(new THREE.SphereGeometry(0.17, 12, 8), toon('#7cc576'), s*0.15, 2.05, 0); l.scale.set(1, 0.3, 0.55); l.rotation.z = s*0.4; g.add(l); }
-  } else if (type === 'beanie'){
-    const m = toon('#5c8fd6');
-    const top = mesh(new THREE.SphereGeometry(0.6, 20, 10, 0, Math.PI*2, 0, Math.PI/2), m, 0, 1.38, 0); top.scale.y = 0.8; g.add(top);
-    const band = mesh(new THREE.TorusGeometry(0.56, 0.08, 8, 24), toon('#ffffff'), 0, 1.4, 0); band.rotation.x = Math.PI/2; g.add(band);
-    g.add(mesh(new THREE.SphereGeometry(0.14, 10, 8), toon('#ffffff'), 0, 1.92, 0));
-  } else if (type === 'tophat'){
-    const k = toon('#2f2b38');
-    g.add(mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.05, 20), k, 0, 1.72, 0));
-    g.add(mesh(new THREE.CylinderGeometry(0.3, 0.32, 0.55, 20), k, 0, 2.0, 0));
-    g.add(mesh(new THREE.CylinderGeometry(0.325, 0.325, 0.1, 20), toon('#d84f5f'), 0, 1.8, 0));
-  }
-  return g;
-}
-function buildChar(look){
+
+// ---------- 体を組み立てる ----------
+function buildChar(L){
   const root = new THREE.Group();
-  const col = new THREE.Color(look.color);
-  const dark = col.clone().multiplyScalar(0.78);
-  const body = mesh(G.body, toon(col), 0, 0.95, 0); body.scale.set(1, 1.2, 0.95); root.add(body);
+  const bw = { slim:0.84, normal:1, chubby:1.3 }[L.body] || 1;
+  const hg = L.height || 1;
+  const legL = 0.5*hg, torsoH = 0.55*hg, hipY = legL + 0.06;
+  const skinM = toon(L.skin), topM = toon(L.top), botM = toon(L.bottom), shoeM = toon(L.shoes);
+  const legs = [];
+  for (const s of [-1, 1]){
+    const p = new THREE.Group(); p.position.set(s*0.12*Math.max(1, bw*0.92), hipY, 0);
+    const leg = mesh(CG.leg, L.bottomType === 'pants' ? botM : skinM, 0, -legL/2, 0); leg.scale.y = legL; p.add(leg);
+    if (L.bottomType === 'shorts'){ const sh = mesh(CG.leg, botM, 0, -legL*0.2, 0); sh.scale.set(1.25, legL*0.42, 1.25); p.add(sh); }
+    const shoe = mesh(CG.ball, shoeM, 0, -legL - 0.01, 0.05); shoe.scale.set(0.12, 0.08, 0.17); p.add(shoe);
+    root.add(p); legs.push(p);
+  }
+  const torso = new THREE.Group(); torso.position.y = hipY; root.add(torso);
+  const body = mesh(CG.torso, topM, 0, torsoH/2, 0); body.scale.set(bw, torsoH, bw*0.82); torso.add(body);
+  const sh = mesh(CG.ball, topM, 0, torsoH, 0); sh.scale.set(0.25*bw, 0.11, 0.2*bw); torso.add(sh);
+  if (L.bottomType === 'skirt'){ const sk = mesh(CG.skirt, toon(L.bottom, true), 0, 0.02, 0); sk.scale.set(bw, 1, bw*0.85); torso.add(sk); }
+  else { const hip = mesh(CG.ball, botM, 0, 0.02, 0); hip.scale.set(0.3*bw, 0.12, 0.25*bw); torso.add(hip); }
+  torso.add(mesh(CG.neck, skinM, 0, torsoH + 0.08, 0));
+  const arms = [];
+  for (const s of [-1, 1]){
+    const p = new THREE.Group(); p.position.set(s*(0.27*bw + 0.06), torsoH - 0.07, 0);
+    const a = mesh(CG.arm, topM, 0, -0.21, 0); a.scale.y = 0.42; p.add(a);
+    const hand = mesh(CG.ball, skinM, 0, -0.45, 0); hand.scale.setScalar(0.085); p.add(hand);
+    p.rotation.z = s*0.12;
+    torso.add(p); arms.push(p);
+  }
+  const head = new THREE.Group(); head.position.y = torsoH + 0.12 + HR*0.88; torso.add(head);
+  head.add(mesh(cgeo('head|' + L.face, () => deformGeo(new THREE.SphereGeometry(HR, 36, 28), L.face)), skinM));
   const cv = document.createElement('canvas'); cv.width = cv.height = 256;
   const tex = new THREE.CanvasTexture(cv);
-  const fmat = new THREE.MeshToonMaterial({ map:tex, transparent:true, polygonOffset:true, polygonOffsetFactor:-2 });
-  const face = new THREE.Mesh(G.face, fmat); body.add(face);
-  const armL = mesh(G.arm, toon(dark), -0.7, 0.82, 0.05), armR = mesh(G.arm, toon(dark), 0.7, 0.82, 0.05);
-  armL.scale.set(0.85, 1.15, 0.85); armR.scale.copy(armL.scale);
-  const fc = dark.clone().multiplyScalar(0.8);
-  const footL = mesh(G.foot, toon(fc), -0.27, 0.1, 0.08), footR = mesh(G.foot, toon(fc), 0.27, 0.1, 0.08);
-  footL.scale.set(1, 0.6, 1.35); footR.scale.copy(footL.scale);
-  const hat = makeHat(look.hat);
-  root.add(armL, armR, footL, footR, hat);
-  drawFace(cv, look, 'normal'); tex.needsUpdate = true;
-  return { root, body, face, cv, tex, fmat, armL, armR, footL, footR, hat };
+  const fmat = new THREE.MeshToonMaterial({ map:tex, gradientMap:GRAD, transparent:true, polygonOffset:true, polygonOffsetFactor:-2 });
+  const face = new THREE.Mesh(cgeo('face|' + L.face, () => deformGeo(new THREE.SphereGeometry(HR*1.012, 32, 20, Math.PI/2 - 0.95, 1.9, 0.55, 1.75), L.face)), fmat);
+  head.add(face);
+  const ex = shapeDir(1, -0.05, 0, L.face)[0]*HR;
+  for (const s of [-1, 1]){ const e = mesh(CG.ball, skinM, s*ex*0.98, -0.04, -0.02); e.scale.set(0.06, 0.11, 0.09); head.add(e); }
+  head.add(buildHair(L));
+  const hat = makeHat(L.hat); fitHat(hat, L); head.add(hat);
+  drawFace(cv, L, 'normal'); tex.needsUpdate = true;
+  const topY = hipY + torsoH + 0.12 + HR*0.88 + hairTop(L) + (L.hat && L.hat !== 'none' ? 0.25 : 0) + (L.hair === 'bun' ? 0.2 : 0);
+  return { root, torso, head, face, cv, tex, fmat, legs, arms, hat, topY, hipY };
 }
 function disposeChar(ch){ scene.remove(ch.root); ch.tex.dispose(); ch.fmat.dispose(); }
 function iconCanvas(r, size=96, expr){
+  const L = r.look;
   const cv = document.createElement('canvas'); cv.width = cv.height = size; const c = cv.getContext('2d');
-  const g = c.createRadialGradient(size*0.4, size*0.35, size*0.05, size/2, size/2, size*0.5);
-  const col = new THREE.Color(r.look.color);
-  g.addColorStop(0, '#' + col.clone().lerp(new THREE.Color('#ffffff'), 0.3).getHexString()); g.addColorStop(1, r.look.color);
-  c.fillStyle = g; c.beginPath(); c.ellipse(size/2, size/2, size*0.45, size*0.48, 0, 0, Math.PI*2); c.fill();
-  const f = document.createElement('canvas'); f.width = f.height = 256; drawFace(f, r.look, expr || 'normal');
-  c.drawImage(f, size*0.08, size*0.06, size*0.84, size*0.84);
+  const s = size;
+  if (L.hair !== 'bald'){
+    c.fillStyle = L.hairColor;
+    const big = L.hair === 'afro' ? 1.2 : 1;
+    ell(c, s/2, s*0.47, s*0.43*big, s*0.42*big);
+    if (L.hair === 'bob' || L.hair === 'long') c.fillRect(s*0.08, s*0.45, s*0.84, s*(L.hair === 'long' ? 0.55 : 0.33));
+  }
+  c.fillStyle = L.skin; ell(c, s/2, s*0.53, s*0.37, s*0.38);
+  const f = document.createElement('canvas'); f.width = f.height = 256; drawFace(f, L, expr || 'normal');
+  c.save(); c.beginPath(); c.ellipse(s/2, s*0.53, s*0.37, s*0.38, 0, 0, Math.PI*2); c.clip();
+  c.drawImage(f, s*0.08, s*0.12, s*0.84, s*0.84);
+  c.restore();
   return cv;
 }
+function randomLook(){
+  return { face:pick(FACES)[0], skin:pick(SKINS), hair:pick(HAIRS.slice(0, 10))[0], bangs:pick(BANGS)[0], hairColor:pick(HAIRC.slice(0, 8)),
+    eyes:pick(EYES)[0], eyeColor:pick(EYEC), eyeSize:+rand(0.85, 1.15).toFixed(2), eyeGap:+rand(0.3, 0.7).toFixed(2), eyeY:+rand(0.3, 0.7).toFixed(2), lashes:pick([0, 0, 1, 2]),
+    brows:pick(BROWS)[0], browW:Math.round(rand(3, 6)), nose:pick(NOSES)[0], mouth:pick(MOUTHS)[0], cheek:Math.random() < 0.5, freckles:Math.random() < 0.12, mole:Math.random() < 0.1,
+    glasses:Math.random() < 0.2 ? pick(GLASSES.slice(1))[0] : 'none', body:pick(BODIES)[0], height:+rand(0.9, 1.1).toFixed(2),
+    top:pick(CLOTH), bottomType:pick(BOTTOMS)[0], bottom:pick(CLOTH), shoes:pick(SHOES), hat:'none' };
+}
 
-// ---------- 住人 ----------
+// ============================================================
+//  住人
+// ============================================================
 const labelsEl = $('labels');
 function spawnResident(d, x, z){
   const ch = buildChar(d.look);
@@ -548,9 +957,9 @@ function spawnResident(d, x, z){
   labelsEl.appendChild(el);
   const r = Object.assign({}, d, {
     ch, el, bubEl: el.firstChild, nmEl: el.lastChild,
-    pos: new THREE.Vector3(x, 0, z), heading: rand(-3, 3), wantHeading: 0,
-    state: 'idle', timer: rand(0.5, 3), target: null, onArrive: null, chatWith: null, goingHome: false,
-    expr: 'normal', exprT: 0, shownExpr: '', phase: Math.random()*6, moving: false, jump: 0,
+    pos: new THREE.Vector3(x, 0, z), heading: rand(-3, 3), wantHeading: 0, path: null,
+    state: 'idle', timer: rand(0.5, 3), onArrive: null, chatWith: null, goingHome: false,
+    expr: 'normal', exprT: 0, shownExpr: '', phase: Math.random()*6, jump: 0,
     worry: null, nextWorry: rand(6, 35), bubble: '', bubbleT: 0, bubbleBig: false, chatCd: rand(4, 12), talkCd: 0, playCount: 0,
     pitch: hash('v' + d.id + d.name), lastLabel: '',
   });
@@ -560,74 +969,100 @@ function spawnResident(d, x, z){
   residents.push(r);
   return r;
 }
+function assignHome(r){
+  for (const a of apartments()){
+    const used = new Set(residents.filter(o => o !== r && o.home === a.id).map(o => o.room));
+    for (let i = 0; i < ROOMS_PER_APT; i++) if (!used.has(i)){ r.home = a.id; r.room = i; return true; }
+  }
+  r.home = 0; r.room = 0; return false;
+}
+function homeApt(r){ let a = objs.get(r.home); if (!a || a.t !== 'apartment'){ assignHome(r); a = objs.get(r.home); } return a || null; }
+function doorOf(r){ const a = homeApt(r); return a ? spotOf(a) : null; }
+function windowPos(r){
+  const a = homeApt(r); if (!a) return null;
+  const c = objCenter(a.t, a.ox, a.oz, a.rot), th = a.rot*Math.PI/2;
+  const lx = [-4.4, -2.2, 2.2, 4.4][r.room % 4], ly = 1.9 + Math.floor(r.room/4)*3.2, lz = 2.0;
+  return new THREE.Vector3(c.x + Math.cos(th)*lx + Math.sin(th)*lz, ly, c.z - Math.sin(th)*lx + Math.cos(th)*lz);
+}
 function bedTime(r){ return 21.5 + r.act*1.3; }
 function wakeTime(r){ return 6 + (1 - r.act)*1.3; }
 function shouldSleep(r){ const h = W.time / 60; return h >= bedTime(r) || h < wakeTime(r); }
-function isAwake(r){ return r.state !== 'home'; }
 function available(r){ return (r.state === 'idle' || (r.state === 'walk' && !r.chatWith && !r.goingHome)) && !r.chatWith && r !== selected && !shouldSleep(r); }
 function setExpr(r, e, dur=2.5){ r.expr = e; r.exprT = dur; }
 function baseExpr(r){ if (r.state === 'home') return 'sleep'; if (r.hunger < 15 || r.happy < 20) return 'sad'; return 'normal'; }
 function showBubble(r, text, dur=2.2, big=false){ r.bubble = text; r.bubbleT = dur; r.bubbleBig = big; }
-function moveTo(r, x, z, cb){ r.state = 'walk'; r.target = { x, z }; r.onArrive = cb || null; }
-function randPoint(){
-  for (let i = 0; i < 60; i++){
-    const a = Math.random()*Math.PI*2, d = Math.sqrt(Math.random())*15;
-    const x = Math.sin(a)*d, z = Math.cos(a)*d;
-    if (z < -9 || Math.abs(x) > 10 || Math.hypot(x, z) < 3.3) continue;
-    return { x, z };
-  }
-  return { x: 0, z: 6 };
+function moveTo(r, x, z, cb){
+  const p = findPath(r.pos.x, r.pos.z, x, z);
+  if (!p) return false;
+  r.path = p; r.state = 'walk'; r.onArrive = cb || null;
+  return true;
 }
 function goHome(r){
   r.goingHome = true;
   if (r.chatWith) endChatFor(r);
-  moveTo(r, DOOR.x + rand(-0.4, 0.4), DOOR.z, () => {
-    r.state = 'home'; r.goingHome = false; r.ch.root.visible = false; r.bubbleT = 0;
-  });
+  const d = doorOf(r);
+  const arrive = () => { r.state = 'home'; r.goingHome = false; r.ch.root.visible = false; r.bubbleT = 0; r.path = null; };
+  if (!d || !moveTo(r, d.x + rand(-0.3, 0.3), d.z, arrive)) arrive();
 }
 function wakeUp(r){
-  r.state = 'idle'; r.timer = rand(0.5, 2); r.pos.set(DOOR.x, 0, DOOR.z); r.ch.root.visible = true; r.heading = r.wantHeading = 0;
+  const d = doorOf(r);
+  let p = d ? { x:d.x, z:d.z } : null;
+  if (!p || !walkableAt(p.x, p.z)){ const n = nearestWalkable(Math.floor(p ? p.x : 0), Math.floor(p ? p.z : 0), 30); p = n ? { x:n[0] + 0.5, z:n[1] + 0.5 } : { x:0, z:0 }; }
+  r.state = 'idle'; r.timer = rand(0.5, 2); r.pos.set(p.x, 0, p.z); r.ch.root.visible = true;
+  r.heading = r.wantHeading = d ? d.face + Math.PI : 0;
   showBubble(r, pick(['おはよう！','ふぁ〜あ','いい朝だ〜','☀️']), 2.5);
   r.hunger = Math.max(r.hunger, 10);
-  const p = randPoint(); moveTo(r, p.x, p.z);
 }
+function visitSpots(){ return [...objs.values()].filter(o => ITEMS[o.t].visit); }
 function decide(r){
   if (shouldSleep(r)) return goHome(r);
   const x = Math.random();
-  if (r.chatCd <= 0 && x < 0.38 && tryChat(r)) return;
-  if (x < 0.48 && r.hunger < 60) return visit(r, CAFE);
-  if (x < 0.55) return visit(r, Math.random() < 0.5 ? CAFE : SHOP);
-  if (x < 0.66){ r.state = 'idle'; r.timer = rand(2, 5); if (Math.random() < 0.5) showBubble(r, pick(['🎵','💭','…','☁️','🌼','😌']), 2); return; }
-  const p = randPoint(); moveTo(r, p.x, p.z);
+  if (r.chatCd <= 0 && x < 0.36 && tryChat(r)) return;
+  if (x < 0.62){
+    let sp = visitSpots().filter(o => { const s = spotOf(o); return Math.hypot(s.x - r.pos.x, s.z - r.pos.z) < 40; });
+    if (r.hunger < 60){ const cafes = sp.filter(o => ITEMS[o.t].visit.food); if (cafes.length && Math.random() < 0.6) sp = cafes; }
+    if (sp.length && (x > 0.42 || r.hunger < 60) && visit(r, pick(sp))) return;
+  }
+  if (x < 0.7){ r.state = 'idle'; r.timer = rand(2, 5); if (Math.random() < 0.5) showBubble(r, pick(['🎵','💭','…','☁️','🌼','😌']), 2); return; }
+  const p = randomWalkableNear(r.pos.x, r.pos.z, 14);
+  if (!p || !moveTo(r, p.x, p.z)){ r.state = 'idle'; r.timer = rand(1, 2); }
 }
-function visit(r, spot){
-  moveTo(r, spot.x + rand(-0.8, 0.8), spot.z + rand(-1.6, 1.6), () => {
-    r.timer = rand(3, 5); r.wantHeading = spot.face; showBubble(r, pick(spot.emo), 2.6, true);
-    if (spot === CAFE) r.hunger = Math.min(100, r.hunger + 12);
+function visit(r, o){
+  const it = ITEMS[o.t].visit, s = spotOf(o);
+  const side = Math.random() - 0.5, th = o.rot*Math.PI/2;
+  const tx = s.x + Math.cos(th)*side*1.6, tz = s.z - Math.sin(th)*side*1.6;
+  if (!walkableAt(tx, tz)) return false;
+  return moveTo(r, tx, tz, () => {
+    r.timer = rand(3, 5); r.wantHeading = s.face; showBubble(r, pick(it.emo), 2.6, true);
+    if (it.food) r.hunger = Math.min(100, r.hunger + 12);
   });
 }
 
 // ---------- おしゃべり ----------
 const chats = [];
 function tryChat(a){
-  const cands = residents.filter(b => b !== a && available(b) && b.chatCd <= 0 && a.pos.distanceTo(b.pos) < 12);
+  const cands = residents.filter(b => b !== a && available(b) && b.chatCd <= 0 && a.pos.distanceTo(b.pos) < 14);
   if (!cands.length) return false;
   let tot = 0; const ws = cands.map(b => { const R = rel(a, b); const w = 1 + Math.max(0, R.aff)/25 + (R.lovers ? 4 : 0) - (R.aff < -10 ? 0.7 : 0); tot += w; return w; });
   let t = Math.random()*tot, b = cands[0];
   for (let i = 0; i < cands.length; i++){ t -= ws[i]; if (t <= 0){ b = cands[i]; break; } }
-  startChat(a, b);
-  return true;
+  return startChat(a, b);
 }
 function startChat(a, b, opt={}){
+  const base = Math.atan2(a.pos.x - b.pos.x, a.pos.z - b.pos.z);
+  let ok = false;
+  for (const off of [0, 0.8, -0.8, 1.6, -1.6, Math.PI]){
+    const ang = base + off, tx = b.pos.x + Math.sin(ang)*1.5, tz = b.pos.z + Math.cos(ang)*1.5;
+    if (!walkableAt(tx, tz)) continue;
+    if (moveTo(a, tx, tz, () => beginChat(a, b, opt))){ ok = true; break; }
+  }
+  if (!ok) return false;
   a.chatWith = b; b.chatWith = a;
-  b.state = 'wait'; b.waitT = 14; b.target = null;
-  const ang = Math.atan2(a.pos.x - b.pos.x, a.pos.z - b.pos.z);
-  let tx = b.pos.x + Math.sin(ang)*1.5, tz = b.pos.z + Math.cos(ang)*1.5;
-  if (Math.hypot(tx, tz) < 3.0){ tx = b.pos.x - Math.sin(ang)*1.5; tz = b.pos.z - Math.cos(ang)*1.5; }
-  moveTo(a, tx, tz, () => beginChat(a, b, opt));
+  b.state = 'wait'; b.waitT = 16; b.path = null;
+  return true;
 }
 function beginChat(a, b, opt){
-  if (b.state !== 'wait' || b.chatWith !== a){ a.chatWith = null; a.state = 'idle'; a.timer = 1; return; }
+  if (b.state !== 'wait' || b.chatWith !== a){ a.chatWith = null; a.state = 'idle'; a.timer = 1; if (opt.onEnd) opt.onEnd(0); return; }
   a.state = b.state = 'chat';
   chats.push({ a, b, t: 0, dur: opt.force ? 4.5 : rand(4.5, 7), next: 0.2, turn: 0, opt });
 }
@@ -653,30 +1088,23 @@ function updateChats(dt){
       showBubble(sp, t, 1.2, t.length <= 2); sp.jump = 0.35; voice(sp, 3);
       c.turn++; c.next += 1.3;
     }
-    if (c.t >= c.dur){
-      chats.splice(i, 1);
-      finishChat(a, b, c.opt);
-    }
+    if (c.t >= c.dur){ chats.splice(i, 1); finishChat(a, b, c.opt); }
   }
 }
 function finishChat(a, b, opt){
-  const R = rel(a, b);
-  const cp = compat(a, b);
+  const R = rel(a, b), cp = compat(a, b);
   let d;
-  if (opt.force === 'good'){ d = Math.max(10, 32 - R.aff); }
-  else if (opt.force === 'makeup'){ d = Math.max(0, 25 - R.aff); }
-  else if (opt.force === 'bad'){ d = -6; }
-  else {
-    d = Math.round((cp - 0.32)*14 + rand(-2, 4));
-    if (!R.lovers && cp < 0.42 && Math.random() < 0.12){ d = -22; }
-  }
+  if (opt.force === 'good') d = Math.max(10, 32 - R.aff);
+  else if (opt.force === 'makeup') d = Math.max(0, 25 - R.aff);
+  else if (opt.force === 'bad') d = -6;
+  else { d = Math.round((cp - 0.32)*14 + rand(-2, 4)); if (!R.lovers && cp < 0.42 && Math.random() < 0.12) d = -22; }
   addAff(a, b, d);
   a.chatWith = b.chatWith = null;
   for (const x of [a, b]){
     x.state = 'idle'; x.timer = rand(1, 2.5); x.chatCd = rand(12, 24);
     if (d <= -15){ setExpr(x, 'angry', 4); showBubble(x, '💢', 2.5, true); }
     else if (d > 0){ setExpr(x, R.lovers ? 'love' : 'happy', 2.5); addHappy(x, 2 + d*0.3); if (R.lovers) floatAt(x, '💕'); }
-    else { setExpr(x, 'normal', 1); }
+    else setExpr(x, 'normal', 1);
   }
   if (opt.onEnd) opt.onEnd(d);
 }
@@ -697,7 +1125,9 @@ function addHappy(r, d){
 
 // ---------- なやみ ----------
 const DREAMS = ['空をとぶ夢を見たんだ！ 🕊', 'おすしの海でおよぐ夢を見たよ 🍣', '島がまるごとケーキになってた 🍰', '宇宙人とお茶する夢だった 👽',
-  '100才のおじいさんになってる夢… 👴', 'くじらの背中でおひるねする夢 🐳', 'まめびとが1000人にふえる夢！ 🫘'];
+  '100才のおじいさんになってる夢… 👴', 'くじらの背中でおひるねする夢 🐳', '島が10倍に大きくなる夢！ 🏝'];
+const GREEN = ['tree','pine','palm','flower','bush'];
+const greenCount = () => [...objs.values()].filter(o => GREEN.includes(o.t)).length;
 function genWorry(r){
   const others = residents.filter(o => o !== r);
   const opts = [];
@@ -706,6 +1136,7 @@ function genWorry(r){
   opts.push([1.2, () => ({ type:'hat', icon:'🎩', text:'新しいぼうしがほしいな〜' })]);
   opts.push([2, () => ({ type:'play', icon:'✊', text:'ひまだな〜。いっしょにあそぼ！' })]);
   opts.push([1.2, () => ({ type:'dream', icon:'💭', text:'ねえねえ、聞いてほしい話があるの' })]);
+  opts.push([0.8, () => ({ type:'build', icon:'🌳', text:'島にもっと木やお花があったらいいな', base: greenCount() })]);
   const fights = others.filter(o => rel(r, o).aff <= -10);
   if (fights.length) opts.push([5, () => { const o = pick(fights); return { type:'fight', target:o.id, icon:'💢', text:`${o.name}とけんかしちゃった…` }; }]);
   if (!loverOf(r)){
@@ -716,8 +1147,8 @@ function genWorry(r){
   if (strangers.length) opts.push([2.5, () => { const o = pick(strangers); return { type:'friend', target:o.id, icon:'🤝', text:`${o.name}ともっとなかよくなりたいな` }; }]);
   let tot = opts.reduce((s, o) => s + o[0], 0), t = Math.random()*tot, ch = opts[0];
   for (const o of opts){ t -= o[0]; if (t <= 0){ ch = o; break; } }
-  r.worry = ch[1](); r.worry.life = 260;
-  blip(880, 0.08, 'triangle', 0.05); setTimeout(() => blip(1175, 0.1, 'triangle', 0.05), 90);
+  r.worry = ch[1](); r.worry.life = r.worry.type === 'build' ? 600 : 260;
+  blip(880, 0.08, 'triangle', 0.05); blip(1175, 0.1, 'triangle', 0.05, 0.09);
   if (r === selected) renderPanel();
 }
 function solveWorry(r, happy, coins, msg){
@@ -727,6 +1158,10 @@ function solveWorry(r, happy, coins, msg){
   setExpr(r, 'happy', 3); floatAt(r, '✨'); jingle('good');
   toast(`${msg ? msg + '　' : ''}💰+${coins}`);
   save(); renderPanel();
+}
+function checkBuildWorries(){
+  const n = greenCount();
+  for (const r of residents) if (r.worry && r.worry.type === 'build' && n >= r.worry.base + 3) solveWorry(r, 14, 100, `${r.name}「島がにぎやかになったね！」`);
 }
 const findRes = id => residents.find(o => o.id === id);
 
@@ -750,6 +1185,7 @@ async function fade(on){ $('fade').classList.toggle('on', on); await wait(480); 
 // ---------- UI：モーダル ----------
 let modalOnClose = null;
 function openModal(title, html, onClose){
+  if (modalOnClose){ const f = modalOnClose; modalOnClose = null; f(); }
   $('mTitle').textContent = title; $('mBody').innerHTML = html; $('mBody').scrollTop = 0;
   $('modalWrap').classList.add('show'); modalOnClose = onClose || null;
 }
@@ -760,11 +1196,11 @@ $('modalWrap').addEventListener('pointerdown', e => { if (e.target === $('modalW
 // ---------- UI：パネル ----------
 const panel = $('panel');
 function select(r){
-  if (busy) return;
+  if (busy || build.on) return;
   if (selected && selected !== r) unfocus(selected);
   selected = r; followRes = r;
-  if (r.state === 'idle' || (r.state === 'walk' && !r.chatWith && !r.goingHome)){ r.state = 'focus'; r.target = null; }
-  cam.tDist = Math.min(cam.tDist, 15); cam.tPitch = Math.min(cam.tPitch, 0.6);
+  if (r.state === 'idle' || (r.state === 'walk' && !r.chatWith && !r.goingHome)){ r.state = 'focus'; r.path = null; }
+  cam.tDist = Math.min(cam.tDist, 13); cam.tPitch = Math.min(cam.tPitch, 0.5);
   panel.classList.add('open'); $('toolbar').classList.add('hide');
   renderPanel(); voice(r, 3); r.jump = 0.4;
 }
@@ -772,7 +1208,7 @@ function unfocus(r){ if (r.state === 'focus'){ r.state = 'idle'; r.timer = rand(
 function deselect(){
   if (selected) unfocus(selected);
   selected = null; followRes = null;
-  panel.classList.remove('open'); $('toolbar').classList.remove('hide');
+  panel.classList.remove('open'); if (!build.on) $('toolbar').classList.remove('hide');
 }
 function statusText(r){
   if (r.state === 'home') return '😴 アパートでおやすみ中';
@@ -780,7 +1216,7 @@ function statusText(r){
   if (r.state === 'event') return '✨ だいじな話の最中';
   if (r.goingHome) return '🏠 おうちに帰るところ';
   if (r.hunger < 25) return '🍙 おなかがペコペコ';
-  return pick(['🙂 島でのんびり', '🌼 きょうもいい日']);
+  return '🙂 島でのんびり';
 }
 let panelSig = '';
 function renderPanel(){
@@ -791,7 +1227,7 @@ function renderPanel(){
   const w = r.worry;
   let wHtml = '';
   if (w && !sleeping){
-    const btn = { hungry:'ごはんをあげる', food:'ごはんをあげる', hat:'ぼうしをえらぶ', play:'あそぶ', dream:'話を聞く', fight:'相談にのる', love:'相談にのる', friend:'相談にのる' }[w.type];
+    const btn = { hungry:'ごはんをあげる', food:'ごはんをあげる', hat:'ぼうしをえらぶ', play:'あそぶ', dream:'話を聞く', fight:'相談にのる', love:'相談にのる', friend:'相談にのる', build:'島づくりへ' }[w.type];
     wHtml = `<div class="worrybox"><div class="wi">${w.icon}</div><div class="wt">${esc(w.text)}</div><button class="btn" data-a="worry">${btn}</button></div>`;
   }
   panel.innerHTML = `
@@ -854,6 +1290,8 @@ function talkLine(r){
   if (r.happy < 30) lines.push('さいきん、ちょっとさびしいな…');
   const lv = loverOf(r); if (lv) lines.push(`${lv.name}のことばっかり考えちゃう…💕`, `${lv.name}とデートしたいな`);
   for (const o of residents){ if (o === r) continue; const R = rel(r, o); if (!R.lovers && R.aff >= 65) lines.push(`${o.name}とは親友なんだ！`); else if (R.aff >= 30) lines.push(`きのう${o.name}とあそんだよ！`); else if (R.aff <= -10) lines.push(`${o.name}とは…ちょっと気まずいの`); }
+  if (landSet.size > 36) lines.push('島、ずいぶん広くなったね！');
+  if (r.look.glasses !== 'none') lines.push('メガネ、似合ってるかな？');
   const per = { 'ムードメーカー':['みんなでパーティーしたいな！','わらってるのがいちばん！'], 'じゆうじん':['風のふくまま〜♪','きょうはなにしようかな〜'], 'やさしい':['みんな元気かな？','なにかお手伝いできることある？'], 'のんびりや':['ふぁ〜あ…','ゆっくりいこうよ〜'] }[persona(r)];
   lines.push(...per, '島のくらし、たのしいね！', `${foodById(r.dislike).n}だけはにがてなんだ…`, 'あ、ちょうちょ！🦋');
   return pick(lines);
@@ -873,8 +1311,8 @@ function giveFood(r, f){
   if (W.money < f.p) return;
   W.money -= f.p;
   r.hunger = Math.min(100, r.hunger + f.f);
-  floatAt(r, f.e); r.jump = 0.4; blip(520, 0.06); setTimeout(() => blip(780, 0.08), 80);
-  let hp, msg;
+  floatAt(r, f.e); r.jump = 0.4; blip(520, 0.06); blip(780, 0.08, 'sine', 0.06, 0.08);
+  let hp;
   if (f.id === r.fav){ setExpr(r, 'love', 3); showBubble(r, '大好物！！😍', 3); hp = 22; }
   else if (f.id === r.dislike){ setExpr(r, 'sad', 3); showBubble(r, 'うっ…にがて…😖', 3); hp = -4; }
   else { setExpr(r, 'happy', 2.5); showBubble(r, pick(['おいしい！😋','もぐもぐ…うまい！','ごちそうさま！']), 3); hp = 8; }
@@ -890,27 +1328,26 @@ function openHats(r){
   $('mBody').querySelectorAll('[data-h]').forEach(b => b.onclick = () => { closeModal(); giveHat(r, hatById(b.dataset.h)); });
 }
 function giveHat(r, h){
-  if (r.look.hat === h.id) return;
-  if (W.money < h.p) return;
+  if (r.look.hat === h.id || W.money < h.p) return;
   W.money -= h.p;
   r.look.hat = h.id;
-  r.ch.root.remove(r.ch.hat); r.ch.hat = makeHat(h.id); r.ch.root.add(r.ch.hat);
+  r.ch.head.remove(r.ch.hat); r.ch.hat = makeHat(h.id); fitHat(r.ch.hat, r.look); r.ch.head.add(r.ch.hat);
   r.jump = 0.5;
   if (h.id === 'none'){ showBubble(r, 'すっきり！', 2.5); save(); renderPanel(); return; }
   const like = hash(r.id + h.id) > 0.25;
-  setExpr(r, like ? 'happy' : 'normal', 3); showBubble(r, like ? pick(['にあう？✨','わぁ、かわいい！','すてき！ありがとう！']) : 'う〜ん、まあまあかな', 3);
+  setExpr(r, like ? 'happy' : 'normal', 3); showBubble(r, like ? pick(['にあう？✨','わぁ、すてき！','ありがとう！大事にするね']) : 'う〜ん、まあまあかな', 3);
   floatAt(r, h.e);
   if (r.worry && r.worry.type === 'hat'){ addHappy(r, like ? 12 : 4); solveWorry(r, 12, 90, `${r.name}が新しいぼうしをゲット！`); }
   else { addHappy(r, like ? 10 : 2); save(); renderPanel(); }
 }
-function openJanken(r, fromWorry){
+function openJanken(r){
   const hands = ['✊','✌️','✋'];
   openModal(`✊ ${r.name}とじゃんけん`, `<div class="msg center">じゃん けん…！</div><div class="jres" id="jres">❔</div><div class="janken">${hands.map((h, i) => `<button data-j="${i}">${h}</button>`).join('')}</div><div class="msg center" id="jmsg"></div>`);
   let done = false;
   $('mBody').querySelectorAll('[data-j]').forEach(b => b.onclick = () => {
     if (done) return;
     const me = +b.dataset.j, you = Math.floor(Math.random()*3);
-    const res = (me - you + 3) % 3; // 0=あいこ 1=まけ 2=かち
+    const res = (me - you + 3) % 3;
     $('jres').textContent = `${hands[me]} vs ${hands[you]}`;
     voice(r, 2);
     if (res === 0){ $('jmsg').textContent = 'あいこ！もういっかい！'; return; }
@@ -919,21 +1356,22 @@ function openJanken(r, fromWorry){
     $('jmsg').innerHTML = win ? `かち！ 🎉<br>${esc(r.name)}「まけた〜！もういっかいやろうね！」` : `まけ…！<br>${esc(r.name)}「やった〜！かった〜！」`;
     setExpr(r, 'happy', 3); r.jump = 0.5;
     r.playCount++;
-    const gain = r.playCount <= 2 ? 10 : 3;
     setTimeout(() => {
+      if (!$('jmsg')) return;
       $('mBody').insertAdjacentHTML('beforeend', '<div class="choices"><button class="btn" id="jAgain">もういっかい</button><button class="btn sub" id="jEnd">おわる</button></div>');
       $('jAgain').onclick = () => openJanken(r);
       $('jEnd').onclick = () => closeModal();
     }, 400);
     if (r.worry && r.worry.type === 'play') solveWorry(r, 14, 70, `${r.name}はいっぱいあそんで満足！`);
-    else addHappy(r, gain);
+    else addHappy(r, r.playCount <= 2 ? 10 : 3);
   });
 }
-async function handleWorry(r){
+function handleWorry(r){
   const w = r.worry; if (!w) return;
   if (w.type === 'hungry' || w.type === 'food') return openFood(r);
   if (w.type === 'hat') return openHats(r);
   if (w.type === 'play') return openJanken(r);
+  if (w.type === 'build'){ deselect(); enterBuild('nature'); toast('木やお花を3つ以上おいてあげよう！'); return; }
   if (w.type === 'dream'){
     let d = pick(DREAMS); const o = residents.find(x => x !== r);
     if (o && Math.random() < 0.35) d = `${o.name}といっしょに冒険する夢を見たよ！🗺`;
@@ -948,12 +1386,12 @@ async function handleWorry(r){
     openModal('🤝 相談', `<div class="msg">${esc(r.name)}「${esc(o.name)}ともっとなかよくなりたいんだ。どうしたらいいかな？」</div>
       <div class="choices"><button class="btn" id="c1">話しかけてみたら？</button><button class="btn blue" id="c2">いっしょにおやつを食べよう (💰60)</button><button class="btn sub" id="c3">また今度にしよう</button></div>`);
     $('c2').disabled = W.money < 60;
-    const go = (bonus) => {
+    const go = bonus => {
       closeModal();
       const ok = Math.random() < clamp(0.4 + compat(r, o)*0.4 + bonus, 0.1, 0.95);
       r.worry = null; r.nextWorry = rand(55, 120);
       chatOrApply(r, o, ok ? 'good' : 'bad', () => {
-        if (ok){ solveWorry(r, 12, 80, `${r.name}と${o.name}がなかよくなった！`); }
+        if (ok) solveWorry(r, 12, 80, `${r.name}と${o.name}がなかよくなった！`);
         else { setExpr(r, 'sad', 3); showBubble(r, 'うまく話せなかった…', 3); addHappy(r, -3); toast(`${r.name}はうまく話せなかったみたい…`); renderPanel(); }
       });
     };
@@ -964,7 +1402,7 @@ async function handleWorry(r){
     openModal('💢 相談', `<div class="msg">${esc(r.name)}「${esc(o.name)}とけんかしちゃった…。どうしよう？」</div>
       <div class="choices"><button class="btn" id="c1">すなおにあやまろう</button><button class="btn blue" id="c2">プレゼントでなかなおり (💰100)</button><button class="btn sub" id="c3">しばらくそっとしておこう</button></div>`);
     $('c2').disabled = W.money < 100;
-    const go = (p) => {
+    const go = p => {
       closeModal();
       const ok = Math.random() < p;
       r.worry = null; r.nextWorry = rand(55, 120);
@@ -983,30 +1421,44 @@ async function handleWorry(r){
     $('c2').onclick = () => { closeModal(); solveWorry(r, 3, 20, `${r.name}はもうすこし考えるみたい`); };
   }
 }
+function applyForce(a, b, force){
+  if (force === 'good') addAff(a, b, Math.max(10, 32 - rel(a, b).aff));
+  else if (force === 'makeup') addAff(a, b, Math.max(0, 25 - rel(a, b).aff));
+  else addAff(a, b, -6);
+}
 function chatOrApply(a, b, force, after){
   deselect();
-  if (b.state === 'home' || b.state === 'event' || b.chatWith || a.state === 'home'){
-    if (force === 'good') addAff(a, b, Math.max(10, 32 - rel(a, b).aff));
-    else if (force === 'makeup') addAff(a, b, Math.max(0, 25 - rel(a, b).aff));
-    else addAff(a, b, -6);
-    after(); return;
-  }
+  if (b.state === 'home' || b.state === 'event' || b.chatWith || a.state === 'home'){ applyForce(a, b, force); after(); return; }
   if (a.chatWith) endChatFor(a);
-  a.state = 'idle'; b.state = b.state === 'focus' ? 'idle' : b.state;
+  a.state = 'idle'; if (b.state === 'focus') b.state = 'idle';
   followRes = a; cam.tDist = Math.min(cam.tDist, 16);
-  startChat(a, b, { force, onEnd: () => { after(); } });
+  let done = false;
+  const ok = startChat(a, b, { force, onEnd: d => { if (done) return; done = true; if (d === 0 && force !== 'bad') applyForce(a, b, force); after(); } });
+  if (!ok){ applyForce(a, b, force); after(); }
 }
 async function confession(a, b){
   deselect(); busy = true;
-  for (const r of [a, b]){ if (r.chatWith) endChatFor(r); }
+  for (const r of [a, b]) if (r.chatWith) endChatFor(r);
   await fade(true);
-  for (const r of [a, b]){ r.state = 'event'; r.ch.root.visible = true; r.target = null; r.bubbleT = 0; r.goingHome = false; }
-  a.pos.set(-0.95, 0, 4.4); b.pos.set(0.95, 0, 4.4);
-  a.heading = a.wantHeading = 0.85; b.heading = b.wantHeading = -0.85;
+  const f = [...objs.values()].find(o => o.t === 'fountain');
+  let sp, th;
+  if (f){ sp = spotOf(f); th = f.rot*Math.PI/2; } else { sp = { x:a.pos.x, z:a.pos.z }; th = 0; }
+  const px = Math.cos(th), pz = -Math.sin(th);
+  for (const r of [a, b]){ r.state = 'event'; r.ch.root.visible = true; r.path = null; r.bubbleT = 0; r.goingHome = false; }
+  a.pos.set(sp.x - px*0.95, 0, sp.z - pz*0.95); b.pos.set(sp.x + px*0.95, 0, sp.z + pz*0.95);
+  a.heading = a.wantHeading = th + 0.85; b.heading = b.wantHeading = th - 0.85;
+  for (const o of residents){
+    if (o === a || o === b || !o.ch.root.visible) continue;
+    if (Math.hypot(o.pos.x - sp.x, o.pos.z - sp.z) < 6){
+      if (o.chatWith) endChatFor(o);
+      const p = randomWalkableNear(sp.x + Math.sin(th)*10, sp.z + Math.cos(th)*10, 5) || randomWalkableNear(sp.x, sp.z, 16);
+      if (p) o.pos.set(p.x, 0, p.z);
+      o.state = 'idle'; o.timer = 3; o.path = null;
+    }
+  }
   const saved = { yaw: cam.tYaw, pitch: cam.tPitch, dist: cam.tDist };
-  followRes = null; cam.tTarget.set(0, 1.1, 4.4); cam.target.copy(cam.tTarget);
-  cam.yaw = cam.tYaw = 0; cam.pitch = cam.tPitch = 0.22; cam.dist = cam.tDist = innerWidth < innerHeight ? 11 : 7.5;
-  for (const o of residents){ if (o === a || o === b || !o.ch.root.visible) continue; if (o.pos.z > 2 && Math.abs(o.pos.x) < 5){ if (o.chatWith) endChatFor(o); o.pos.set(o.pos.x < 0 ? -6.5 : 6.5, 0, rand(-2, 8)); o.state = 'idle'; o.timer = 2; } }
+  followRes = null; cam.tTarget.set(sp.x, 1.3, sp.z); cam.target.copy(cam.tTarget);
+  cam.yaw = cam.tYaw = th; cam.pitch = cam.tPitch = 0.2; cam.dist = cam.tDist = innerWidth < innerHeight ? 9.5 : 6.5;
   await fade(false);
   setExpr(a, 'love', 99); setExpr(b, 'normal', 99);
   await say(a.name, `${b.name}…ちょっと、話があるんだ。`);
@@ -1045,56 +1497,91 @@ async function confession(a, b){
   await fade(false);
 }
 
-// ---------- 住人づくり ----------
-let prev = null; // プレビュー用
+// ============================================================
+//  住人づくり（細かいキャラメイク）
+// ============================================================
+let prev = null;
 function getPreview(){
   if (prev) return prev;
   const r = new THREE.WebGLRenderer({ antialias:true, alpha:true });
-  r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); r.setSize(170, 170, false);
+  r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); r.setSize(180, 180, false);
   const s = new THREE.Scene();
-  s.add(new THREE.HemisphereLight(0xffffff, 0xaaccdd, 0.8));
-  const d = new THREE.DirectionalLight(0xffffff, 0.6); d.position.set(3, 5, 6); s.add(d);
-  const c = new THREE.PerspectiveCamera(30, 1, 0.1, 50); c.position.set(0, 1.4, 6.2); c.lookAt(0, 1.05, 0);
-  prev = { r, s, c, ch: null, t: 0, on: false };
+  s.add(new THREE.HemisphereLight(0xffffff, 0xaaccdd, 0.75));
+  const d = new THREE.DirectionalLight(0xffffff, 0.45); d.position.set(3, 5, 6); s.add(d);
+  const c = new THREE.PerspectiveCamera(30, 1, 0.1, 50);
+  prev = { r, s, c, ch: null, t: 0, on: false, zoom: 1, tzoom: 1, rotY: 0, drag: null };
+  const el = r.domElement;
+  el.addEventListener('pointerdown', e => { prev.drag = e.clientX; el.setPointerCapture(e.pointerId); });
+  el.addEventListener('pointermove', e => { if (prev.drag !== null){ prev.rotY += (e.clientX - prev.drag)*0.02; prev.drag = e.clientX; } });
+  el.addEventListener('pointerup', () => { prev.drag = null; });
+  el.addEventListener('pointercancel', () => { prev.drag = null; });
   return prev;
 }
+const CR_TABS = [['face','りんかく'],['hair','かみ'],['eye','め'],['brow','まゆ'],['mouth','はな・くち'],['body','からだ・服'],['mind','せいかく']];
 function openCreator(edit){
-  const d = edit ? { name: edit.name, look: Object.assign({}, edit.look), act: edit.act, care: edit.care, fav: edit.fav }
-    : { name: '', look: { color: pick(COLORS), eyes: pick(EYES)[0], mouth: pick(MOUTHS)[0], cheek: Math.random() < 0.5, hat: 'none' }, act: 0.5, care: 0.5, fav: pick(FOODS).id };
-  if (!edit && residents.length >= MAX_RES){ toast('アパートが満室です（12人まで）'); return; }
-  const html = `
-    <canvas id="prev"></canvas><div class="persona" id="cPer"></div>
-    <div class="row"><label>なまえ（8文字まで）</label><input type="text" id="cName" maxlength="8" value="${esc(d.name)}" placeholder="なまえを入力"></div>
-    <div class="row"><label>からだの色</label><div class="sw" id="cCol">${COLORS.map(c => `<button data-v="${c}" style="background:${c}" aria-label="${c}"></button>`).join('')}</div></div>
-    <div class="row"><label>め</label><div class="seg" id="cEye">${EYES.map(([v, n]) => `<button data-v="${v}">${n}</button>`).join('')}</div></div>
-    <div class="row"><label>くち</label><div class="seg" id="cMouth">${MOUTHS.map(([v, n]) => `<button data-v="${v}">${n}</button>`).join('')}</div></div>
-    <div class="row"><label>ほっぺ</label><div class="seg" id="cCheek"><button data-v="1">あり</button><button data-v="0">なし</button></div></div>
-    <div class="row"><label>せいかく</label>
-      <input type="range" id="cAct" min="0" max="100" value="${Math.round(d.act*100)}"><div class="rng"><span>おっとり</span><span>げんき</span></div>
-      <input type="range" id="cCare" min="0" max="100" value="${Math.round(d.care*100)}"><div class="rng"><span>マイペース</span><span>気くばり</span></div></div>
-    <div class="row"><label>好きな食べもの</label><select id="cFav">${FOODS.map(f => `<option value="${f.id}" ${f.id === d.fav ? 'selected' : ''}>${f.e} ${f.n}</option>`).join('')}</select></div>
-    <div class="choices"><button class="btn" id="cOk">${edit ? 'これでOK！' : 'この子を島によぶ！'}</button>
-    ${edit ? '<button class="btn sub" id="cBye">島から引っこす…</button>' : ''}</div>`;
+  if (!edit && residents.length >= capacity()){
+    toast(capacity() >= MAX_RES ? `住人は${MAX_RES}人までだよ` : 'アパートが満室！島づくりでアパートをたてよう');
+    return;
+  }
+  const d = edit ? { name: edit.name, look: JSON.parse(JSON.stringify(edit.look)), act: edit.act, care: edit.care, fav: edit.fav }
+    : { name: '', look: randomLook(), act: 0.5, care: 0.5, fav: pick(FOODS).id };
+  let tab = 'face';
   const pv = getPreview();
-  openModal(edit ? `✏️ ${edit.name}を編集` : '✨ 新しい住人をつくる', html, () => { pv.on = false; });
-  const holder = $('prev'); holder.replaceWith(pv.r.domElement); pv.r.domElement.id = 'prev'; pv.on = true;
-  const segSel = (id, val) => $(id).querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === String(val)));
+  openModal(edit ? `✏️ ${edit.name}を編集` : '✨ 新しい住人をつくる', `
+    <div class="sticky">
+      <div class="crTop"><input type="text" id="cName" maxlength="8" value="${esc(d.name)}" placeholder="なまえ（8文字まで）"><button class="btn sub" id="cRand" title="おまかせ">🎲</button></div>
+      <canvas id="prev"></canvas>
+      <div class="tabs" id="cTabs">${CR_TABS.map(([k, n]) => `<button data-t="${k}">${n}</button>`).join('')}</div>
+    </div>
+    <div id="cBody"></div>
+    <div class="choices"><button class="btn" id="cOk">${edit ? 'これでOK！' : 'この人を島によぶ！'}</button>${edit ? '<button class="btn sub" id="cBye">島から引っこす…</button>' : ''}</div>`, () => { pv.on = false; });
+  $('prev').replaceWith(pv.r.domElement); pv.r.domElement.id = 'prev'; pv.on = true; pv.rotY = 0;
+  let pending = false;
   const refresh = () => {
-    segSel('cCol', d.look.color); segSel('cEye', d.look.eyes); segSel('cMouth', d.look.mouth); segSel('cCheek', d.look.cheek ? 1 : 0);
-    $('cPer').textContent = `せいかく: ${persona(d)}`;
-    if (pv.ch) disposeCharPrev(pv);
-    pv.ch = buildChar(d.look); pv.s.add(pv.ch.root);
-    drawFace(pv.ch.cv, d.look, 'happy'); pv.ch.tex.needsUpdate = true; pv.t = 0;
+    if (pending) return; pending = true;
+    requestAnimationFrame(() => {
+      pending = false;
+      if (pv.ch){ pv.s.remove(pv.ch.root); pv.ch.tex.dispose(); pv.ch.fmat.dispose(); }
+      pv.ch = buildChar(d.look); pv.s.add(pv.ch.root);
+    });
   };
-  const bindSeg = (id, fn) => $(id).querySelectorAll('button').forEach(b => b.onclick = () => { blip(760, 0.04); fn(b.dataset.v); refresh(); });
-  bindSeg('cCol', v => d.look.color = v);
-  bindSeg('cEye', v => d.look.eyes = v);
-  bindSeg('cMouth', v => d.look.mouth = v);
-  bindSeg('cCheek', v => d.look.cheek = v === '1');
-  $('cAct').oninput = e => { d.act = e.target.value/100; $('cPer').textContent = `せいかく: ${persona(d)}`; };
-  $('cCare').oninput = e => { d.care = e.target.value/100; $('cPer').textContent = `せいかく: ${persona(d)}`; };
-  $('cFav').onchange = e => d.fav = e.target.value;
-  refresh();
+  const L = d.look;
+  const seg = (label, key, opts) => `<div class="row"><label>${label}</label><div class="seg" data-k="${key}">${opts.map(([v, n]) => `<button data-v="${v}" class="${String(L[key]) === String(v) ? 'on' : ''}">${n}</button>`).join('')}</div></div>`;
+  const sw = (label, key, cols) => `<div class="row"><label>${label}</label><div class="sw" data-k="${key}">${cols.map(c => `<button data-v="${c}" style="background:${c}" class="${L[key] === c ? 'on' : ''}" aria-label="${c}"></button>`).join('')}</div></div>`;
+  const sl = (label, key, min, max, step, l, r, obj='look') => `<div class="row">${label ? `<label>${label}</label>` : ''}<input type="range" data-s="${key}" data-o="${obj}" min="${min}" max="${max}" step="${step}" value="${obj === 'look' ? L[key] : d[key]}"><div class="rng"><span>${l}</span><span>${r}</span></div></div>`;
+  const tg = (label, key) => `<div class="row"><label>${label}</label><div class="seg" data-k="${key}" data-bool="1"><button data-v="1" class="${L[key] ? 'on' : ''}">あり</button><button data-v="0" class="${!L[key] ? 'on' : ''}">なし</button></div></div>`;
+  const renderTab = () => {
+    $('cTabs').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.t === tab));
+    pv.tzoom = (tab === 'body' || tab === 'mind') ? 0 : 1;
+    let h = '';
+    if (tab === 'face') h = seg('かおの形', 'face', FACES) + sw('はだの色', 'skin', SKINS) + tg('ほっぺ', 'cheek') + tg('そばかす', 'freckles') + tg('ほくろ', 'mole');
+    else if (tab === 'hair') h = seg('かみがた', 'hair', HAIRS) + seg('まえがみ', 'bangs', BANGS) + sw('かみの色', 'hairColor', HAIRC);
+    else if (tab === 'eye') h = seg('目の形', 'eyes', EYES) + sw('目の色', 'eyeColor', EYEC) + sl('大きさ', 'eyeSize', 0.7, 1.3, 0.01, 'ちいさい', 'おおきい') +
+      sl('目と目のはなれぐあい', 'eyeGap', 0, 1, 0.01, 'ちかい', 'はなれ') + sl('目の高さ', 'eyeY', 0, 1, 0.01, 'うえ', 'した') + seg('まつげ', 'lashes', LASHES);
+    else if (tab === 'brow') h = seg('まゆの形', 'brows', BROWS) + sl('まゆの太さ', 'browW', 2, 9, 1, 'ほそい', 'ふとい');
+    else if (tab === 'mouth') h = seg('はな', 'nose', NOSES) + seg('くち', 'mouth', MOUTHS) + seg('メガネ', 'glasses', GLASSES);
+    else if (tab === 'body') h = seg('体型', 'body', BODIES) + sl('身長', 'height', 0.82, 1.18, 0.01, 'ひくい', 'たかい') + sw('トップスの色', 'top', CLOTH) +
+      seg('ボトムス', 'bottomType', BOTTOMS) + sw('ボトムスの色', 'bottom', CLOTH) + sw('くつの色', 'shoes', SHOES);
+    else h = `<div class="persona" id="cPer">せいかく: ${persona(d)}</div>` + sl('', 'act', 0, 1, 0.01, 'おっとり', 'げんき', 'd') + sl('', 'care', 0, 1, 0.01, 'マイペース', '気くばり', 'd') +
+      `<div class="row"><label>好きな食べもの</label><select id="cFav">${FOODS.map(f => `<option value="${f.id}" ${f.id === d.fav ? 'selected' : ''}>${f.e} ${f.n}</option>`).join('')}</select></div>`;
+    $('cBody').innerHTML = h;
+    $('cBody').querySelectorAll('[data-k]').forEach(g => g.querySelectorAll('button').forEach(b => b.onclick = () => {
+      blip(760, 0.04);
+      const k = g.dataset.k, v = b.dataset.v;
+      L[k] = g.dataset.bool ? v === '1' : (k === 'lashes' ? +v : v);
+      g.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+      refresh();
+    }));
+    $('cBody').querySelectorAll('[data-s]').forEach(s => s.oninput = () => {
+      const k = s.dataset.s, v = +s.value;
+      if (s.dataset.o === 'd'){ d[k] = v; const p = $('cPer'); if (p) p.textContent = `せいかく: ${persona(d)}`; }
+      else { L[k] = v; refresh(); }
+    });
+    const fav = $('cFav'); if (fav) fav.onchange = e => d.fav = e.target.value;
+  };
+  $('cTabs').querySelectorAll('button').forEach(b => b.onclick = () => { blip(700, 0.04); tab = b.dataset.t; renderTab(); });
+  $('cRand').onclick = () => { blip(900, 0.05); const keepHat = L.hat; Object.assign(L, randomLook()); L.hat = keepHat; renderTab(); refresh(); };
+  renderTab(); refresh();
   $('cOk').onclick = () => {
     const name = $('cName').value.trim();
     if (!name){ toast('なまえを入れてね'); $('cName').focus(); return; }
@@ -1110,14 +1597,14 @@ function openCreator(edit){
     $('byeNo').onclick = () => closeModal();
   };
 }
-function disposeCharPrev(pv){ pv.s.remove(pv.ch.root); pv.ch.tex.dispose(); pv.ch.fmat.dispose(); pv.ch = null; }
 function createResident(d){
-  const used = new Set(residents.map(r => r.room));
-  let room = 0; while (used.has(room)) room++;
   let dislike; do { dislike = pick(FOODS).id; } while (dislike === d.fav);
-  const r = spawnResident({ id: 'r' + (W.nextId++), name: d.name, look: d.look, act: d.act, care: d.care, fav: d.fav, dislike, level: 1, happy: 60, hunger: 80, room }, rand(-1.5, 1.5), 9);
-  r.ch.root.visible = true;
-  if (shouldSleep(r)){ r.state = 'idle'; }
+  const data = { id: 'r' + (W.nextId++), name: d.name, look: d.look, act: d.act, care: d.care, fav: d.fav, dislike, level: 1, happy: 60, hunger: 80, home: 0, room: 0 };
+  assignHome(data);
+  const ap = objs.get(data.home);
+  const s = ap ? spotOf(ap) : { x: 0, z: 0 };
+  const p = randomWalkableNear(s.x, s.z, 3) || randomWalkableNear(0, 0, 14) || { x: 0, z: 0 };
+  const r = spawnResident(data, p.x, p.z);
   setExpr(r, 'happy', 4); showBubble(r, 'はじめまして！', 3.5); r.jump = 0.6;
   for (let i = 0; i < 4; i++) setTimeout(() => floatAt(r, pick(['✨','🌟','🎉'])), i*220);
   jingle('level');
@@ -1127,7 +1614,7 @@ function createResident(d){
 function applyEdit(r, d){
   Object.assign(r, { name: d.name, act: d.act, care: d.care, fav: d.fav });
   if (r.dislike === r.fav){ do { r.dislike = pick(FOODS).id; } while (r.dislike === r.fav); }
-  d.look.hat = r.look.hat; r.look = d.look;
+  r.look = d.look;
   const vis = r.ch.root.visible;
   disposeChar(r.ch); r.ch = buildChar(r.look); scene.add(r.ch.root); r.ch.root.visible = vis; r.shownExpr = '';
   r.nmEl.textContent = r.name;
@@ -1144,10 +1631,222 @@ function removeResident(r){
   save();
 }
 
-// ---------- リスト・ニュース ----------
+// ============================================================
+//  島づくりモード
+// ============================================================
+const build = { on:false, cat:'nature', tool:null, rot:0, ghost:null, ghostAt:null, sel:null, moving:null, plates:[], selPlate:null };
+const ghostMat = new THREE.MeshBasicMaterial({ color:0x66ee88, transparent:true, opacity:0.5, depthWrite:false });
+const ghostBad = new THREE.MeshBasicMaterial({ color:0xff6666, transparent:true, opacity:0.5, depthWrite:false });
+$('bCats').innerHTML = CATS.map(([k, n]) => `<button data-c="${k}">${n}</button>`).join('');
+$('bCats').querySelectorAll('button').forEach(b => b.onclick = () => { blip(700, 0.04); setCat(b.dataset.c); });
+function enterBuild(cat){
+  if (busy) return;
+  deselect(); closeModal();
+  build.on = true;
+  $('toolbar').classList.add('hide'); $('buildbar').classList.add('show');
+  cam.tDist = Math.max(cam.tDist, 26); cam.tPitch = Math.max(cam.tPitch, 0.75);
+  setCat(cat || 'nature');
+}
+function exitBuild(){
+  unselectObj(); setTool(null); clearPlates();
+  build.on = false;
+  $('buildbar').classList.remove('show'); $('toolbar').classList.remove('hide');
+  save();
+}
+function setCat(c){
+  unselectObj(); setTool(null); clearPlates();
+  build.cat = c;
+  $('bCats').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.c === c));
+  const box = $('bItems');
+  if (c === 'land'){
+    box.innerHTML = `<div class="bhint">黄色い「＋」の土地をタップすると買えるよ！<br>いまの値段: <b>💰${landPrice()}</b></div>`;
+    showPlates();
+  } else if (c === 'select'){
+    box.innerHTML = '<div class="bhint">おいてあるものをタップすると、回転・いどう・しまうができるよ</div>';
+  } else {
+    box.innerHTML = Object.entries(ITEMS).filter(([, it]) => it.cat === c).map(([k, it]) => `<button class="bitem" data-i="${k}"><span class="e">${it.e}</span><span class="n">${it.n}</span><span class="p">💰${it.p}</span></button>`).join('');
+    box.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { blip(760, 0.04); setTool(build.tool === b.dataset.i ? null : b.dataset.i); });
+  }
+  updateBuildUI();
+}
+function setTool(t){
+  build.tool = t; build.ghostAt = null;
+  if (build.ghost){ scene.remove(build.ghost); build.ghost = null; }
+  if (t){ unselectObj(); build.ghost = makeGhost(t); build.ghost.visible = false; scene.add(build.ghost); }
+  $('bItems').querySelectorAll('[data-i]').forEach(b => b.classList.toggle('on', b.dataset.i === t));
+  updateBuildUI();
+}
+function makeGhost(t){
+  const g = buildItem(t, 1);
+  g.traverse(o => { if (o.isMesh){ o.material = ghostMat; o.castShadow = false; o.receiveShadow = false; } });
+  const base = new THREE.Mesh(new THREE.PlaneGeometry(ITEMS[t].w, ITEMS[t].d), ghostMat); base.rotation.x = -Math.PI/2; base.position.y = 0.07; g.add(base);
+  return g;
+}
+function updateBuildUI(){
+  const t = build.moving ? build.moving.t : build.tool;
+  $('bRot').style.display = t ? '' : 'none';
+  $('bPut').style.display = t && build.ghostAt ? '' : 'none';
+  let hint = '';
+  if (build.moving) hint = build.ghostAt ? 'ここでいい？「おく」でけってい' : `<b>${ITEMS[build.moving.t].n}</b>をいどう中。おきたい場所をタップしてね`;
+  else if (t) hint = build.ghostAt ? 'ここでいい？「おく」か、もう一度タップでせっち' : `<b>${ITEMS[t].n}</b>をおく場所をタップしてね`;
+  else if (build.cat !== 'land' && build.cat !== 'select') hint = 'おきたいものをえらんでね。おいたものをタップするとへんしゅうできるよ';
+  $('bHint').innerHTML = hint;
+  if (build.cat !== 'land' && build.cat !== 'select') $('bItems').querySelectorAll('[data-i]').forEach(b => b.disabled = W.money < ITEMS[b.dataset.i].p);
+}
+const rc = new THREE.Raycaster();
+function groundPoint(x, y){
+  rc.setFromCamera(new THREE.Vector2(x/innerWidth*2 - 1, -(y/innerHeight)*2 + 1), camera);
+  const o = rc.ray.origin, d = rc.ray.direction;
+  if (Math.abs(d.y) < 1e-4) return null;
+  const t = -o.y/d.y; if (t < 0) return null;
+  return { x: o.x + d.x*t, z: o.z + d.z*t };
+}
+function snapFor(t, rot, p){ const [w, d] = dims(t, rot); return { ox: Math.round(p.x - w/2), oz: Math.round(p.z - d/2) }; }
+function showGhostAt(p){
+  const t = build.moving ? build.moving.t : build.tool; if (!t || !build.ghost) return null;
+  const s = snapFor(t, build.rot, p);
+  const ok = canPlace(t, s.ox, s.oz, build.rot, build.moving ? build.moving.id : 0);
+  const c = objCenter(t, s.ox, s.oz, build.rot);
+  build.ghost.position.set(c.x, 0, c.z); build.ghost.rotation.y = build.rot*Math.PI/2; build.ghost.visible = true;
+  build.ghost.traverse(o => { if (o.isMesh) o.material = ok ? ghostMat : ghostBad; });
+  return { ...s, ok };
+}
+function buildTap(x, y){
+  const p = groundPoint(x, y); if (!p) return;
+  if (build.cat === 'land'){
+    const cx = Math.floor(p.x/CH), cz = Math.floor(p.z/CH);
+    const ch = buyableChunks().find(c => c.x === cx && c.z === cz);
+    if (ch) askBuyLand(ch);
+    return;
+  }
+  const t = build.moving ? build.moving.t : build.tool;
+  if (t){
+    const s = snapFor(t, build.rot, p);
+    if (build.ghostAt && build.ghostAt.ox === s.ox && build.ghostAt.oz === s.oz) return confirmPlace();
+    build.ghostAt = showGhostAt(p);
+    blip(600, 0.03);
+    updateBuildUI();
+    return;
+  }
+  const o = objAt(Math.floor(p.x), Math.floor(p.z));
+  if (o) selectObj(o); else unselectObj();
+}
+function confirmPlace(){
+  const g = build.ghostAt; if (!g) return;
+  if (build.moving){
+    const o = build.moving;
+    if (!canPlace(o.t, g.ox, g.oz, build.rot, o.id)){ toast('そこにはおけないよ'); blip(200, 0.15); return; }
+    markObj(o, false); o.ox = g.ox; o.oz = g.oz; o.rot = build.rot; markObj(o, true); positionObj(o);
+    o.mesh.visible = true; build.moving = null; setTool(null); afterWorldChange(); blip(880, 0.06);
+    selectObj(o);
+    return;
+  }
+  const t = build.tool, it = ITEMS[t];
+  if (W.money < it.p){ toast('お金がたりないよ'); blip(200, 0.15); return; }
+  if (!canPlace(t, g.ox, g.oz, build.rot)){ toast('そこにはおけないよ'); blip(200, 0.15); return; }
+  W.money -= it.p;
+  placeObj(t, g.ox, g.oz, build.rot);
+  blip(660, 0.05); blip(990, 0.08, 'sine', 0.06, 0.06);
+  build.ghostAt = null; if (build.ghost) build.ghost.visible = false;
+  afterWorldChange();
+  if (t === 'apartment') toast(`🏢 アパートができた！ 住人は${capacity()}人まで住めるよ`);
+  updateBuildUI();
+}
+function afterWorldChange(){
+  for (const r of residents){
+    if (r.state === 'home' || r.state === 'event') continue;
+    if (!walkableAt(r.pos.x, r.pos.z)){ const n = nearestWalkable(Math.floor(r.pos.x), Math.floor(r.pos.z), 20); if (n) r.pos.set(n[0] + 0.5, 0, n[1] + 0.5); }
+    if (r.state === 'walk'){
+      if (r.goingHome){ goHome(r); continue; }
+      if (r.chatWith) endChatFor(r);
+      r.state = 'idle'; r.timer = 0.3; r.path = null; r.onArrive = null;
+    }
+  }
+  checkBuildWorries();
+  save();
+}
+function selectObj(o){
+  unselectObj();
+  build.sel = o;
+  const [w, d] = dims(o.t, o.rot), c = objCenter(o.t, o.ox, o.oz, o.rot);
+  const pl = new THREE.Mesh(new THREE.PlaneGeometry(w + 0.2, d + 0.2), new THREE.MeshBasicMaterial({ color:0xffd54f, transparent:true, opacity:0.45, depthWrite:false }));
+  pl.rotation.x = -Math.PI/2; pl.position.set(c.x, 0.08, c.z); scene.add(pl); build.selPlate = pl;
+  $('obName').textContent = `${ITEMS[o.t].e} ${ITEMS[o.t].n}`;
+  $('objbar').classList.add('show');
+  blip(800, 0.04);
+}
+function unselectObj(){
+  if (build.moving){ build.moving.mesh.visible = true; build.moving = null; if (build.ghost){ scene.remove(build.ghost); build.ghost = null; } build.ghostAt = null; }
+  build.sel = null;
+  if (build.selPlate){ scene.remove(build.selPlate); build.selPlate = null; }
+  $('objbar').classList.remove('show');
+}
+$('obClose').onclick = () => unselectObj();
+$('obRot').onclick = () => {
+  const o = build.sel; if (!o) return;
+  const nr = (o.rot + 1) % 4;
+  const s = snapFor(o.t, nr, objCenter(o.t, o.ox, o.oz, o.rot));
+  if (!canPlace(o.t, s.ox, s.oz, nr, o.id)){ toast('せまくて回せないよ'); blip(200, 0.15); return; }
+  markObj(o, false); o.rot = nr; o.ox = s.ox; o.oz = s.oz; markObj(o, true); positionObj(o);
+  afterWorldChange(); selectObj(o);
+};
+$('obMove').onclick = () => {
+  const o = build.sel; if (!o) return;
+  unselectObj(); setTool(null);
+  build.moving = o; build.rot = o.rot; o.mesh.visible = false;
+  build.ghost = makeGhost(o.t); build.ghost.visible = false; scene.add(build.ghost); build.ghostAt = null;
+  updateBuildUI();
+};
+$('obDel').onclick = () => {
+  const o = build.sel; if (!o) return;
+  if (o.t === 'apartment' && residents.some(r => r.home === o.id)){ toast('住人が住んでいるアパートはしまえないよ'); blip(200, 0.15); return; }
+  const back = Math.floor(ITEMS[o.t].p/2);
+  unselectObj(); removeObj(o); W.money += back;
+  toast(`${ITEMS[o.t].n}をしまった（💰+${back}）`); blip(500, 0.06);
+  afterWorldChange();
+};
+$('bRot').onclick = () => {
+  const t = build.moving ? build.moving.t : build.tool; if (!t) return;
+  const old = build.rot; build.rot = (build.rot + 1) % 4; blip(700, 0.04);
+  if (build.ghostAt){ build.ghostAt = showGhostAt(objCenter(t, build.ghostAt.ox, build.ghostAt.oz, old)); updateBuildUI(); }
+};
+$('bPut').onclick = () => confirmPlace();
+$('bDone').onclick = () => { blip(600, 0.05); exitBuild(); };
+let plateMat = null;
+function showPlates(){
+  clearPlates();
+  if (!plateMat){
+    const cv = document.createElement('canvas'); cv.width = cv.height = 128; const c = cv.getContext('2d');
+    c.fillStyle = 'rgba(255,213,79,.6)'; c.fillRect(0, 0, 128, 128);
+    c.strokeStyle = '#fff'; c.lineWidth = 6; c.setLineDash([12, 8]); c.strokeRect(5, 5, 118, 118);
+    c.fillStyle = '#fff'; c.font = 'bold 64px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('+', 64, 66);
+    plateMat = new THREE.MeshBasicMaterial({ map:new THREE.CanvasTexture(cv), transparent:true, depthWrite:false });
+  }
+  for (const ch of buyableChunks()){
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(CH - 0.4, CH - 0.4), plateMat);
+    m.rotation.x = -Math.PI/2; m.position.set(ch.x*CH + CH/2, -0.08, ch.z*CH + CH/2);
+    scene.add(m); build.plates.push(m);
+  }
+}
+function clearPlates(){ for (const m of build.plates){ scene.remove(m); m.geometry.dispose(); } build.plates = []; }
+function askBuyLand(ch){
+  const price = landPrice();
+  openModal('🗺 土地を広げる', `<div class="msg">この土地を買って島を広げる？<br>値段: <b>💰${price}</b>（もってるお金: 💰${W.money}）</div>
+    <div class="choices"><button class="btn" id="lYes" ${W.money < price ? 'disabled' : ''}>買う！</button><button class="btn sub" id="lNo">やめる</button></div>`);
+  $('lYes').onclick = () => {
+    if (W.money < price) return;
+    W.money -= price; addChunk(ch.x, ch.z); closeModal();
+    jingle('good'); toast('🏝 島が広くなった！'); news('島の土地が広くなった');
+    cam.tTarget.set(ch.x*CH + CH/2, 0, ch.z*CH + CH/2);
+    setCat('land'); save();
+  };
+  $('lNo').onclick = () => closeModal();
+}
+
+// ---------- リスト・ニュース・せってい ----------
 function openList(){
   if (!residents.length){ openModal('👥 住人', '<div class="msg">まだだれもいないよ。✨から住人をつくろう！</div>'); return; }
-  openModal(`👥 住人（${residents.length}/${MAX_RES}）`, '<div class="grid" id="lg"></div>');
+  openModal(`👥 住人（${residents.length}/${capacity()}）`, '<div class="grid" id="lg"></div>');
   for (const r of residents){
     const b = document.createElement('button'); b.className = 'card';
     b.appendChild(iconCanvas(r, 112, r.state === 'home' ? 'sleep' : undefined));
@@ -1160,28 +1859,41 @@ function openNews(){
   const html = W.news.length ? W.news.map(n => `<div class="news"><i>${n.d}日目 ${n.t}</i>${esc(n.text)}</div>`).join('') : '<div class="msg">まだニュースはないよ。</div>';
   openModal('📰 島のニュース', html);
 }
+const SPEEDS = [[1, 'ふつう'], [2, 'はやい'], [4, 'すごくはやい']];
+function openSettings(){
+  openModal('⚙️ せってい', `
+    <div class="row"><label>時間の速さ</label><div class="seg" id="sSpeed">${SPEEDS.map(([v, n]) => `<button data-v="${v}" class="${W.speed === v ? 'on' : ''}">${n}</button>`).join('')}</div></div>
+    <div class="row"><label>おと</label><div class="seg" id="sSound"><button data-v="1" class="${W.sound ? 'on' : ''}">オン</button><button data-v="0" class="${!W.sound ? 'on' : ''}">オフ</button></div></div>
+    <div class="choices"><button class="btn sub" id="sHelp">❓ あそびかた</button><button class="btn red" id="sReset">🗑 さいしょからやりなおす</button></div>`);
+  $('sSpeed').querySelectorAll('button').forEach(b => b.onclick = () => { W.speed = +b.dataset.v; openSettings(); blip(700, 0.04); });
+  $('sSound').querySelectorAll('button').forEach(b => b.onclick = () => { W.sound = b.dataset.v === '1'; save(); openSettings(); blip(700, 0.04); });
+  $('sHelp').onclick = () => openHelp();
+  $('sReset').onclick = () => {
+    openModal('🗑 やりなおし', '<div class="msg">島も住人もぜんぶ消えて、さいしょからになります。ほんとうにいい？</div><div class="choices"><button class="btn red" id="rYes">やりなおす</button><button class="btn sub" id="rNo">やめる</button></div>');
+    $('rYes').onclick = () => { resetting = true; try { localStorage.removeItem(SAVE_KEY); } catch(e) {} location.reload(); };
+    $('rNo').onclick = () => closeModal();
+  };
+}
 function openHelp(){
   openModal('🏝 まめじまへようこそ！', `<div class="msg">
-    ここは「まめびと」たちがくらす小さな島。<br><br>
+    ここは住人たちがくらす小さな島。<br><br>
     👆 <b>住人をタップ</b>すると、話したり、ごはんやぼうしをあげたりできるよ。<br>
     ❗ 頭の上にアイコンが出たら<b>なやみ</b>のサイン。解決するとおれいがもらえるよ。<br>
     🤝 住人どうしで勝手におしゃべりして、友だち・親友・恋人になったり、けんかしたりするよ。<br>
-    ✨ <b>つくる</b>ボタンで新しい住人を島によべるよ（12人まで）。<br>
+    ✨ <b>住人+</b>で、かおの形・かみがた・目・まゆ・まつげ・体型・服まで細かく決めて住人をつくれるよ。<br>
+    🔨 <b>島づくり</b>で土地を買って島を広げたり、木や道や建物を自由においたりできるよ。<br>
     🌙 夜になるとみんなアパートでねむるよ。<br><br>
-    🖐 ドラッグで回転、ピンチ／ホイールでズーム、2本指で移動。</div>
+    🖐 ドラッグで回転、ピンチ／ホイールでズーム、2本指（または右ドラッグ）で移動。</div>
     <div class="choices"><button class="btn" id="hOk">はじめる！</button></div>`, () => { W.seenHelp = true; save(); });
   $('hOk').onclick = () => closeModal();
 }
+const homeDist = () => innerWidth < innerHeight ? 58 : 40;
 $('bList').onclick = () => { blip(700, 0.05); openList(); };
 $('bNews').onclick = () => { blip(700, 0.05); openNews(); };
 $('bNew').onclick = () => { blip(700, 0.05); openCreator(null); };
-const homeDist = () => innerWidth < innerHeight ? 54 : 36;
-$('bHome').onclick = () => { blip(700, 0.05); followRes = null; cam.tTarget.set(0, 0, 2); cam.tDist = homeDist(); cam.tPitch = 0.78; };
-const SPEEDS = [[1, '▶', 'ふつう'], [2, '▶▶', 'はやい'], [4, '⏩', 'すごく']];
-function updateSpeedBtn(){ const s = SPEEDS.find(x => x[0] === W.speed) || SPEEDS[0]; $('bSpeed').innerHTML = `${s[1]}<small>${s[2]}</small>`; }
-$('bSpeed').onclick = () => { const i = SPEEDS.findIndex(x => x[0] === W.speed); W.speed = SPEEDS[(i + 1) % SPEEDS.length][0]; updateSpeedBtn(); blip(700, 0.05); };
-function updateSoundBtn(){ $('bSound').innerHTML = W.sound ? '🔊<small>おと</small>' : '🔇<small>おと</small>'; }
-$('bSound').onclick = () => { W.sound = !W.sound; updateSoundBtn(); blip(700, 0.05); save(); };
+$('bBuild').onclick = () => { blip(700, 0.05); enterBuild('nature'); };
+$('bSet').onclick = () => { blip(700, 0.05); openSettings(); };
+$('bHome').onclick = () => { blip(700, 0.05); followRes = null; const b = landBBox(); cam.tTarget.set(b.cx, 0, b.cz); cam.tDist = Math.max(homeDist(), b.size*1.05); cam.tPitch = 0.8; };
 
 // ---------- エフェクト ----------
 const floats = [];
@@ -1217,7 +1929,7 @@ function jingle(kind){
 window.addEventListener('pointerdown', ensureAudio, { capture:true });
 
 // ---------- カメラ操作 ----------
-const cam = { yaw:0, pitch:0.78, dist:36, tYaw:0, tPitch:0.78, tDist:36, target:new THREE.Vector3(0,0,2), tTarget:new THREE.Vector3(0,0,2), offX:0, offY:0 };
+const cam = { yaw:0, pitch:0.8, dist:40, tYaw:0, tPitch:0.8, tDist:40, target:new THREE.Vector3(0,0,2), tTarget:new THREE.Vector3(0,0,2), offX:0, offY:0 };
 const ptrs = new Map();
 let gesture = null;
 const cvs = renderer.domElement;
@@ -1227,13 +1939,17 @@ cvs.addEventListener('pointerdown', e => {
   gesture = ptrs.size === 1 ? { moved:false, button:e.button } : { moved:true };
 });
 cvs.addEventListener('pointermove', e => {
-  const p = ptrs.get(e.pointerId); if (!p) return;
+  const p = ptrs.get(e.pointerId);
+  if (!p){
+    if (build.on && e.pointerType === 'mouse' && !build.ghostAt && (build.tool || build.moving)){ const g = groundPoint(e.clientX, e.clientY); if (g) showGhostAt(g); }
+    return;
+  }
   const dx = e.clientX - p.x, dy = e.clientY - p.y;
   if (ptrs.size === 1){
     if (Math.hypot(e.clientX - p.sx, e.clientY - p.sy) > 8) gesture.moved = true;
     if (gesture.moved){
       if (gesture.button === 2 || e.shiftKey) pan(dx, dy);
-      else { cam.tYaw -= dx*0.007; cam.tPitch = clamp(cam.tPitch + dy*0.005, 0.18, 1.35); }
+      else { cam.tYaw -= dx*0.007; cam.tPitch = clamp(cam.tPitch + dy*0.005, 0.15, 1.38); }
     }
   } else if (ptrs.size === 2){
     const [a, b] = [...ptrs.values()];
@@ -1241,7 +1957,7 @@ cvs.addEventListener('pointermove', e => {
     const mx0 = (a.x + b.x)/2, my0 = (a.y + b.y)/2;
     p.x = e.clientX; p.y = e.clientY;
     const after = Math.hypot(a.x - b.x, a.y - b.y);
-    if (before > 0) cam.tDist = clamp(cam.tDist*before/after, 6, 60);
+    if (before > 0 && after > 0) cam.tDist = clamp(cam.tDist*before/after, 5, 110);
     pan((a.x + b.x)/2 - mx0, (a.y + b.y)/2 - my0);
     return;
   }
@@ -1256,15 +1972,16 @@ function endPtr(e){
 cvs.addEventListener('pointerup', endPtr);
 cvs.addEventListener('pointercancel', e => { ptrs.delete(e.pointerId); gesture = null; });
 cvs.addEventListener('contextmenu', e => e.preventDefault());
-cvs.addEventListener('wheel', e => { e.preventDefault(); cam.tDist = clamp(cam.tDist*(1 + e.deltaY*0.0012), 6, 60); }, { passive:false });
+cvs.addEventListener('wheel', e => { e.preventDefault(); cam.tDist = clamp(cam.tDist*(1 + e.deltaY*0.0012), 5, 110); }, { passive:false });
 function pan(dx, dy){
   followRes = null;
-  const k = cam.dist*0.0016;
+  const k = cam.dist*0.0022;
   const fx = Math.sin(cam.yaw), fz = Math.cos(cam.yaw);
-  cam.tTarget.x += (-dx*fz - dy*fx)*k*1.4;
-  cam.tTarget.z += (dx*fx - dy*fz)*k*1.4;
-  const d = Math.hypot(cam.tTarget.x, cam.tTarget.z);
-  if (d > 24){ cam.tTarget.x *= 24/d; cam.tTarget.z *= 24/d; }
+  cam.tTarget.x += (-dx*fz - dy*fx)*k;
+  cam.tTarget.z += (dx*fx - dy*fz)*k;
+  const b = landBBox();
+  cam.tTarget.x = clamp(cam.tTarget.x, b.x0 - 6, b.x1 + 6);
+  cam.tTarget.z = clamp(cam.tTarget.z, b.z0 - 6, b.z1 + 6);
 }
 const tmpV = new THREE.Vector3();
 function toScreen(x, y, z){
@@ -1273,10 +1990,11 @@ function toScreen(x, y, z){
 }
 function onTap(x, y){
   if (busy) return;
+  if (build.on) return buildTap(x, y);
   let best = null, bd = 46;
   for (const r of residents){
     if (!r.ch.root.visible) continue;
-    for (const h of [0.4, 1.0, 1.6]){
+    for (const h of [0.5, 1.2, 1.9]){
       const s = toScreen(r.pos.x, h, r.pos.z); if (!s.ok) continue;
       const d = Math.hypot(s.x - x, s.y - y);
       if (d < bd){ bd = d; best = r; }
@@ -1298,15 +2016,35 @@ function skyAt(h){
 }
 function nightFactor(h){ if (h >= 7 && h <= 17) return 0; if (h > 17 && h < 19.5) return (h - 17)/2.5; if (h >= 5 && h < 7) return 1 - (h - 5)/2; return 1; }
 
+// ---------- 海・雲・星 ----------
+let sea, seaBase, stars; const clouds = [];
+function buildSky(){
+  const sg = new THREE.PlaneGeometry(900, 900, 72, 72); sg.rotateX(-Math.PI/2);
+  sea = new THREE.Mesh(sg, new THREE.MeshPhongMaterial({ color:0x46aee6, shininess:90, specular:0xaee6ff, flatShading:true }));
+  sea.position.y = -0.6; scene.add(sea);
+  seaBase = Float32Array.from(sg.attributes.position.array);
+  const sr = seeded(0.37);
+  const cm = new THREE.MeshToonMaterial({ color:'#ffffff', transparent:true, opacity:.95 });
+  for (let i = 0; i < 10; i++){
+    const c = new THREE.Group();
+    for (let j = 0; j < 4; j++){ const b = mesh(OG.ball, cm, j*1.9 - 2.8, sr()*0.8, sr()*1.2, false); b.scale.setScalar(1.6 + sr()*1.4); c.add(b); }
+    c.position.set(-120 + sr()*240, 24 + sr()*10, -90 + sr()*150); c.userData.v = 0.6 + sr()*0.8;
+    scene.add(c); clouds.push(c);
+  }
+  const sp = []; for (let i = 0; i < 600; i++){ const v = new THREE.Vector3(sr()*2-1, sr()*0.9+0.1, sr()*2-1).normalize().multiplyScalar(300); sp.push(v.x, v.y, v.z); }
+  const sgeo = new THREE.BufferGeometry(); sgeo.setAttribute('position', new THREE.Float32BufferAttribute(sp, 3));
+  stars = new THREE.Points(sgeo, new THREE.PointsMaterial({ color:0xffffff, size:1.6, transparent:true, opacity:0, fog:false }));
+  scene.add(stars);
+}
+
 // ---------- メインループ ----------
 function simulate(dt){
-  // 時間
   const allHome = residents.length > 0 && residents.every(r => r.state === 'home');
   const before = W.time;
   W.time += dt*2*(allHome ? 8 : 1);
   if (W.time >= 1440){
     W.time -= 1440; W.day++;
-    const gift = 30*residents.length;
+    const gift = 40*residents.length;
     W.money += gift;
     toast(`🌅 ${W.day}日目の朝！ 島のおこづかい 💰+${gift}`); news(`${W.day}日目がはじまった`);
     save();
@@ -1322,7 +2060,6 @@ function simulate(dt){
     r.hunger = Math.max(0, r.hunger - dt*0.06);
     r.happy = Math.max(0, r.happy - dt*(r.hunger <= 0 ? 0.08 : 0.012));
     r.chatCd -= dt; r.talkCd -= dt;
-    // なやみ
     if (r.worry){
       r.worry.life -= dt;
       if (r.worry.life <= 0){ r.worry = null; r.nextWorry = rand(50, 100); addHappy(r, -8); setExpr(r, 'sad', 3); showBubble(r, '…もういいや', 2.5); if (r === selected) renderPanel(); }
@@ -1330,34 +2067,43 @@ function simulate(dt){
       r.nextWorry -= dt;
       if (r.nextWorry <= 0) genWorry(r);
     }
-    // ねる時間
-    if (shouldSleep(r) && !r.goingHome && r.state !== 'chat' && r.state !== 'focus' && !(r.state === 'wait')) { goHome(r); }
+    if (shouldSleep(r) && !r.goingHome && r.state !== 'chat' && r.state !== 'focus' && r.state !== 'wait') goHome(r);
     switch (r.state){
       case 'idle': r.timer -= dt; if (r.timer <= 0) decide(r); break;
       case 'walk': stepWalk(r, dt); break;
-      case 'wait': r.waitT -= dt; if (r.chatWith) r.wantHeading = Math.atan2(r.chatWith.pos.x - r.pos.x, r.chatWith.pos.z - r.pos.z); if (r.waitT <= 0){ const o = r.chatWith; r.chatWith = null; if (o && o.chatWith === r){ o.chatWith = null; } r.state = 'idle'; r.timer = 1; } break;
+      case 'wait':
+        r.waitT -= dt;
+        if (r.chatWith) r.wantHeading = Math.atan2(r.chatWith.pos.x - r.pos.x, r.chatWith.pos.z - r.pos.z);
+        if (r.waitT <= 0){ const o = r.chatWith; r.chatWith = null; if (o && o.chatWith === r) o.chatWith = null; r.state = 'idle'; r.timer = 1; }
+        break;
       case 'focus': r.wantHeading = Math.atan2(camera.position.x - r.pos.x, camera.position.z - r.pos.z); break;
     }
   }
   updateChats(dt);
-  // おしあい・噴水よけ
   for (let i = 0; i < residents.length; i++){
     const a = residents[i]; if (!a.ch.root.visible || a.state === 'event') continue;
     for (let j = i + 1; j < residents.length; j++){
       const b = residents[j]; if (!b.ch.root.visible || b.state === 'event') continue;
       const dx = b.pos.x - a.pos.x, dz = b.pos.z - a.pos.z, d = Math.hypot(dx, dz);
-      if (d > 0.001 && d < 1.15){ const push = (1.15 - d)/2; a.pos.x -= dx/d*push; a.pos.z -= dz/d*push; b.pos.x += dx/d*push; b.pos.z += dz/d*push; }
+      if (d > 0.001 && d < 0.9){
+        const push = (0.9 - d)/2, ux = dx/d*push, uz = dz/d*push;
+        if (walkableAt(a.pos.x - ux, a.pos.z - uz)){ a.pos.x -= ux; a.pos.z -= uz; }
+        if (walkableAt(b.pos.x + ux, b.pos.z + uz)){ b.pos.x += ux; b.pos.z += uz; }
+      }
     }
-    const fd = Math.hypot(a.pos.x, a.pos.z);
-    if (fd < 2.9 && fd > 0.001){ a.pos.x *= 2.9/fd; a.pos.z *= 2.9/fd; }
   }
 }
 function stepWalk(r, dt){
-  const dx = r.target.x - r.pos.x, dz = r.target.z - r.pos.z, d = Math.hypot(dx, dz);
-  if (d < 0.2){ r.state = 'idle'; r.timer = rand(1.5, 4); r.target = null; const cb = r.onArrive; r.onArrive = null; if (cb) cb(); return; }
-  const s = Math.min(d, (1.3 + r.act*1.1)*dt);
-  r.pos.x += dx/d*s; r.pos.z += dz/d*s;
-  r.wantHeading = Math.atan2(dx, dz); r.moving = true;
+  if (!r.path || !r.path.length){ r.state = 'idle'; r.timer = 1; return; }
+  let step = (1.3 + r.act*1.1)*dt;
+  while (r.path.length){
+    const t = r.path[0], dx = t.x - r.pos.x, dz = t.z - r.pos.z, d = Math.hypot(dx, dz);
+    if (d <= step){ r.pos.x = t.x; r.pos.z = t.z; step -= d; r.path.shift(); continue; }
+    r.pos.x += dx/d*step; r.pos.z += dz/d*step; r.wantHeading = Math.atan2(dx, dz);
+    return;
+  }
+  r.state = 'idle'; r.timer = rand(1.5, 4); r.path = null;
+  const cb = r.onArrive; r.onArrive = null; if (cb) cb();
 }
 function animate(dt, now){
   const t = now/1000;
@@ -1366,29 +2112,32 @@ function animate(dt, now){
     if (!ch.root.visible) continue;
     r.heading += angDiff(r.heading, r.wantHeading)*Math.min(1, dt*8);
     const walking = r.state === 'walk';
-    if (walking) r.phase += dt*(8 + r.act*4);
+    if (walking) r.phase += dt*(7 + r.act*3);
     r.jump = Math.max(0, r.jump - dt);
-    const jy = r.jump > 0 ? Math.sin((1 - r.jump/0.6)*Math.PI)*0.35*Math.min(1, r.jump*3) : 0;
-    const bob = walking ? Math.abs(Math.sin(r.phase))*0.1 : Math.sin(t*2 + r.pitch*6)*0.02;
+    const jy = r.jump > 0 ? Math.sin((1 - r.jump/0.6)*Math.PI)*0.3*Math.min(1, r.jump*3) : 0;
+    const sw = walking ? Math.sin(r.phase) : 0;
+    const bob = walking ? Math.abs(Math.cos(r.phase))*0.05 : Math.sin(t*2 + r.pitch*6)*0.008;
     ch.root.position.set(r.pos.x, jy, r.pos.z);
     ch.root.rotation.y = r.heading;
-    ch.body.position.y = 0.95 + bob;
-    ch.body.rotation.z = walking ? Math.sin(r.phase)*0.06 : 0;
-    const sw = walking ? Math.sin(r.phase) : 0;
-    ch.footL.position.z = 0.08 + sw*0.18; ch.footR.position.z = 0.08 - sw*0.18;
-    ch.footL.position.y = 0.1 + Math.max(0, sw)*0.08; ch.footR.position.y = 0.1 + Math.max(0, -sw)*0.08;
+    ch.torso.position.y = ch.hipY + bob;
+    ch.legs[0].rotation.x = sw*0.6; ch.legs[1].rotation.x = -sw*0.6;
     const talking = r.state === 'chat' && r.bubbleT > 0;
-    const armUp = talking ? Math.abs(Math.sin(t*10))*0.25 : r.expr === 'happy' || r.expr === 'love' ? 0.2 + Math.abs(Math.sin(t*6))*0.2 : 0;
-    ch.armL.position.set(-0.7, 0.82 + bob + armUp, 0.05 - sw*0.12);
-    ch.armR.position.set(0.7, 0.82 + bob + armUp, 0.05 + sw*0.12);
-    ch.hat.position.y = bob;
-    // 表情
+    const cheer = r.expr === 'happy' || r.expr === 'love';
+    for (let i = 0; i < 2; i++){
+      const s = i ? 1 : -1, arm = ch.arms[i];
+      arm.rotation.x = walking ? (i ? sw : -sw)*0.6 : 0;
+      let raise = 0.12;
+      if (talking) raise = 0.4 + Math.abs(Math.sin(t*9 + i))*0.5;
+      else if (cheer) raise = 0.6 + Math.abs(Math.sin(t*6))*0.5;
+      arm.rotation.z = s*raise;
+    }
+    ch.head.rotation.z = talking ? Math.sin(t*4)*0.08 : r.expr === 'sad' ? 0.1 : 0;
+    ch.head.rotation.x = r.expr === 'sad' ? 0.15 : 0;
     if (r.exprT > 0){ r.exprT -= dt; if (r.exprT <= 0) r.expr = 'normal'; }
     let e = r.expr === 'normal' ? baseExpr(r) : r.expr;
     const blink = (t + r.pitch*7) % 4 < 0.12;
     if (blink && e === 'normal') e = 'sleep';
-    const key = e;
-    if (r.shownExpr !== key){ drawFace(ch.cv, r.look, e); ch.tex.needsUpdate = true; r.shownExpr = key; }
+    if (r.shownExpr !== e){ drawFace(ch.cv, r.look, e); ch.tex.needsUpdate = true; r.shownExpr = e; }
     if (r.bubbleT > 0) r.bubbleT -= dt;
   }
 }
@@ -1396,7 +2145,7 @@ function updateLabels(dt){
   for (const r of residents){
     const el = r.el;
     if (!r.ch.root.visible){ if (el.style.display !== 'none') el.style.display = 'none'; continue; }
-    const s = toScreen(r.pos.x, r.ch.root.position.y + 2.15 + (r.look.hat === 'tophat' ? 0.35 : 0), r.pos.z);
+    const s = toScreen(r.pos.x, r.ch.root.position.y + r.ch.topY + 0.2, r.pos.z);
     if (!s.ok || s.x < -100 || s.x > innerWidth + 100 || s.y < -60 || s.y > innerHeight + 60){ if (el.style.display !== 'none') el.style.display = 'none'; continue; }
     if (el.style.display === 'none') el.style.display = '';
     el.style.transform = `translate(${s.x}px, ${s.y}px) translate(-50%, -100%)`;
@@ -1404,66 +2153,57 @@ function updateLabels(dt){
     if (r.bubbleT > 0){ txt = r.bubble; if (r.bubbleBig) cls += ' big'; }
     else if (r.worry && r.state !== 'event'){ txt = r.worry.icon; cls += ' worry'; }
     const lab = cls + '|' + txt;
-    if (lab !== r.lastLabel){
-      r.lastLabel = lab;
-      r.bubEl.className = cls; r.bubEl.textContent = txt; r.bubEl.style.display = txt ? 'block' : 'none';
-    }
+    if (lab !== r.lastLabel){ r.lastLabel = lab; r.bubEl.className = cls; r.bubEl.textContent = txt; r.bubEl.style.display = txt ? 'block' : 'none'; }
     el.classList.toggle('sel', r === selected);
   }
   for (let i = floats.length - 1; i >= 0; i--){
     const f = floats[i]; f.t += dt;
     if (f.t >= f.life || !f.r.ch.root.visible){ f.el.remove(); floats.splice(i, 1); continue; }
-    const s = toScreen(f.r.pos.x + f.dx, 2.0 + f.t*1.2, f.r.pos.z);
+    const s = toScreen(f.r.pos.x + f.dx, f.r.ch.topY - 0.2 + f.t*1.2, f.r.pos.z);
     f.el.style.transform = `translate(${s.x}px, ${s.y}px) translate(-50%, -50%) scale(${0.8 + Math.min(1, f.t*4)*0.4})`;
     f.el.style.opacity = String(1 - Math.max(0, f.t - f.life*0.6)/(f.life*0.4));
   }
 }
 const sunCol = new THREE.Color();
 function updateWorld(dt, t){
-  const h = W.time/60;
-  const nf = nightFactor(h);
-  const sky = skyAt(h);
+  const h = W.time/60, nf = nightFactor(h), sky = skyAt(h);
   scene.background = sky; scene.fog.color.copy(sky);
-  const a = (h - 6)/12*Math.PI;
-  const day = Math.max(0, Math.sin(a));
-  sun.position.set(Math.cos(a)*40 + cam.target.x, Math.max(8, Math.sin(a)*45), 18 + cam.target.z);
-  if (day <= 0.05) sun.position.set(-20 + cam.target.x, 40, 20 + cam.target.z);
+  const a = (h - 6)/12*Math.PI, day = Math.max(0, Math.sin(a));
+  if (day > 0.05) sun.position.set(Math.cos(a)*40 + cam.target.x, Math.max(8, Math.sin(a)*45), 18 + cam.target.z);
+  else sun.position.set(-20 + cam.target.x, 40, 20 + cam.target.z);
   sun.target.position.set(cam.target.x, 0, cam.target.z);
   sun.intensity = lerp(0.62, 0.25, nf);
   sunCol.set('#fff4e0').lerp(cA.set('#9fb2ff'), nf); sun.color.copy(sunCol);
   hemi.intensity = lerp(0.5, 0.3, nf);
   hemi.color.set('#ffffff').lerp(cB.set('#7d8cd6'), nf);
   stars.material.opacity = Math.max(0, nf - 0.4)*1.6;
-  for (const m of lampMats) m.emissiveIntensity = nf*1.1;
-  for (let i = 0; i < windowMats.length; i++){
-    const r = residents.find(x => x.room === i);
-    const lit = r && r.state === 'home' && nf > 0.2 && h > 12;
-    const m = windowMats[i];
-    m.emissiveIntensity = lerp(m.emissiveIntensity, lit ? 0.9 : 0, Math.min(1, dt*3));
-    m.color.set(nf > 0.5 ? '#3d4a7a' : '#a9dcf5');
+  for (const o of objs.values()){
+    const u = o.mesh.userData;
+    if (u.bulb) u.bulb.emissiveIntensity = nf*1.1;
+    if (u.win){
+      for (let i = 0; i < u.win.length; i++){
+        const r = residents.find(x => x.home === o.id && x.room === i);
+        const lit = r && r.state === 'home' && nf > 0.2 && h > 12;
+        const m = u.win[i];
+        m.emissiveIntensity = lerp(m.emissiveIntensity, lit ? 0.9 : 0, Math.min(1, dt*3));
+        m.color.set(nf > 0.5 ? '#3d4a7a' : '#a9dcf5');
+      }
+    }
+    if (u.spout){ const s = 1 + Math.sin(t*6)*0.08; u.spout.scale.set(s, 1/s, s); u.water.position.y = 0.55 + Math.sin(t*3)*0.02; }
+    if (u.swings) u.swings.forEach((s, i) => s.rotation.x = Math.sin(t*2 + i*1.7)*0.35);
   }
-  // 海の波
   const pos = sea.geometry.attributes.position;
-  for (let i = 0; i < pos.count; i++){
-    const x = seaBase[i*3], z = seaBase[i*3 + 2];
-    pos.array[i*3 + 1] = Math.sin(x*0.15 + t*1.2)*0.18 + Math.cos(z*0.13 + t*0.9)*0.18;
-  }
+  for (let i = 0; i < pos.count; i++){ const x = seaBase[i*3], z = seaBase[i*3 + 2]; pos.array[i*3 + 1] = Math.sin(x*0.15 + t*1.2)*0.18 + Math.cos(z*0.13 + t*0.9)*0.18; }
   pos.needsUpdate = true; sea.geometry.computeVertexNormals();
   sea.material.color.set('#46aee6').lerp(cA.set('#1d2c5c'), nf*0.8);
-  for (const c of clouds){ c.position.x += c.userData.v*dt; if (c.position.x > 90) c.position.x = -90; }
-  fountainWater.position.y = 0.55 + Math.sin(t*3)*0.02;
-  const sp = scene.getObjectByName('spout'); if (sp){ const s = 1 + Math.sin(t*6)*0.08; sp.scale.set(s, 1/s, s); }
-  // HUD
+  for (const c of clouds){ c.position.x += c.userData.v*dt; if (c.position.x > 130) c.position.x = -130; }
   const icon = h >= 5 && h < 17 ? '☀️' : h >= 17 && h < 19.5 ? '🌇' : '🌙';
   $('clock').textContent = `${icon} ${W.day}日目 ${clockText()}`;
   $('money').textContent = `💰 ${W.money}`;
 }
 function updateCamera(dt){
-  if (followRes && followRes.ch.root.visible) cam.tTarget.set(followRes.pos.x, 1.0, followRes.pos.z);
-  else if (followRes && followRes.state === 'home'){
-    const i = followRes.room, col = i % 4, fl = Math.floor(i/4);
-    cam.tTarget.set([-4.4, -2.2, 2.2, 4.4][col], 1.9 + fl*3.2, -11.5);
-  }
+  if (followRes && followRes.ch.root.visible) cam.tTarget.set(followRes.pos.x, 1.3, followRes.pos.z);
+  else if (followRes && followRes.state === 'home'){ const w = windowPos(followRes); if (w) cam.tTarget.copy(w); }
   const k = 1 - Math.exp(-dt*5);
   cam.yaw += angDiff(cam.yaw, cam.tYaw)*k; cam.pitch = lerp(cam.pitch, cam.tPitch, k); cam.dist = lerp(cam.dist, cam.tDist, k);
   cam.target.lerp(cam.tTarget, k);
@@ -1472,22 +2212,18 @@ function updateCamera(dt){
     cam.target.y + Math.sin(cam.pitch)*cam.dist,
     cam.target.z + Math.cos(cam.yaw)*Math.cos(cam.pitch)*cam.dist);
   camera.lookAt(cam.target);
-  // パネルの分だけ画面をずらす
   const open = panel.classList.contains('open');
   const wide = innerWidth >= 760;
   const tx = open && wide ? (panel.offsetWidth + 16)/2 : 0;
-  const ty = open && !wide ? panel.offsetHeight/2 : 0;
+  const ty = open && !wide ? panel.offsetHeight/2 : build.on && !wide ? $('buildbar').offsetHeight/2 : 0;
   cam.offX = lerp(cam.offX, tx, k); cam.offY = lerp(cam.offY, ty, k);
   if (Math.abs(cam.offX) > 0.5 || Math.abs(cam.offY) > 0.5) camera.setViewOffset(innerWidth, innerHeight, cam.offX, cam.offY, innerWidth, innerHeight);
   else camera.clearViewOffset();
 }
-function resize(){
-  renderer.setSize(innerWidth, innerHeight, false);
-  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
-}
+function resize(){ renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); }
 window.addEventListener('resize', resize);
 
-let last = performance.now(), saveT = 0, panelT = 0;
+let last = performance.now(), saveT = 0, panelT = 0, uiT = 0;
 function loop(now){
   requestAnimationFrame(loop);
   const dt = Math.min(0.05, (now - last)/1000); last = now;
@@ -1497,21 +2233,68 @@ function loop(now){
   updateWorld(dt, now/1000);
   renderer.render(scene, camera);
   updateLabels(dt);
-  if (prev && prev.on && prev.ch){ prev.t += dt; prev.ch.root.rotation.y = Math.sin(prev.t*1.2)*0.6; prev.ch.body.position.y = 0.95 + Math.abs(Math.sin(prev.t*3))*0.05; prev.r.render(prev.s, prev.c); }
+  if (prev && prev.on && prev.ch){
+    prev.t += dt; prev.zoom = lerp(prev.zoom, prev.tzoom, Math.min(1, dt*6));
+    if (prev.drag === null) prev.rotY = lerp(prev.rotY, Math.sin(prev.t*0.8)*0.5, Math.min(1, dt*1.5));
+    prev.ch.root.rotation.y = prev.rotY;
+    const hy = prev.ch.hipY + prev.ch.torso.children[0].scale.y + 0.12 + HR*0.88;
+    prev.c.position.set(0, lerp(1.3, hy + 0.05, prev.zoom), lerp(6.0, 3.3, prev.zoom));
+    prev.c.lookAt(0, lerp(1.12, hy, prev.zoom), 0);
+    prev.r.render(prev.s, prev.c);
+  }
   panelT += dt;
   if (selected && panelT > 0.4){ panelT = 0; if (sigOf(selected) !== panelSig) renderPanel(); else updateBars(); }
+  uiT += dt; if (build.on && uiT > 0.5){ uiT = 0; updateBuildUI(); }
   saveT += dt; if (saveT > 8){ saveT = 0; save(); }
 }
 
 // ---------- はじまり ----------
-function initDefault(){
+function defaultWorld(){
+  for (let x = -3; x <= 2; x++) for (let z = -3; z <= 2; z++) addChunk(x, z);
+  const P = (t, ox, oz, rot=0) => placeObj(t, ox, oz, rot);
+  P('plaza', -6, -6);
+  P('fountain', -3, -3);
+  P('apartment', -6, -20, 0);
+  for (const oz of [-14, -12, -10, -8]) P('stone', -1, oz);
+  P('cafe', 12, -3, 3);
+  for (const ox of [6, 8, 10]) P('stone', ox, -1);
+  P('hatshop', -18, -3, 1);
+  for (const ox of [-8, -10, -12]) P('stone', ox, -1);
+  for (let oz = 6; oz <= 20; oz += 2) P('path', -1, oz);
+  P('bench', -6, 7, 2); P('bench', 4, 7, 2); P('bench', -6, -8, 0); P('bench', 4, -8, 0);
+  for (const [x, z] of [[-7, -7], [6, -7], [-7, 6], [6, 6]]) P('lamp', x, z);
+  P('pond', 9, 11);
+  P('swing', -14, 10, 0);
+  const sr = seeded(0.123);
+  let n = 0;
+  for (let k = 0; k < 900 && n < 46; k++){
+    const i = Math.floor(-24 + sr()*48), j = Math.floor(-24 + sr()*48);
+    if (Math.hypot(i + 0.5, j + 0.5) < 13) continue;
+    if (Math.abs(i) < 3 && j > -15) continue;           // 南の道
+    if (Math.abs(j) < 4 && Math.abs(i) < 19) continue;  // お店の前
+    if (!canPlace('tree', i, j, 0)) continue;
+    const t = n % 6 === 5 ? 'bush' : n % 4 === 3 ? 'pine' : n % 9 === 8 ? 'palm' : 'tree';
+    P(t, i, j); n++;
+  }
+  for (let k = 0, m = 0; k < 500 && m < 30; k++){
+    const i = Math.floor(-22 + sr()*44), j = Math.floor(-22 + sr()*44);
+    if (Math.hypot(i, j) < 7) continue;
+    if (canPlace('flower', i, j, 0)){ P('flower', i, j); m++; }
+  }
+}
+function initResidents(){
   const base = [
-    { name:'ハル', look:{ color:'#ffb74d', eyes:'round', mouth:'smile', cheek:true, hat:'cap' }, act:.8, care:.7, fav:'ramen', dislike:'straw' },
-    { name:'モモ', look:{ color:'#f48fb1', eyes:'big', mouth:'cat', cheek:true, hat:'ribbon' }, act:.4, care:.8, fav:'cake', dislike:'curry' },
-    { name:'ソラ', look:{ color:'#64b5f6', eyes:'dot', mouth:'line', cheek:false, hat:'none' }, act:.25, care:.3, fav:'sushi', dislike:'bread' },
-    { name:'コタ', look:{ color:'#aed581', eyes:'sharp', mouth:'open', cheek:false, hat:'leaf' }, act:.9, care:.3, fav:'curry', dislike:'apple' },
+    { name:'ハル', look:{ face:'round', skin:'#f8d2b2', hair:'short', bangs:'side', hairColor:'#3b2a20', eyes:'round', eyeColor:'#5a3a22', eyeSize:1, eyeGap:0.5, eyeY:0.5, lashes:0,
+      brows:'normal', browW:5, nose:'dot', mouth:'grin', cheek:true, freckles:false, mole:false, glasses:'none', body:'normal', height:1.02, top:'#ffb74d', bottomType:'pants', bottom:'#3949ab', shoes:'#ffffff', hat:'cap' }, act:.8, care:.7, fav:'ramen', dislike:'straw' },
+    { name:'モモ', look:{ face:'oval', skin:'#ffe3cc', hair:'twin', bangs:'full', hairColor:'#ff8fb8', eyes:'big', eyeColor:'#8a5bd1', eyeSize:1.08, eyeGap:0.45, eyeY:0.55, lashes:2,
+      brows:'arched', browW:3, nose:'button', mouth:'cat', cheek:true, freckles:false, mole:false, glasses:'none', body:'slim', height:0.94, top:'#f48fb1', bottomType:'skirt', bottom:'#ffffff', shoes:'#e53935', hat:'none' }, act:.4, care:.8, fav:'cake', dislike:'curry' },
+    { name:'ソラ', look:{ face:'sharp', skin:'#efbf98', hair:'bob', bangs:'center', hairColor:'#1f1a1c', eyes:'narrow', eyeColor:'#2a1e18', eyeSize:1, eyeGap:0.55, eyeY:0.5, lashes:1,
+      brows:'straight', browW:4, nose:'line', mouth:'line', cheek:false, freckles:false, mole:true, glasses:'round', body:'slim', height:1.1, top:'#64b5f6', bottomType:'pants', bottom:'#455a64', shoes:'#212121', hat:'none' }, act:.25, care:.3, fav:'sushi', dislike:'bread' },
+    { name:'コタ', look:{ face:'wide', skin:'#c98a5e', hair:'spiky', bangs:'spiky', hairColor:'#d9a650', eyes:'cat', eyeColor:'#3e8f5e', eyeSize:0.95, eyeGap:0.5, eyeY:0.45, lashes:0,
+      brows:'sharp', browW:7, nose:'round', mouth:'open', cheek:false, freckles:true, mole:false, glasses:'none', body:'chubby', height:0.98, top:'#aed581', bottomType:'shorts', bottom:'#6d4c41', shoes:'#5d4037', hat:'leaf' }, act:.9, care:.3, fav:'curry', dislike:'apple' },
   ];
-  W.residents = base.map((b, i) => Object.assign({ id:'r' + (W.nextId++), level:1, happy:55, hunger:70 - i*12, room:i }, b));
+  const ap = apartments()[0];
+  W.residents = base.map((b, i) => Object.assign({ id:'r' + (W.nextId++), level:1, happy:55, hunger:70 - i*12, home: ap ? ap.id : 0, room:i }, b));
   W.rel = {};
   const [a, b, c, d] = W.residents;
   W.rel[[a.id, b.id].sort().join('|')] = { aff:42, lovers:false };
@@ -1519,23 +2302,29 @@ function initDefault(){
   W.rel[[b.id, c.id].sort().join('|')] = { aff:12, lovers:false };
   news('まめじまでのくらしがはじまった！');
 }
+let resetting = false;
 function start(){
-  buildWorld();
-  const loaded = load();
-  if (!loaded || !W.residents.length && !W.news.length) initDefault();
-  for (const d of W.residents){
-    const p = randPoint();
-    const r = spawnResident(d, p.x, p.z);
-    if (shouldSleep(r)){ r.state = 'home'; r.ch.root.visible = false; r.pos.set(DOOR.x, 0, DOOR.z); }
+  buildSky();
+  if (load()){
+    for (const k of W.land){ const [x, z] = k.split(',').map(Number); addChunk(x, z); }
+    for (const o of W.objects) if (ITEMS[o.t]) placeObj(o.t, o.ox, o.oz, o.rot, o.id);
+  } else {
+    defaultWorld(); initResidents();
   }
-  updateSpeedBtn(); updateSoundBtn();
+  for (const d of W.residents){
+    const p = randomWalkableNear(0, 0, 12) || { x:0, z:6 };
+    const r = spawnResident(d, p.x, p.z);
+    if (!objs.get(r.home)) assignHome(r);
+    if (shouldSleep(r)){ r.state = 'home'; r.ch.root.visible = false; }
+  }
   resize();
-  cam.tTarget.set(0, 0, 2); cam.target.copy(cam.tTarget); cam.dist = cam.tDist = homeDist();
+  const b = landBBox();
+  cam.tTarget.set(b.cx, 0, b.cz + 2); cam.target.copy(cam.tTarget); cam.dist = cam.tDist = homeDist();
   requestAnimationFrame(loop);
   if (!W.seenHelp) openHelp();
 }
-document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
-window.addEventListener('pagehide', save);
+document.addEventListener('visibilitychange', () => { if (document.hidden && !resetting) save(); });
+window.addEventListener('pagehide', () => { if (!resetting) save(); });
 start();
 </script>
 </body>
