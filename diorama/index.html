@@ -54,6 +54,16 @@ header p{margin:4px 0 0; color:var(--sub); font-size:14px; max-width:60ch}
   color:var(--stage-ink); font-family:var(--font-display); font-size:18px; pointer-events:none;
 }
 .hint{color:var(--sub); font-size:13px; margin:8px 2px 0}
+.modebar{display:flex; gap:8px; align-items:center; margin-bottom:10px; flex-wrap:wrap}
+.seg{display:inline-flex; background:var(--track); border-radius:10px; padding:3px; gap:3px}
+.seg button{border:0; background:transparent; padding:8px 16px; font-family:var(--font-display); font-weight:800}
+.seg button.on{background:var(--panel); color:var(--accent); box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.tools{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px}
+.tools button{display:inline-flex; align-items:center; gap:6px; padding:6px 10px}
+.tools button.on{background:var(--accent); color:var(--accent-ink); border-color:var(--accent)}
+.sw{width:14px; height:14px; border-radius:3px; border:1px solid rgba(0,0,0,.25); flex:none}
+.tools .sep{flex-basis:100%; height:0}
+.tools .sub{font-size:13px; color:var(--sub)}
 
 .panel{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px}
 .panel h2{font-size:12px; color:var(--sub); font-weight:700; margin:16px 0 6px; letter-spacing:.08em}
@@ -104,12 +114,31 @@ button:disabled{opacity:.5; cursor:not-allowed}
 
   <div class="layout">
     <div>
+      <div class="modebar">
+        <div class="seg" role="group" aria-label="モード">
+          <button id="tabEdit" type="button">街をつくる</button>
+          <button id="tabView" type="button" class="on">ジオラマで見る</button>
+        </div>
+      </div>
+      <div class="tools" id="tools" hidden>
+        <button type="button" data-tool="road" class="on"><span class="sw" style="background:#55595d"></span>道路</button>
+        <button type="button" data-tool="rail"><span class="sw" style="background:#9c9184"></span>線路</button>
+        <button type="button" data-tool="house"><span class="sw" style="background:#d0574a"></span>家</button>
+        <button type="button" data-tool="tower"><span class="sw" style="background:#b9bfc4"></span>ビル</button>
+        <button type="button" data-tool="tree"><span class="sw" style="background:#3f7d3a"></span>木</button>
+        <button type="button" data-tool="park"><span class="sw" style="background:#62a04e"></span>公園</button>
+        <button type="button" data-tool="water"><span class="sw" style="background:#4f9fd4"></span>水</button>
+        <button type="button" data-tool="erase"><span class="sw" style="background:#7aab5c"></span>消す</button>
+        <span class="sep"></span>
+        <button type="button" id="resetTown" class="sub">サンプルの街に戻す</button>
+        <button type="button" id="clearTown" class="sub">全部消す</button>
+      </div>
       <div class="stage" id="stage">
         <canvas id="cv" width="1280" height="720"></canvas>
-        <span class="tag" id="tag">サンプルの街</span>
+        <span class="tag" id="tag">つくった街</span>
         <div class="drop" id="drop" hidden>ここにドロップ</div>
       </div>
-      <p class="hint">画面をタップ・ドラッグすると、ピントが合う位置を動かせます。</p>
+      <p class="hint" id="hint">画面をタップ・ドラッグすると、ピントが合う位置を動かせます。</p>
 
       <section class="result" id="result" hidden>
         <h2>できあがり</h2>
@@ -248,120 +277,323 @@ $('#fps').addEventListener('change', e => { state.fps = +e.target.value; clearPr
 $('#size').addEventListener('change', e => { state.size = +e.target.value; resizeCanvas(); });
 function applySpeed(){ if (mode === 'video' && !recording) video.playbackRate = state.speed; }
 
-/* ---------- サンプルの街（動く車つき） ---------- */
+/* ---------- 街づくり（マス目に置いて作る街・動く車と電車） ---------- */
 const scene = (() => {
-  const W = 1280, H = 720;
-  const out = document.createElement('canvas'); out.width = W; out.height = H;
-  const ctx = out.getContext('2d');
-  const base = document.createElement('canvas'); base.width = W; base.height = H;
-  const b = base.getContext('2d');
-  let seed = 11;
-  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  const pick = a => a[Math.floor(rnd() * a.length)];
-
-  const roadsH = [[300, 72], [590, 56]];   // [y, 幅]
-  const roadsV = [[540, 68], [1010, 56]];  // [x, 幅]
-  b.fillStyle = '#7aab5c'; b.fillRect(0, 0, W, H);
-  for (let i = 0; i < 5000; i++) {
-    b.fillStyle = rnd() < .5 ? 'rgba(30,80,20,.14)' : 'rgba(255,255,210,.10)';
-    b.fillRect(rnd() * W, rnd() * H, 3, 3);
-  }
-  // 区画（道路以外）に建物と公園
-  const xs = [[0, 540], [608, 1010], [1066, W]];
-  const ys = [[0, 300], [372, 590], [646, H]];
-  const roofs = ['#d0574a', '#ece6da', '#4b78b2', '#e19a3c', '#a3acb4', '#cbb495', '#5e8f63', '#8a5a9e', '#f2d25c'];
-  for (const [x0, x1] of xs) for (const [y0, y1] of ys) {
-    const bx = x0 + 16, by = y0 + 16, bw = x1 - x0 - 32, bh = y1 - y0 - 32;
-    if (bw < 40 || bh < 40) continue;
-    if (rnd() < .18) { // 公園
-      b.fillStyle = '#5f9a4c'; b.fillRect(bx, by, bw, bh);
-      b.fillStyle = '#d9c9a0'; b.fillRect(bx + bw * .1, by + bh / 2 - 6, bw * .8, 12);
-      b.fillStyle = '#6fb0d8'; b.beginPath(); b.ellipse(bx + bw * .7, by + bh * .3, bw * .12, bh * .14, 0, 0, 7); b.fill();
-      for (let i = 0; i < 18; i++) tree(bx + rnd() * bw, by + rnd() * bh, 8 + rnd() * 10);
-      continue;
+  const T = 40, COLS = 32, ROWS = 18, W = COLS * T, H = ROWS * T;
+  const K = {EMPTY:0, ROAD:1, RAIL:2, HOUSE:3, TOWER:4, TREE:5, PARK:6, WATER:7, CROSS:8};
+  const grid = new Uint8Array(COLS * ROWS), vari = new Uint8Array(COLS * ROWS);
+  const mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+  const out = mk(W, H), ctx = out.getContext('2d');
+  const base = mk(W, H), b = base.getContext('2d');
+  const grass = mk(W, H);
+  {
+    const g = grass.getContext('2d');
+    g.fillStyle = '#7aab5c'; g.fillRect(0, 0, W, H);
+    for (let i = 0; i < 5000; i++) {
+      g.fillStyle = Math.random() < .5 ? 'rgba(30,80,20,.14)' : 'rgba(255,255,210,.10)';
+      g.fillRect(Math.random() * W, Math.random() * H, 3, 3);
     }
-    let y = by;
-    while (y < by + bh - 30) {
-      const rowH = Math.min(by + bh - y, 50 + rnd() * 70);
-      let x = bx;
-      while (x < bx + bw - 30) {
-        const w = Math.min(bx + bw - x, 50 + rnd() * 80);
-        if (rnd() < .12) { tree(x + w / 2, y + rowH / 2, 10 + rnd() * 8); }
-        else building(x + 4, y + 4, w - 8, rowH - 8, pick(roofs));
-        x += w;
+  }
+  const DIRS = [[1,0],[0,1],[-1,0],[0,-1]];          // 東・南・西・北
+  const wc = c => (c % COLS + COLS) % COLS, wr = r => (r % ROWS + ROWS) % ROWS;
+  const get = (c, r) => grid[wr(r) * COLS + wc(c)];
+  const isRoad = k => k === K.ROAD || k === K.CROSS;
+  const isRail = k => k === K.RAIL || k === K.CROSS;
+  const conns = (c, r, fn) => DIRS.map(([dx, dy]) => fn(get(c + dx, r + dy)));
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  let dirty = true, onChange = null;
+
+  /* ---- 地面 ---- */
+  const ROOFS = ['#d0574a','#ece6da','#4b78b2','#e19a3c','#a3acb4','#cbb495','#5e8f63','#8a5a9e','#f2d25c'];
+  const SIDE = '#cfc8b8', ASPH = '#55595d', PAINT = '#f4f1e6';
+  function drawRoad(x, y, cn, plain){
+    const m = 6;
+    b.fillStyle = SIDE; b.fillRect(x, y, T, T);
+    b.fillStyle = ASPH;
+    b.fillRect(x + (cn[2] ? 0 : m), y + (cn[3] ? 0 : m),
+      T - (cn[2] ? 0 : m) - (cn[0] ? 0 : m), T - (cn[3] ? 0 : m) - (cn[1] ? 0 : m));
+    if (plain) return;
+    const n = cn.filter(Boolean).length;
+    b.fillStyle = PAINT;
+    if (cn[0] && cn[2] && !cn[1] && !cn[3]) { b.fillRect(x + 3, y + T/2 - 1.5, 14, 3); b.fillRect(x + 23, y + T/2 - 1.5, 14, 3); }
+    else if (cn[1] && cn[3] && !cn[0] && !cn[2]) { b.fillRect(x + T/2 - 1.5, y + 3, 3, 14); b.fillRect(x + T/2 - 1.5, y + 23, 3, 14); }
+    else if (n >= 3) {
+      for (let i = 0; i < 5; i++) {
+        const s = 7 + i * 6;
+        if (cn[0]) b.fillRect(x + T - 7, y + s, 6, 3);
+        if (cn[2]) b.fillRect(x + 1, y + s, 6, 3);
+        if (cn[1]) b.fillRect(x + s, y + T - 7, 3, 6);
+        if (cn[3]) b.fillRect(x + s, y + 1, 3, 6);
       }
-      y += rowH;
     }
   }
-  function building(x, y, w, h, col){
-    b.fillStyle = 'rgba(0,0,0,.28)'; b.fillRect(x + 7, y + 7, w, h);
-    b.fillStyle = col; b.fillRect(x, y, w, h);
-    b.fillStyle = 'rgba(255,255,255,.18)'; b.fillRect(x, y, w, h * .5);
-    b.strokeStyle = 'rgba(0,0,0,.25)'; b.lineWidth = 2; b.strokeRect(x + 1, y + 1, w - 2, h - 2);
-    b.fillStyle = 'rgba(0,0,0,.2)'; b.fillRect(x + 2, y + h / 2 - 1, w - 4, 2);
-    if (w > 50 && rnd() < .6) { b.fillStyle = '#d8dde0'; b.fillRect(x + w * .2, y + h * .65, 12, 9); b.fillRect(x + w * .6, y + h * .65, 12, 9); }
+  function drawRail(x, y, cn, bed){
+    if (!cn.some(Boolean)) { cn = [true, false, true, false]; }
+    const cx = x + T/2, cy = y + T/2;
+    if (bed) {
+      b.fillStyle = '#9c9184'; b.fillRect(cx - 9, cy - 9, 18, 18);
+      cn.forEach((on, d) => { if (!on) return; const [dx, dy] = DIRS[d];
+        if (dx) b.fillRect(dx > 0 ? cx : x, cy - 9, T/2, 18); else b.fillRect(cx - 9, dy > 0 ? cy : y, 18, T/2); });
+      b.fillStyle = '#6b4f3a';
+      cn.forEach((on, d) => { if (!on) return; const [dx, dy] = DIRS[d];
+        for (let s = 0; s < 3; s++) { const o = 3 + s * 7;
+          if (dx) b.fillRect(cx + dx * o - 2, cy - 8, 4, 16); else b.fillRect(cx - 8, cy + dy * o - 2, 16, 4); } });
+    }
+    b.strokeStyle = '#dde2e6'; b.lineWidth = 2;
+    cn.forEach((on, d) => { if (!on) return; const [dx, dy] = DIRS[d];
+      for (const s of [-5, 5]) { b.beginPath();
+        if (dx) { b.moveTo(cx - dx * 5, cy + s); b.lineTo(cx + dx * T/2, cy + s); }
+        else { b.moveTo(cx + s, cy - dy * 5); b.lineTo(cx + s, cy + dy * T/2); }
+        b.stroke(); } });
   }
-  function tree(x, y, r){
-    b.fillStyle = 'rgba(0,0,0,.25)'; b.beginPath(); b.arc(x + 4, y + 4, r, 0, 7); b.fill();
-    b.fillStyle = '#3f7d3a'; b.beginPath(); b.arc(x, y, r, 0, 7); b.fill();
-    b.fillStyle = 'rgba(190,230,140,.35)'; b.beginPath(); b.arc(x - r * .3, y - r * .3, r * .55, 0, 7); b.fill();
+  function drawGround(c, r){
+    const i = r * COLS + c, k = grid[i], v = vari[i], x = c * T, y = r * T;
+    if (k === K.WATER) {
+      b.fillStyle = '#4f9fd4'; b.fillRect(x, y, T, T);
+      b.strokeStyle = 'rgba(255,255,255,.4)'; b.lineWidth = 1.5;
+      for (let j = 0; j < 2; j++) { const yy = y + 12 + j * 16 + (v % 5), xx = x + 5 + (v % 11);
+        b.beginPath(); b.moveTo(xx, yy); b.quadraticCurveTo(xx + 7, yy - 4, xx + 14, yy); b.stroke(); }
+      const cn = conns(c, r, q => q === K.WATER); b.fillStyle = '#e2d3a3';
+      if (!cn[0]) b.fillRect(x + T - 4, y, 4, T); if (!cn[1]) b.fillRect(x, y + T - 4, T, 4);
+      if (!cn[2]) b.fillRect(x, y, 4, T); if (!cn[3]) b.fillRect(x, y, T, 4);
+    } else if (k === K.PARK) {
+      b.fillStyle = '#62a04e'; b.fillRect(x, y, T, T);
+      const fl = ['#f6e05e', '#f28cb1', '#ffffff', '#f0a04b'];
+      for (let j = 0; j < 5; j++) { const h = (v * 7 + j * 53) % 251;
+        b.fillStyle = fl[j % 4]; b.fillRect(x + 4 + (h % 31), y + 4 + ((h * 3) % 31), 3, 3); }
+    } else if (k === K.ROAD) {
+      drawRoad(x, y, conns(c, r, isRoad), false);
+    } else if (k === K.RAIL) {
+      drawRail(x, y, conns(c, r, isRail), true);
+    } else if (k === K.CROSS) {
+      drawRoad(x, y, conns(c, r, isRoad), true);
+      drawRail(x, y, conns(c, r, isRail), false);
+      const rc = conns(c, r, isRail), horizRail = rc[0] || rc[2];
+      b.fillStyle = '#f2c230';
+      for (let j = 0; j < 4; j++) {
+        if (horizRail) { b.fillRect(x + 4 + j * 9, y + 2, 5, 3); b.fillRect(x + 4 + j * 9, y + T - 5, 5, 3); }
+        else { b.fillRect(x + 2, y + 4 + j * 9, 3, 5); b.fillRect(x + T - 5, y + 4 + j * 9, 3, 5); }
+      }
+    }
   }
-  // 道路
-  const sidewalk = '#cfc8b8', asphalt = '#55595d';
-  for (const [y, h] of roadsH) { b.fillStyle = sidewalk; b.fillRect(0, y - 8, W, h + 16); }
-  for (const [x, w] of roadsV) { b.fillStyle = sidewalk; b.fillRect(x - 8, 0, w + 16, H); }
-  for (const [y, h] of roadsH) { b.fillStyle = asphalt; b.fillRect(0, y, W, h); }
-  for (const [x, w] of roadsV) { b.fillStyle = asphalt; b.fillRect(x, 0, w, H); }
-  b.fillStyle = '#f4f1e6';
-  for (const [y, h] of roadsH) for (let x = 0; x < W; x += 40) b.fillRect(x, y + h / 2 - 2, 22, 4);
-  for (const [x, w] of roadsV) for (let y = 0; y < H; y += 40) b.fillRect(x + w / 2 - 2, y, 4, 22);
-  // 交差点と横断歩道
-  for (const [y, h] of roadsH) for (const [x, w] of roadsV) {
-    b.fillStyle = asphalt; b.fillRect(x, y, w, h);
-    b.fillStyle = '#f4f1e6';
-    for (let i = 0; i < w; i += 10) { b.fillRect(x + i + 2, y - 14, 6, 12); b.fillRect(x + i + 2, y + h + 2, 6, 12); }
-    for (let i = 0; i < h; i += 10) { b.fillRect(x - 14, y + i + 2, 12, 6); b.fillRect(x + w + 2, y + i + 2, 12, 6); }
+  /* ---- 建物・木 ---- */
+  function tree(x, y, rad){
+    b.fillStyle = 'rgba(0,0,0,.25)'; b.beginPath(); b.arc(x + 4, y + 4, rad, 0, 7); b.fill();
+    b.fillStyle = '#3f7d3a'; b.beginPath(); b.arc(x, y, rad, 0, 7); b.fill();
+    b.fillStyle = 'rgba(190,230,140,.35)'; b.beginPath(); b.arc(x - rad * .3, y - rad * .3, rad * .55, 0, 7); b.fill();
+  }
+  function drawObject(c, r){
+    const i = r * COLS + c, k = grid[i], v = vari[i], x = c * T, y = r * T;
+    if (k === K.HOUSE) {
+      const ins = 4 + (v % 3), w = T - ins * 2, col = ROOFS[v % ROOFS.length];
+      b.fillStyle = 'rgba(0,0,0,.28)'; b.fillRect(x + ins + 5, y + ins + 5, w, w);
+      b.fillStyle = col; b.fillRect(x + ins, y + ins, w, w);
+      b.fillStyle = 'rgba(255,255,255,.2)';
+      if (v & 8) b.fillRect(x + ins, y + ins, w, w / 2); else b.fillRect(x + ins, y + ins, w / 2, w);
+      b.fillStyle = 'rgba(0,0,0,.22)';
+      if (v & 8) b.fillRect(x + ins, y + T/2 - 1, w, 2); else b.fillRect(x + T/2 - 1, y + ins, 2, w);
+      b.strokeStyle = 'rgba(0,0,0,.25)'; b.lineWidth = 1.5; b.strokeRect(x + ins + .75, y + ins + .75, w - 1.5, w - 1.5);
+    } else if (k === K.TOWER) {
+      const ins = 3, w = T - 6, col = ['#b9bfc4', '#d7d2c8', '#8e98a1', '#c9b9a6', '#7f8f9f'][v % 5];
+      b.fillStyle = 'rgba(0,0,0,.32)'; b.fillRect(x + ins + 11, y + ins + 11, w, w);
+      b.fillStyle = col; b.fillRect(x + ins, y + ins, w, w);
+      b.strokeStyle = 'rgba(255,255,255,.35)'; b.lineWidth = 2; b.strokeRect(x + ins + 2, y + ins + 2, w - 4, w - 4);
+      if (v % 9 === 0) {
+        b.strokeStyle = '#f2c230'; b.lineWidth = 2; b.beginPath(); b.arc(x + T/2, y + T/2, 10, 0, 7); b.stroke();
+        b.fillStyle = '#f2c230'; b.fillRect(x + T/2 - 5, y + T/2 - 6, 2, 12); b.fillRect(x + T/2 + 3, y + T/2 - 6, 2, 12); b.fillRect(x + T/2 - 4, y + T/2 - 1, 8, 2);
+      } else {
+        b.fillStyle = '#e6e9eb'; b.fillRect(x + 9, y + 9, 9, 7); b.fillRect(x + 22, y + 22, 9, 7);
+        b.fillStyle = 'rgba(0,0,0,.25)'; b.fillRect(x + 9, y + 16, 9, 2); b.fillRect(x + 22, y + 29, 9, 2);
+      }
+    } else if (k === K.TREE) {
+      const n = 1 + (v % 3);
+      if (n === 1) tree(x + T/2, y + T/2, 13);
+      else for (let j = 0; j < n; j++) tree(x + 10 + ((v * (j + 3)) % 20), y + 10 + ((v * (j + 5) * 3) % 20), 9);
+    } else if (k === K.PARK && v % 3 === 0) {
+      tree(x + T/2, y + T/2, 10);
+    }
+  }
+  function renderBase(){
+    b.drawImage(grass, 0, 0);
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) drawGround(c, r);
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) drawObject(c, r);
   }
 
-  // 車と人
-  const carCols = ['#e63b2e', '#f7f7f2', '#2f5fd0', '#f2c230', '#1f1f22', '#33a06b', '#ff8a3d', '#9fb3c8'];
-  const movers = [];
-  const lane = (axis, pos, dir, n, len) => {
-    for (let i = 0; i < n; i++) movers.push({
-      axis, pos, dir, kind:'car', len, off: rnd() * len, v: 70 + rnd() * 60,
-      col: pick(carCols), big: rnd() < .15,
+  /* ---- 車と電車 ---- */
+  const CAR_COLS = ['#e63b2e', '#f7f7f2', '#2f5fd0', '#f2c230', '#1f1f22', '#33a06b', '#ff8a3d', '#9fb3c8'];
+  const TRAIN_COLS = [['#2e8b57', '#f1ead8'], ['#eef0f2', '#2f5fd0'], ['#f2c230', '#6b6b6b'], ['#c8472d', '#f1ead8']];
+  let movers = [];
+  const fitsAt = (m, c, r) => (m.kind === 'train' ? isRail : isRoad)(get(c, r));
+  function spawn(kind){
+    const ok = kind === 'train' ? isRail : isRoad;
+    const cells = [];
+    for (let i = 0; i < grid.length; i++) if (ok(grid[i])) cells.push(i);
+    for (let tries = 0; tries < 12 && cells.length; tries++) {
+      const i = pick(cells), c = i % COLS, r = (i / COLS) | 0;
+      const opts = [0, 1, 2, 3].filter(d => ok(get(c + DIRS[d][0], r + DIRS[d][1])));
+      if (!opts.length) continue;
+      const d = pick(opts);
+      movers.push({kind, c, r, d, pd: d, t: Math.random(), ux: c * T + T/2, uy: r * T + T/2,
+        v: kind === 'train' ? 1.1 : .6 + Math.random() * .5,
+        col: kind === 'train' ? pick(TRAIN_COLS) : pick(CAR_COLS), big: kind === 'car' && Math.random() < .15, hist: []});
+      return;
+    }
+  }
+  function sync(){
+    movers = movers.filter(m => fitsAt(m, m.c, m.r));
+    let roads = 0, rails = 0;
+    for (const k of grid) { if (isRoad(k)) roads++; if (isRail(k)) rails++; }
+    const want = {car: Math.min(45, Math.floor(roads / 5)), train: rails >= 6 ? Math.min(3, Math.max(1, Math.floor(rails / 36))) : 0};
+    for (const kind of ['car', 'train']) {
+      let have = movers.filter(m => m.kind === kind).length;
+      while (have > want[kind]) { movers.splice(movers.findIndex(m => m.kind === kind), 1); have--; }
+      for (let n = have; n < want[kind]; n++) spawn(kind);
+    }
+  }
+  function step(m, dist){
+    m.t += dist;
+    let guard = 0;
+    while (m.t >= 1 && guard++ < 4) {
+      const [dx, dy] = DIRS[m.d];
+      if (!fitsAt(m, m.c + dx, m.r + dy)) { m.pd = m.d; m.d = (m.d + 2) % 4; m.t = 0; break; }
+      m.t -= 1;
+      m.c = wc(m.c + dx); m.r = wr(m.r + dy); m.ux += dx * T; m.uy += dy * T;
+      m.pd = m.d;
+      const opts = [0, 1, 2, 3].filter(d => d !== (m.d + 2) % 4 && fitsAt(m, m.c + DIRS[d][0], m.r + DIRS[d][1]));
+      if (!opts.length) m.d = (m.d + 2) % 4;
+      else if (!(opts.includes(m.d) && Math.random() < (m.kind === 'train' ? .85 : .6))) m.d = pick(opts);
+    }
+  }
+  function where(m){
+    const [dx, dy] = DIRS[m.d];
+    let x = m.ux + dx * m.t * T, y = m.uy + dy * m.t * T, ang = Math.atan2(dy, dx);
+    if (m.kind === 'car') {
+      const lane = 8, a = m.pd !== m.d ? Math.min(1, m.t / .45) : 1;
+      const [pdx, pdy] = DIRS[m.pd];
+      x += (dy * a + pdy * (1 - a)) * lane;          // 左側通行
+      y += (-dx * a - pdx * (1 - a)) * lane;
+      if (a < 1) { const pa = Math.atan2(pdy, pdx); let dA = ang - pa; dA = Math.atan2(Math.sin(dA), Math.cos(dA)); ang = pa + dA * a; }
+    }
+    return [x, y, ang];
+  }
+  const mod = (a, n) => (a % n + n) % n;
+  function wrapped(x, y, fn){
+    const X = mod(x, W), Y = mod(y, H), m = 40;
+    const xs = [X], ys = [Y];
+    if (X < m) xs.push(X + W); if (X > W - m) xs.push(X - W);
+    if (Y < m) ys.push(Y + H); if (Y > H - m) ys.push(Y - H);
+    for (const a of xs) for (const bb of ys) fn(a, bb);
+  }
+  function drawCar(m, x, y, ang){
+    const L = m.big ? 30 : 20, Wd = m.big ? 13 : 11;
+    wrapped(x, y, (X, Y) => {
+      ctx.save(); ctx.translate(X, Y); ctx.rotate(ang);
+      ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(-L / 2 + 3, -Wd / 2 + 3, L, Wd);
+      ctx.fillStyle = m.big ? '#ebe7dc' : m.col;
+      ctx.beginPath(); ctx.roundRect(-L / 2, -Wd / 2, L, Wd, 3); ctx.fill();
+      ctx.fillStyle = 'rgba(25,35,45,.85)';
+      if (m.big) { ctx.fillRect(L / 2 - 7, -Wd / 2 + 2, 5, Wd - 4); ctx.fillStyle = m.col; ctx.fillRect(-L / 2 + 3, -1.5, L - 12, 3); }
+      else { ctx.fillRect(2, -Wd / 2 + 2, 5, Wd - 4); ctx.fillRect(-7, -Wd / 2 + 2, 3, Wd - 4); }
+      ctx.restore();
     });
-  };
-  for (const [y, h] of roadsH) { lane('h', y + h * .27, -1, 4, W + 120); lane('h', y + h * .73, 1, 4, W + 120); }
-  for (const [x, w] of roadsV) { lane('v', x + w * .27, 1, 3, H + 120); lane('v', x + w * .73, -1, 3, H + 120); }
-  for (const [y, h] of roadsH) for (const side of [y - 4, y + h + 4]) for (let i = 0; i < 5; i++)
-    movers.push({axis:'h', pos: side, dir: rnd() < .5 ? 1 : -1, kind:'person', len: W + 40, off: rnd() * W, v: 12 + rnd() * 10, col: pick(carCols)});
-
-  function car(m, x, y){
-    const L = m.big ? 64 : 38, Wd = m.big ? 22 : 19;
-    ctx.save(); ctx.translate(x, y);
-    if (m.axis === 'v') ctx.rotate(Math.PI / 2);
-    if (m.dir < 0) ctx.rotate(Math.PI);
-    ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(-L / 2 + 4, -Wd / 2 + 4, L, Wd);
-    ctx.fillStyle = m.big ? '#e8e4d8' : m.col;
-    ctx.beginPath(); ctx.roundRect(-L / 2, -Wd / 2, L, Wd, 5); ctx.fill();
-    ctx.fillStyle = 'rgba(25,35,45,.85)';
-    if (m.big) { ctx.fillRect(L / 2 - 12, -Wd / 2 + 3, 8, Wd - 6); ctx.fillStyle = m.col; ctx.fillRect(-L / 2 + 4, -2, L - 18, 4); }
-    else { ctx.fillRect(4, -Wd / 2 + 3, 8, Wd - 6); ctx.fillRect(-12, -Wd / 2 + 3, 6, Wd - 6); }
-    ctx.restore();
   }
+  function trail(hist, D){
+    let acc = 0;
+    for (let i = hist.length - 1; i > 0; i--) {
+      const a = hist[i], p = hist[i - 1], s = Math.hypot(a[0] - p[0], a[1] - p[1]);
+      if (acc + s >= D) { const f = (D - acc) / s; return [a[0] + (p[0] - a[0]) * f, a[1] + (p[1] - a[1]) * f, Math.atan2(a[1] - p[1], a[0] - p[0])]; }
+      acc += s;
+    }
+    return null;
+  }
+  function drawTrain(m){
+    const [hx, hy, ha] = where(m);
+    const pts = [[hx, hy, ha]];
+    for (let k = 1; k < 4; k++) { const p = trail(m.hist, k * 33); if (p) pts.push(p); }
+    for (const [x, y, ang] of pts.reverse()) {
+      wrapped(x, y, (X, Y) => {
+        ctx.save(); ctx.translate(X, Y); ctx.rotate(ang);
+        ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(-13, -4, 30, 14);
+        ctx.fillStyle = m.col[0]; ctx.beginPath(); ctx.roundRect(-15, -7, 30, 14, 3); ctx.fill();
+        ctx.fillStyle = m.col[1]; ctx.fillRect(-15, -1.5, 30, 3);
+        ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(-12, -6, 24, 2);
+        ctx.restore();
+      });
+    }
+  }
+
+  /* ---- サンプルの街 ---- */
+  function sample(){
+    grid.fill(K.EMPTY);
+    for (let i = 0; i < vari.length; i++) vari[i] = Math.random() * 256 | 0;
+    const S = (c, r, k) => { grid[r * COLS + c] = k; };
+    for (let c = 26; c < COLS; c++) for (let r = 0; r < 4; r++) S(c, r, K.WATER);
+    for (let c = 12; c < 17; c++) for (let r = 8; r < 11; r++) S(c, r, K.PARK);
+    for (const r of [6, 12]) for (let c = 0; c < COLS; c++) S(c, r, K.ROAD);
+    for (const c of [10, 22]) for (let r = 0; r < ROWS; r++) S(c, r, K.ROAD);
+    for (let c = 0; c < COLS; c++) S(c, 16, isRoad(grid[16 * COLS + c]) ? K.CROSS : K.RAIL);
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+      if (grid[r * COLS + c] !== K.EMPTY) continue;
+      const q = Math.random(), center = c > 10 && c < 22 && r < 12;
+      if (r === 17 || r === 15) S(c, r, q < .55 ? K.TREE : K.EMPTY);
+      else if (q < .1) S(c, r, K.TREE);
+      else if (q < .16) continue;
+      else S(c, r, center && q < .6 ? K.TOWER : K.HOUSE);
+    }
+  }
+  const KEY = 'diorama-town-v1';
+  function save(){
+    try { localStorage.setItem(KEY, JSON.stringify({g: Array.from(grid).join(''), v: Array.from(vari)})); } catch (e) {}
+  }
+  function load(){
+    try {
+      const d = JSON.parse(localStorage.getItem(KEY) || 'null');
+      if (!d || d.g.length !== grid.length) return false;
+      for (let i = 0; i < grid.length; i++) { grid[i] = +d.g[i] || 0; vari[i] = d.v[i] | 0; }
+      return true;
+    } catch (e) { return false; }
+  }
+  let saveTimer = 0;
+  function changed(){ dirty = true; sync(); clearTimeout(saveTimer); saveTimer = setTimeout(save, 400); }
+  if (!load()) sample();
+  sync();
+
+  const TOOL = {road:K.ROAD, rail:K.RAIL, house:K.HOUSE, tower:K.TOWER, tree:K.TREE, park:K.PARK, water:K.WATER, erase:K.EMPTY};
   return {
-    canvas: out, W, H,
-    render(t){
-      ctx.drawImage(base, 0, 0);
+    canvas: out, W, H, T, COLS, ROWS,
+    cell(x, y){ return [Math.floor(x / T), Math.floor(y / T)]; },
+    paint(c, r, tool){
+      if (c < 0 || r < 0 || c >= COLS || r >= ROWS) return;
+      const i = r * COLS + c, cur = grid[i];
+      let k = TOOL[tool];
+      if ((tool === 'road' && isRail(cur)) || (tool === 'rail' && isRoad(cur))) k = K.CROSS;
+      if (cur === k) return;
+      grid[i] = k; vari[i] = Math.random() * 256 | 0;
+      changed();
+    },
+    reset(){ sample(); changed(); },
+    clear(){ grid.fill(K.EMPTY); changed(); },
+    update(dt){
       for (const m of movers) {
-        const p = (((m.off + m.dir * m.v * t) % m.len) + m.len) % m.len - 60;
-        const x = m.axis === 'h' ? p : m.pos, y = m.axis === 'h' ? m.pos : p;
-        if (m.kind === 'car') car(m, x, y);
-        else {
-          ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.arc(x + 2, y + 2, 3.5, 0, 7); ctx.fill();
-          ctx.fillStyle = m.col; ctx.beginPath(); ctx.arc(x, y, 3.5, 0, 7); ctx.fill();
+        step(m, m.v * dt);
+        if (m.kind === 'train') {
+          const [x, y] = where(m), h = m.hist, last = h[h.length - 1];
+          if (!last || Math.hypot(x - last[0], y - last[1]) > 3) { h.push([x, y]); if (h.length > 90) h.shift(); }
         }
+      }
+    },
+    render(editing, hover){
+      if (dirty) { renderBase(); dirty = false; }
+      ctx.drawImage(base, 0, 0);
+      for (const m of movers) if (m.kind === 'train') drawTrain(m);
+      for (const m of movers) if (m.kind === 'car') { const [x, y, a] = where(m); drawCar(m, x, y, a); }
+      if (editing) {
+        ctx.strokeStyle = 'rgba(255,255,255,.22)'; ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let c = 1; c < COLS; c++) { ctx.moveTo(c * T + .5, 0); ctx.lineTo(c * T + .5, H); }
+        for (let r = 1; r < ROWS; r++) { ctx.moveTo(0, r * T + .5); ctx.lineTo(W, r * T + .5); }
+        ctx.stroke();
+        if (hover) { ctx.strokeStyle = '#ffd34d'; ctx.lineWidth = 3; ctx.strokeRect(hover[0] * T + 1.5, hover[1] * T + 1.5, T - 3, T - 3); }
       }
     },
   };
@@ -454,7 +686,8 @@ function makeFbos(w, h){
 /* ---------- ソース ---------- */
 let mode = null;          // 'scene' | 'video' | 'image'
 let srcW = 0, srcH = 0, objUrl = null;
-let compare = false, guideUntil = 0, clipStart = performance.now(), sceneT = 0;
+let compare = false, guideUntil = 0, clipStart = performance.now();
+let editing = false, tool = 'road', hoverCell = null, lastCell = null;
 let recording = false, cancelRec = null;
 
 function resizeCanvas(){
@@ -476,12 +709,14 @@ stage.addEventListener('drop', e => {
 });
 
 function useScene(){
-  mode = 'scene'; srcW = scene.W; srcH = scene.H; sceneT = 0;
-  $('#tag').textContent = 'サンプルの街'; $('#tag').hidden = false;
+  video.pause();
+  mode = 'scene'; srcW = scene.W; srcH = scene.H;
+  $('#tag').textContent = 'つくった街'; $('#tag').hidden = false;
   ready();
 }
 function loadFile(f){
   if (!gl) return;
+  setEditing(false);
   if (objUrl) URL.revokeObjectURL(objUrl);
   objUrl = URL.createObjectURL(f);
   setStatus('読み込み中…');
@@ -522,7 +757,7 @@ function describe(){
   if (recording) return;
   if (mode === 'video') setStatus(`動画 ${srcW}×${srcH}・${fmtTime(video.duration)} → 書き出すと約${fmtTime(video.duration / state.speed)}`);
   else if (mode === 'image') setStatus(`写真 ${srcW}×${srcH} → ${state.dur}秒の動画になります`);
-  else if (mode === 'scene') setStatus('サンプルの街を表示しています。自分の動画や写真も選べます。');
+  else if (mode === 'scene') setStatus(editing ? '道具を選んで、画面をなぞると置けます。できたら「ジオラマで見る」へ。' : 'つくった街をジオラマにしています。「街をつくる」で街を変えられます。');
 }
 function fmtTime(s){ if (!isFinite(s)) return '?'; s = Math.max(1, Math.round(s)); return s >= 60 ? `${Math.floor(s/60)}分${s%60}秒` : `${s}秒`; }
 function setStatus(t){ $('#status').textContent = t; }
@@ -536,10 +771,62 @@ function pointerPos(e){
   state.cy = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
   guideUntil = performance.now() + 1200;
 }
-cv.addEventListener('pointerdown', e => { dragging = true; cv.setPointerCapture(e.pointerId); pointerPos(e); });
-cv.addEventListener('pointermove', e => { if (dragging) pointerPos(e); });
-cv.addEventListener('pointerup', () => dragging = false);
-cv.addEventListener('pointercancel', () => dragging = false);
+function sceneCell(e){
+  const r = cv.getBoundingClientRect();
+  return scene.cell((e.clientX - r.left) / r.width * scene.W, (e.clientY - r.top) / r.height * scene.H);
+}
+function paintTo(cell){
+  // 速くなぞっても途切れないよう、前のマスから線で結んで置く
+  const [c1, r1] = cell, [c0, r0] = lastCell || cell;
+  const n = Math.max(Math.abs(c1 - c0), Math.abs(r1 - r0));
+  for (let i = 0; i <= n; i++) {
+    const t = n ? i / n : 0;
+    const c = Math.round(c0 + (c1 - c0) * t), r = Math.round(r0 + (r1 - r0) * t);
+    if (i && (tool === 'road' || tool === 'rail')) { const pc = Math.round(c0 + (c1 - c0) * (i - 1) / n); if (pc !== c) scene.paint(c, Math.round(r0 + (r1 - r0) * (i - 1) / n), tool); }
+    scene.paint(c, r, tool);
+  }
+  lastCell = cell;
+}
+const isPainting = () => editing && mode === 'scene';
+cv.addEventListener('pointerdown', e => {
+  dragging = true; cv.setPointerCapture(e.pointerId);
+  if (isPainting()) { lastCell = null; paintTo(sceneCell(e)); } else pointerPos(e);
+});
+cv.addEventListener('pointermove', e => {
+  if (isPainting()) { hoverCell = sceneCell(e); if (dragging) paintTo(hoverCell); }
+  else if (dragging) pointerPos(e);
+});
+cv.addEventListener('pointerup', () => { dragging = false; lastCell = null; });
+cv.addEventListener('pointercancel', () => { dragging = false; lastCell = null; });
+cv.addEventListener('pointerleave', () => { hoverCell = null; });
+
+/* モード切り替えと道具 */
+function setEditing(on){
+  editing = on;
+  $('#tabEdit').classList.toggle('on', on);
+  $('#tabView').classList.toggle('on', !on);
+  $('#tools').hidden = !on;
+  cv.style.cursor = on ? 'cell' : 'crosshair';
+  $('#hint').textContent = on
+    ? '道具を選んで、画面をタップ・なぞると置けます。道路と線路が交わると踏切になります。車と電車は自動で走ります。'
+    : '画面をタップ・ドラッグすると、ピントが合う位置を動かせます。';
+  if (!on) guideUntil = performance.now() + 1500;
+  describe();
+}
+$('#tabEdit').addEventListener('click', () => { if (recording) return; if (mode !== 'scene') useScene(); setEditing(true); });
+$('#tabView').addEventListener('click', () => { if (recording) return; setEditing(false); });
+document.querySelectorAll('#tools [data-tool]').forEach(btn => btn.addEventListener('click', () => {
+  tool = btn.dataset.tool;
+  document.querySelectorAll('#tools [data-tool]').forEach(x => x.classList.toggle('on', x === btn));
+}));
+$('#resetTown').addEventListener('click', () => scene.reset());
+let clearArmed = 0;
+$('#clearTown').addEventListener('click', e => {
+  const btn = e.currentTarget;
+  if (performance.now() < clearArmed) { scene.clear(); clearArmed = 0; btn.textContent = '全部消す'; return; }
+  clearArmed = performance.now() + 3000; btn.textContent = 'もう一度押すと全部消えます';
+  setTimeout(() => { if (performance.now() >= clearArmed) btn.textContent = '全部消す'; }, 3100);
+});
 
 const cmp = $('#compareBtn');
 cmp.addEventListener('pointerdown', e => { e.preventDefault(); compare = true; cmp.classList.add('on'); });
@@ -569,12 +856,12 @@ function draw(now){
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, video);
   } else if (mode === 'scene') {
-    scene.render(sceneT);
+    scene.render(editing, hoverCell);
     gl.bindTexture(gl.TEXTURE_2D, srcTex);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, scene.canvas);
   }
-  const off = compare && !recording;
+  const off = (compare || editing) && !recording;
   let zoom = 1;
   if (mode === 'image') {
     const ph = Math.min(1, ((now - clipStart) / (state.dur * 1000)) % 1);
@@ -608,8 +895,8 @@ function loop(now){
   requestAnimationFrame(loop);
   const dt = Math.min(.1, (now - lastTick) / 1000); lastTick = now;
   if (!mode || !gl) return;
-  if (mode === 'scene') sceneT += dt * state.speed;
-  const interval = state.fps ? 1000 / state.fps : 0;
+  if (mode === 'scene') scene.update(dt * (editing ? 1 : state.speed));
+  const interval = state.fps && !editing ? 1000 / state.fps : 0;
   if (interval && !(dragging || compare) && now - lastDraw < interval - 4) return;
   lastDraw = now;
   draw(now);
@@ -629,6 +916,7 @@ const exportBtn = $('#exportBtn');
 exportBtn.addEventListener('click', () => recording ? (cancelRec && cancelRec()) : exportVideo());
 
 async function exportVideo(){
+  if (editing) setEditing(false);
   const mime = pickMime();
   if (mime === null || !cv.captureStream) { setStatus('このブラウザは動画の書き出しに対応していません。Chrome か Safari の新しい版で開いてください。'); return; }
   const stream = cv.captureStream(30);
